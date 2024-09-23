@@ -409,6 +409,7 @@ ol {
 
 .header__logo a {
 	display: inline-block;
+	color: #000;
 }
 
 .header__menu {
@@ -534,6 +535,11 @@ ol {
 	margin-left: -20px;
 	position: relative;
 	top: 3px;
+}
+
+.sign-in-link {
+	color: #000;
+	display: inline-block;
 }
 
 .offcanvas-menu-wrapper {

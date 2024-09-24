@@ -5,6 +5,7 @@ const {userAuth,adminAuth} = require("../middlewares/auth")
 const customerController = require("../controllers/admin/customerController")
 const categoryController = require("../controllers/admin/categoryController")
 const brandController = require("../controllers/admin/brandController")
+const productController = require("../controllers/admin/productController")
 const storage = require("../helpers/multer")
 const multer = require('multer')
 const uploads = multer({storage:storage})
@@ -35,5 +36,7 @@ router.post("/addBrand",adminAuth,uploads.single("image"),brandController.addBra
 router.get("/blockBrand",adminAuth,brandController.blockBrand)
 router.get("/unBlockBrand",adminAuth,brandController.unBlockBrand)
 router.get("/deleteBrand",adminAuth,brandController.deleteBrand)
+//Product Management
+router.get("/addProducts",adminAuth,productController.getProductAddPage)
 
 module.exports = router

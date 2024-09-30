@@ -55,7 +55,7 @@ const addProducts = async (req,res) => {
                 salePrice:products.salePrice,
                 createdOn: new Date(),
                 quantity:products.quantity,
-                size:products.size,
+                sizes:products.sizes,
                 color:products.color,
                 productImage:images,
                 status:'Available'
@@ -222,7 +222,7 @@ const editProduct = async (req,res) => {
             regularPrice:data.regularPrice,
             salePrice:data.salePrice,
             quantity:data.quantity,
-            //size:data.size,
+            sizes:data.sizes,
             color:data.color
         }
         if(req.files.length>0){

@@ -22,7 +22,7 @@ const getBrandPage = async (req,res) => {
             totalBrands:totalBrands
         })
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -42,7 +42,7 @@ const addBrand = async (req,res) => {
         }
     } catch (error) {
         console.error("error adding brand",error)
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -52,7 +52,7 @@ const blockBrand = async (req,res) => {
         await Brand.updateOne({_id:id},{$set:{isBlocked:true}})
         res.redirect("/admin/brands")
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -62,7 +62,7 @@ const unBlockBrand = async (req,res) => {
         await Brand.updateOne({_id:id},{$set:{isBlocked:false}})
         res.redirect("/admin/brands")
     } catch (error) {
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -76,7 +76,7 @@ const deleteBrand = async (req,res) => {
         res.redirect("/admin/brands")
     } catch (error) {
         console.error("Error deleteing brand",error)
-        res.status(500).redirect("/pageerror")
+        res.status(500).redirect("/admin/pageerror")
     }
 }
 

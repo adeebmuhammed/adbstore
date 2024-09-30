@@ -53,6 +53,10 @@ const productSchema = new Schema({
         required:true,
         default:"Available"
     },
+    sizes: {
+        type: [String],
+        required: true
+    }
 
 },{timestamps:true})
 

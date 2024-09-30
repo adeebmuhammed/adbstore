@@ -1,0 +1,169 @@
+<!--header begins-->
+<%- include("../../views/partials/user/header") %>
+    <!--header ends-->
+
+    <div class="container mt-5 profile-page">
+      <div class="row">
+        <!-- Sidebar -->
+        <%- include("../../views/partials/user/profile-sidebar") %>
+    
+        <!-- Profile Content -->
+        <div class="col-md-9 profile-content">
+          <h2 class="mb-4">My Profile</h2>
+    
+          <!-- Profile Display -->
+          <div class="card mb-4" id="profileCard">
+            <div class="card-body">
+              <h5>Name: <span id="display-name"><%= user.name %></span></h5>
+              <h5>Email: <span class="email-value"><%= user.email %></span></h5>
+              <h5>Phone: <span id="display-phone"><%= user.phone %></span></h5>
+              <button type="button" class="btn btn-primary edit-btn">Edit</button>
+            </div>
+          </div>
+    
+          <!-- Profile Edit Form -->
+          <form id="editProfileForm" style="display: none;">
+            <div class="form-group mb-3">
+              <label for="name">Name</label>
+              <input type="text" id="name" class="form-control" value="<%= user.name %>">
+              <small id="nameError" class="text-danger" style="display: none;"></small>
+            </div>
+            <div class="form-group mb-3">
+              <label for="phone">Phone</label>
+              <input type="text" id="phone" class="form-control" value="<%= user.phone %>">
+              <small id="phoneError" class="text-danger" style="display: none;"></small>
+            </div>
+            <div class="text-center">
+              <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+              <button type="button" class="btn btn-success save-btn">Save</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function () {
+                    const editButton = document.querySelector('.edit-btn');
+                    const cancelButton = document.querySelector('.cancel-btn');
+                    const saveButton = document.querySelector('.save-btn');
+                    const editForm = document.getElementById('editProfileForm');
+                    const profileCard = document.getElementById('profileCard');
+                    const displayName = document.getElementById('display-name');
+                    const displayPhone = document.getElementById('display-phone');
+                    const nameInput = document.getElementById('name');
+                    const phoneInput = document.getElementById('phone');
+                    const nameError = document.getElementById('nameError');
+                    const phoneError = document.getElementById('phoneError');
+            
+                    // Regex patterns for validation
+                    const namePattern = /^[a-zA-Z\s]+$/;
+                    const phonePattern = /^[1-9][0-9]{9}$/;
+            
+                    // Show form when clicking "Edit" button
+                    editButton.addEventListener('click', function () {
+                        profileCard.style.display = 'none'; // Hide the card
+                        editForm.style.display = 'block'; // Show the edit form
+                    });
+            
+                    // Hide form when clicking "Cancel" button
+                    cancelButton.addEventListener('click', function () {
+                        profileCard.style.display = 'block'; // Show the card again
+                        editForm.style.display = 'none'; // Hide the edit form
+                        clearErrors(); // Clear errors when cancelling
+                    });
+            
+                    // Save button click handler
+                    saveButton.addEventListener('click', function () {
+                        // Clear any previous error messages
+                        clearErrors();
+            
+                        // Validate name and phone
+                        const name = nameInput.value.trim();
+                        const phone = phoneInput.value.trim();
+                        let isValid = true;
+            
+                        // Name validation: only letters and spaces, but no only spaces allowed
+                        if (!name || !namePattern.test(name) || name.replace(/\s/g, '').length === 0) {
+                            nameError.textContent = 'Name must contain only letters and spaces, and cannot be empty or just spaces.';
+                            nameError.style.display = 'block'; // Show the error message
+                            isValid = false;
+                        }
+            
+                        // Phone validation: only digits allowed, must be exactly 10 digits, cannot be all zeros
+                        if (!phonePattern.test(phone)) {
+                            phoneError.textContent = 'Phone must be a 10-digit number and cannot be all 0.';
+                            phoneError.style.display = 'block'; // Show the error message
+                            isValid = false;
+                        }
+            
+                        // If invalid, prevent submission and show error messages
+                        if (!isValid) {
+                            return;
+                        }
+            
+                        // If valid, send the data to the backend
+                        fetch("/update-profile", {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                userId: '<%= user._id %>',
+                                name,
+                                phone
+                            }),
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.message) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Profile Updated',
+                                    text: data.message,
+                                });
+            
+                                // Update displayed values
+                                displayName.textContent = name;
+                                displayPhone.textContent = phone;
+            
+                                // Show the profile card again and hide the form
+                                profileCard.style.display = 'block';
+                                editForm.style.display = 'none';
+                            }else if (data.error) { // Handling the error message from the backend
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: data.error, // Show the specific error message from backend
+        });} else {
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'Error updating profile',
+                                });
+                            }
+                        })
+                        .catch((error) => {
+                            console.error('Error:', error);
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: 'An error occurred while updating the profile',
+                            });
+                        });
+                    });
+            
+                    // Clear error messages
+                    function clearErrors() {
+                        nameError.style.display = 'none';
+                        phoneError.style.display = 'none';
+                        nameError.textContent = '';
+                        phoneError.textContent = '';
+                    }
+                });
+            </script>
+    
+
+                
+                <!--footer begins-->
+                <%- include("../../views/partials/user/footer") %>

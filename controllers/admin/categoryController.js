@@ -23,7 +23,7 @@ const categoryInfo = async (req,res) => {
         })
     } catch (error) {
         console.error(error);
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 
@@ -76,7 +76,7 @@ const addCategoryOffer = async (req,res) => {
     }
 }
 
-const removeCategoryOffer = async (req,res) => {
+const removeCategoryOffer = async (req,res) => { 
     try {
         const  categoryId = req.body.categoryId
         const category = await Category.findById(categoryId)
@@ -89,7 +89,7 @@ const removeCategoryOffer = async (req,res) => {
         const products = await Product.find({category:category._id})
 
         if(products.length > 0){
-            for(const product of products){
+            for(let product of products){
                 product.salePrice = product.regularPrice;
                 product.productOffer = 0
                 await product.save()

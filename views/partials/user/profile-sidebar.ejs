@@ -1,8 +1,21 @@
 <div class="col-md-3">
-    <div class="list-group">
-      <a href="/profile" class="list-group-item list-group-item-action active">My Profile</a>
+  <div class="list-group" id="menu-items">
+      <a href="/profile" class="list-group-item list-group-item-action">My Profile</a>
       <a href="/manage-addresses" class="list-group-item list-group-item-action">Manage Addresses</a>
       <a href="/orders" class="list-group-item list-group-item-action">My Orders</a>
-      <a href="/" class="list-group-item list-group-item-action">Payment Methods</a>
-    </div>
-  </div>  
+      <a href="/payment-methods" class="list-group-item list-group-item-action">Payment Methods</a>
+  </div>
+</div>
+
+<!-- JavaScript to add 'active' class based on current URL -->
+<script>
+  // Get all menu items
+  const menuItems = document.querySelectorAll('#menu-items a');
+
+  // Loop through menu items and check the current URL path
+  menuItems.forEach(item => {
+      if (item.getAttribute('href') === window.location.pathname) {
+          item.classList.add('active');
+      }
+  });
+</script>

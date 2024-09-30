@@ -3,6 +3,7 @@ const router = express.Router()
 const userController = require("../controllers/user/userController")
 const shopController = require("../controllers/user/shopController")
 const profileController = require("../controllers/user/profileController")
+const addressController = require("../controllers/user/addressController")
 const passport = require("passport")
 const {userAuth,adminAuth} = require("../middlewares/auth")
 
@@ -29,6 +30,11 @@ router.get("/productDetails",userAuth,shopController.getProductDetails)
 router.get("/profile",userAuth,profileController.getProfilePage)
 router.post("/update-profile",userAuth,profileController.updateProfile)
 //Address Management
-router.get("/manage-addresses",userAuth)
+router.get("/manage-addresses",userAuth,addressController.getManageAddresses)
+router.get("/manage-addresses/add-address",userAuth,addressController.getAddAddress)
+router.post("/manage-addresses/add-address",userAuth,addressController.addAddress)
+router.get("/manage-addresses/edit-address/:addressId",userAuth,addressController.getEditAddress)
+router.post("/manage-addresses/edit-address/:addressId",userAuth,addressController.editAddress)
+router.delete('/manage-addresses/delete-address/:addressId', addressController.deleteAddress);
 
 module.exports = router;

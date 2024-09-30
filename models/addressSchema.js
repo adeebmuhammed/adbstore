@@ -10,7 +10,7 @@ const addressSchema = new Schema({
     address:[{
         addressType:{
             type:String,
-            required:true
+            required:false
         },
         name:{
             type:String,
@@ -20,7 +20,11 @@ const addressSchema = new Schema({
             type:String,
             required:true
         },
-        landMark:{
+        houseName:{
+            type:String,
+            required:true
+        },
+        street:{
             type:String,
             required:true
         },
@@ -38,7 +42,7 @@ const addressSchema = new Schema({
         },
         altPhone:{
             type:String,
-            required:true
+            required:false
         }
     }]
 })

@@ -171,6 +171,11 @@ const login = async (req, res) => {
     try {
         const { email, password } = req.body;
 
+        // Check if the password is coming from the request
+        if (!password) {
+            return res.render("login", { message: "Password is required" });
+        }
+
         const findUser = await User.findOne({ isAdmin: 0, email: email });
         if (!findUser) {
             return res.render("login", { message: "User not found" });
@@ -178,6 +183,10 @@ const login = async (req, res) => {
         if (findUser.isBlocked) {
             return res.render("login", { message: "User is blocked by admin" });
         }
+
+        // Log both passwords to verify values
+        console.log("Password:", password);
+        console.log("Hashed Password:", findUser.password);
 
         const passwordMatch = await bcrypt.compare(password, findUser.password);
         if (!passwordMatch) {
@@ -188,7 +197,7 @@ const login = async (req, res) => {
         res.redirect("/");
     } catch (error) {
         console.error("login error", error);
-        res.render("login", { message: "login failed, please try again later" });
+        res.render("login", { message: "Login failed, please try again later" });
     }
 };
 

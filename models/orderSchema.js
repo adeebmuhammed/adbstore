@@ -1,12 +1,17 @@
 const mongoose = require("mongoose")
 const {Schema} = mongoose;
-const {v4:uuidv4} = require("uuid")
+const { v4: uuidv4 } = require('uuid');
 
 const orderSchema = new Schema({
     orderId:{
         type:String,
         default:()=>uuidv4(),
         unique:true
+    },
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User", // Reference to the User model
+        required: true
     },
     orderedItems:[{
         product:{

@@ -33,13 +33,7 @@
     <div class="product__details__pic__item">
         <img id="main-product-image" src="/uploads/product-images/<%= product.productImage[0] %>" alt="Main Product Image">
     </div>
-</div>
-
-
-
-
-
-                    
+</div>        
                 </div>
             </div>
         </div>
@@ -48,7 +42,7 @@
                 <div class="row d-flex justify-content-center">
                     <div class="col-lg-8">
                         <div class="product__details__text">
-                            <h4><%=product.productName%></h4>
+                            <h4><%= product.productName %></h4>
                             <div class="rating">
                                 <i class="fa fa-star"></i>
                                 <i class="fa fa-star"></i>
@@ -57,48 +51,59 @@
                                 <i class="fa fa-star-o"></i>
                                 <span> - 5 Reviews</span>
                             </div>
-                            <h3><%=product.salePrice%><span><%=product.regularPrice%></span></h3>
-                            <p><%=product.description%></p>
+                            <h3><%= product.salePrice %><span><%= product.regularPrice %></span></h3>
+                            <p><%= product.description %></p>
                             <div class="product__details__option">
                                 <div class="product__details__option__size">
                                     <span>Size:</span>
                                     <% availableSizes.forEach(size => { %>
                                         <label for="<%= size %>"><%= size %>
-                                            <input type="radio" id="<%= size %>">
+                                            <input type="radio" id="<%= size %>" name="size" value="<%= size %>">
                                         </label>
                                     <% }) %>
                                 </div>
                                 
                                 <div class="product__details__option__color">
-                                    <span>Color : <%=product.color%></span>
+                                    <span>Color: <%= product.color %></span>
                                 </div>
                             </div>
-                            <div class="product__details__cart__option">
-                                <div class="quantity">
-                                    <div class="pro-qty">
-                                        <input type="text" value="1">
+        
+                            <% if (product.quantity < 1) { %>
+                                <div class="product__details__stock">
+                                    <span class="out-of-stock text-danger">Out of Stock</span>
+                                </div>
+                            <% } else { %>
+                                <div class="product__details__cart__option">
+                                    <div class="quantity">
+                                        <label for="quantity">Quantity:</label>
+                                        <select id="quantity" name="quantity">
+                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                <option value="<%= i %>"><%= i %></option>
+                                            <% } %>
+                                        </select>
                                     </div>
+                                    <a href="#" class="primary-btn" id="addToCartButton">Add to Cart</a>
                                 </div>
-                                <a href="#" class="primary-btn">add to cart</a>
-                            </div>
+                            <% } %>
+        
                             <div class="product__details__btns__option">
                                 <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
-                                <a href="#"><i class="fa fa-exchange"></i> Add To Compare</a>
                             </div>
                             <div class="product__details__last__option">
                                 <h5><span>Guaranteed Safe Checkout</span></h5>
                                 <img src="img/shop-details/details-payment.png" alt="">
                                 <ul>
-                                    <!--<li><span>SKU:</span> 3812912</li>-->
-                                    <li><span>Categories:</span> <%=cat.name%></li>
-                                    <!--<li><span>Tag:</span> Clothes, Skin, Body</li>-->
+                                    <li><span>Categories:</span> <%= cat.name %></li>
                                 </ul>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div>        
+        
+        
+        
     </section>
     <!-- Shop Details Section End -->
 
@@ -126,7 +131,7 @@
                         </div>
                         <div class="product__item__text">
                             <h6><%=product.productName%></h6>
-                            <a href="#" class="add-cart">+ Add To Cart</a>
+                           <!-- <a href="/addToCart/<%=product._id%>" class="add-cart">+ Add To Cart</a>-->
                             <div class="rating">
                                 <i class="fa fa-star"></i>
                                 <i class="fa fa-star"></i>
@@ -171,6 +176,76 @@
         mainImage.src = newImageSrc;
     });
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the add to cart button
+    var addToCartButton = document.getElementById('addToCartButton');
+
+    // Add click event listener
+    addToCartButton.addEventListener('click', function(e) {
+        e.preventDefault(); // Prevent default action
+
+        // Get selected quantity and product ID
+        var quantity = parseInt(document.getElementById('quantity').value, 10);
+        var productId = '<%= product._id %>'; // Ensure this is correctly rendered
+        
+        // Get the selected size
+        var selectedSize = document.querySelector('input[name="size"]:checked');
+        var size = selectedSize ? selectedSize.value : null; // Get size value if selected
+
+        // Ensure a size is selected
+        if (!size) {
+            Swal.fire({
+                title: "Error!",
+                text: "Please select a size before adding to cart",
+                icon: "error",
+                button: "OK",
+            });
+            return; // Stop if no size is selected
+        }
+
+        // Send a POST request using fetch
+        fetch('/addToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ productId: productId, quantity: quantity, size: size })
+        })
+        .then(response => response.json()) // Parse the JSON response
+        .then(data => {
+            if (data.success) {
+                // Show success message using SweetAlert
+                Swal.fire({
+                    title: "Success!",
+                    text: "Product added to cart successfully!",
+                    icon: "success",
+                    button: "OK",
+                });
+            } else {
+                // Show error message
+                Swal.fire({
+                    title: "Error!",
+                    text: data.message || "Failed to add product to cart",
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        })
+        .catch(error => {
+            // Log the error and show an error alert
+            console.error('Error:', error);
+            Swal.fire({
+                title: "Error!",
+                text: "An unexpected error occurred",
+                icon: "error",
+                button: "OK",
+            });
+        });
+    });
+});
+
+
 
     </script>
 

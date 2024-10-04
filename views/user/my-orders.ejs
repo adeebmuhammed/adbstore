@@ -1,0 +1,114 @@
+<%-include("../../views/partials/user/header")%>
+
+<div class="container mt-4">
+    <div class="row">
+        <!-- Sidebar -->
+        <%- include("../../views/partials/user/profile-sidebar") %>
+
+        <!-- Orders Table -->
+        <div class="col-md-9">
+            <h1>My Orders</h1>
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Status</th>
+                        <th>Total Price</th>
+                        <th>Address</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td><%= order.orderId %></td>
+                            <td><%= order.status %></td>
+                            <td>₹<%= order.totalprice %></td>
+                            <td><%= order.addressDetails ? order.addressDetails.houseName + ', ' + order.addressDetails.street + ', ' + order.addressDetails.city + ', ' + order.addressDetails.state + ', ' + order.addressDetails.pincode : 'Address not found' %></td>
+                            <td>
+                                <% order.orderedItems.forEach(item => { %>
+                                    <div><%= item.productDetails ? item.productDetails.productName : 'Product not found' %></div>
+                                <% }) %>
+                            </td>
+                            <td>
+                                <% order.orderedItems.forEach(item => { %>
+                                    <div><%= item.quantity %></div>
+                                <% }) %>
+                            </td>
+                            <td>
+                                <% if (order.status === 'Pending') { %>
+                                    <button class="btn btn-danger cancel-order-btn" data-order-id="<%= order._id %>">Cancel</button>
+                                <% } else if (order.status === 'Canceled') { %>
+                                    <button class="btn btn-secondary" disabled>Canceled</button>
+                                <% } else { %>
+                                    <span>N/A</span>
+                                <% } %>
+                            </td>                                                   
+                        </tr>
+                    <% }) %>
+                </tbody>                
+            </table>
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const orderId = this.getAttribute('data-order-id');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to cancel this order?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, cancel it!',
+                    cancelButtonText: 'No, keep it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Send POST request to cancel the order
+                        fetch(`/cancel-order/${orderId}`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Canceled!',
+                                    'Your order has been canceled.',
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload(); // Reload page to update the status
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to cancel order.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'Error!',
+                                'An unexpected error occurred.',
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+
+<%-include("../../views/partials/user/footer")%>

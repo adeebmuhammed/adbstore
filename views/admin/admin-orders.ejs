@@ -1,0 +1,103 @@
+<%- include("../../views/partials/admin/header") %>
+
+<div class="container mt-4">
+    <div class="row">
+
+        <!-- Orders Table -->
+        <div class="col-md-9">
+            <h1>All Orders</h1>
+            <table class="table table-bordered table-hover">
+                <thead class="thead-dark">
+                    <tr>
+                        <th>Order ID</th>
+                        <th>Status</th>
+                        <th>Total Price</th>
+                        <th>Address</th>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Change Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% orders.forEach(order => { %>
+                        <tr>
+                            <td><%= order.orderId %></td>
+                            <td><%= order.status %></td>
+                            <td>₹<%= order.totalprice %></td>
+                            <td>
+                                <% if (order.addressDetails) { %>
+                                    <div class="card" style="width: 18rem;">
+                                        <div class="card-body">
+                                            <h5 class="card-title"><%= order.addressDetails.name %></h5>
+                                            <p class="card-text">
+                                                <strong>Address:</strong><br>
+                                                <%= order.addressDetails.houseName %>, <br>
+                                                <%= order.addressDetails.street %>, <br>
+                                                <%= order.addressDetails.city %>, <br>
+                                                <%= order.addressDetails.state %>, <br>
+                                                <%= order.addressDetails.pincode %><br>
+                                                <strong>Phone:</strong> <%= order.addressDetails.phone %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                <% } else { %>
+                                    <span class="text-danger">Address not found</span>
+                                <% } %>
+                            </td>
+                            <td>
+                                <% order.orderedItems.forEach(item => { %>
+                                    <div><%= item.productDetails ? item.productDetails.productName : 'Product not found' %></div>
+                                <% }) %>
+                            </td>
+                            <td>
+                                <% order.orderedItems.forEach(item => { %>
+                                    <div><%= item.quantity %></div>
+                                <% }) %>
+                            </td>
+                            <td>
+                                <form id="statusChangeForm" action="/admin/change-order-status/<%= order._id %>" method="POST">
+                                    <select name="status" class="form-control" onchange="updateOrderStatus(event, '<%= order._id %>')">
+                                        <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                        <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                        <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                        <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                        <option value="Canceled" <%= order.status === 'Canceled' ? 'selected' : '' %>>Canceled</option>
+                                    </select>
+                                </form>
+                            </td>                            
+                        </tr>
+                    <% }) %>
+                </tbody>                
+            </table>
+        </div>
+    </div>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>
+
+<script>
+    async function updateOrderStatus(event, orderId) {
+    event.preventDefault(); // Prevent the default form submission
+
+    const status = event.target.value; // Get the selected status
+
+    try {
+        const response = await fetch(`/admin/change-order-status/${orderId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ status }),
+        });
+
+        if (response.ok) {
+            // Reload the page after successful status update
+            window.location.reload();
+        } else {
+            console.error("Error updating order status");
+        }
+    } catch (error) {
+        console.error("An unexpected error occurred:", error);
+    }
+}
+</script>

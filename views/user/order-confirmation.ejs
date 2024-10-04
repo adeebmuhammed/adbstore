@@ -1,0 +1,75 @@
+<%-include("../../views/partials/user/header")%>
+
+<div class="container my-5">
+    <div class="text-center">
+        <h1 class="display-4">Thank You for Your Order!</h1>
+        <p class="lead">Your order has been successfully placed.</p>
+    </div>
+
+    <!-- Order Summary -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Order Summary</h4>
+        </div>
+        <div class="card-body">
+            <h5>Order ID: <%= order.orderId %></h5>
+
+            <!-- Products Table -->
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% order.orderedItems.forEach(item => { %>
+                    <tr>
+                        <td><%= item.product.productName %></td>
+                        <td><%= item.quantity %></td>
+                        <td>$<%= item.price %></td>
+                        <td>$<%= item.quantity * item.price %></td>
+                    </tr>
+                    <% }); %>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="3" class="text-end"><strong>Total Price:</strong></td>
+                        <td><strong>$<%= totalPrice %></strong></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- Shipping Address -->
+    <div class="card mt-4">
+        <div class="card-header">
+            <h4>Shipping Address</h4>
+        </div>
+        <div class="card-body">
+            <p>
+                <strong><%= specificAddress.name %></strong><br>
+                <%= specificAddress.houseName %>, <%= specificAddress.street %><br>
+                <%= specificAddress.city %>, <%= specificAddress.state %>, <%= specificAddress.pincode %><br>
+                Phone: <%= specificAddress.phone %><br>
+                <% if (specificAddress.altPhone) { %>
+                    Alternate Phone: <%= specificAddress.altPhone %>
+                <% } %>
+            </p>
+        </div>
+    </div>
+
+    <!-- Confirmation Message -->
+    <div class="alert alert-success mt-4" role="alert">
+        We’ve sent a confirmation email with your order details.
+    </div>
+
+    <div class="text-center mt-4">
+        <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+    </div>
+</div>
+
+    <%-include("../../views/partials/user/footer")%>

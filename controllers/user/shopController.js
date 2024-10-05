@@ -64,7 +64,64 @@ const getProductDetails = async (req,res) => {
     }
 }
 
+const sortProducts = async (req,res) => {
+    try {
+
+        const category = await Category.find()
+        const brand = await Brand.find()
+        const user = req.session.user;
+        let userData = null
+        const sort = req.query.sort;
+        let sortCriteria;
+        
+        
+
+        if (user) {
+            userData = await User.findOne({ _id: user});
+        }else {
+            return res.redirect("/login");
+        }
+
+    switch (sort) {
+        case 'priceAsc':
+            sortCriteria = { salePrice: 1 }; // Sort by price ascending
+            break;
+        case 'priceDesc':
+            sortCriteria = { salePrice: -1 }; // Sort by price descending
+            break;
+        case 'newest':
+            sortCriteria = { createdAt: -1 }; // Sort by newest
+            break;
+        case 'oldest':
+            sortCriteria = { createdAt: 1 }; // Sort by oldest
+            break;
+        case 'alphaAsc':
+            sortCriteria = { productName: 1 }; // Sort by name ascending
+            break;
+        case 'alphaDesc':
+            sortCriteria = { productName: -1 }; // Sort by name descending
+            break;
+        default:
+            sortCriteria = {}; // Default: no sorting
+    }
+
+    // Fetch the products sorted based on the criteria
+    const product = await Product.find().sort(sortCriteria);
+
+    res.render("shop",{
+        cat:category,
+        product,
+        brand:brand,
+        user:userData
+    })
+    } catch (error) {
+        res.status(500).json({message:"Internal server error"})
+        console.error(error);
+    }
+}
+
 module.exports = {
     getShopPage,
     getProductDetails,
+    sortProducts
 }

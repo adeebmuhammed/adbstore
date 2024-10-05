@@ -31,6 +31,7 @@ router.get("/logout",userController.logout)
 //Shop Management
 router.get("/shop",userAuth,shopController.getShopPage)
 router.get("/productDetails",userAuth,shopController.getProductDetails)
+router.get("/products",userAuth,shopController.sortProducts)
 //Profile Management
 router.get("/profile",userAuth,profileController.getProfilePage)
 router.post("/update-profile",userAuth,profileController.updateProfile)

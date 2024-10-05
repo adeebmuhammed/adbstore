@@ -52,6 +52,7 @@ router.delete('/manage-addresses/delete-address/:addressId',userAuth, addressCon
 router.get("/cart",userAuth,cartController.getCartPage)
 router.post("/addToCart",userAuth,cartController.addToCart)
 router.post("/removeFromCart",userAuth,cartController.removeFromCart)
+router.post("/update-cart",userAuth,cartController.updateCart)
 //Checkout Management
 router.get("/checkout",userAuth,checkoutController.getCheckoutPage)
 router.post("/place-order",userAuth,checkoutController.placeOrder)

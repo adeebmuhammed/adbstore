@@ -132,8 +132,34 @@ const removeFromCart = async (req, res) => {
     }
 };
 
+const updateCart = async (req, res) => {
+    const { itemId, quantity } = req.body;
+
+    try {
+        // Find the product by its ID to check stock availability
+        const product = await Product.findById(itemId);
+
+        const availableStock = product.quantity;
+        if (quantity > availableStock) {
+            return res.status(400).json({ success: false, message: `Only ${availableStock} units available.` });
+        }
+
+        // Find the cart and update the quantity for the matching productId
+        await Cart.updateOne(
+            { 'items.productId': itemId }, // Match the item by its productId
+            { $set: { 'items.$.quantity': quantity } } // Dynamically update the quantity
+        );
+
+        res.json({ success: true, message: 'Quantity updated successfully' });
+    } catch (error) {
+        console.error('Error updating quantity:', error);
+        res.status(500).json({ success: false, message: 'Error updating quantity' });
+    }
+};
+
 module.exports = {
     getCartPage,
     addToCart,
-    removeFromCart
+    removeFromCart,
+    updateCart
 }

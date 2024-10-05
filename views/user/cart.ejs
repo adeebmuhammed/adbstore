@@ -56,10 +56,14 @@
                                             <td class="quantity__item">
                                                 <div class="quantity">
                                                     <div class="pro-qty-2">
-                                                        <input type="text" value="<%= item.quantity %>">
+                                                        <select class="quantity-select" name="quantity" onchange="updateQuantity('<%= item.productId._id %>', this.value)">
+                                                            <% for (let i = 1; i <= 5; i++) { %>
+                                                                <option value="<%= i %>" <%= item.quantity == i ? 'selected' : '' %>><%= i %></option>
+                                                            <% } %>
+                                                        </select>                                                                                                               
                                                     </div>
                                                 </div>
-                                            </td>
+                                            </td>                                            
                                             <td class="cart__price"><%= item.totalPrice.toFixed(2) %></td>
                                             <td class="cart__close">
                                                 <i class="fa fa-close" id="removeFromCart" data-product-id="<%= item.productId._id %>"></i>
@@ -175,6 +179,41 @@
                 });
             });
         });
+
+        function updateQuantity(productId, quantity) {
+        fetch('/update-cart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                itemId: productId, // Send the productId as itemId
+                quantity: quantity
+            }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: "Success!",
+                    text: "Quantity updated successfully!",
+                    icon: "success",
+                    button: "OK",
+                });
+            } else {
+                Swal.fire({
+                    title: "Error!",
+                    text: data.message || "Failed to update quantity",
+                    icon: "error",
+                    button: "OK",
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
+    }
+
         </script>        
 
     <%-include("../../views/partials/user/footer")%>

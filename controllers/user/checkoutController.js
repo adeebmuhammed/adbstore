@@ -84,7 +84,9 @@ const placeOrder = async (req, res) => {
         cart.items = [];
         await cart.save();
 
-        return res.redirect(`/order-confirmation/${newOrder.orderId}`);
+        //return res.redirect(`/order-confirmation/${newOrder.orderId}`);
+
+        return res.status(200).json({success:true, message:"Order Confirmed Successfully"})
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Failed to place order' });

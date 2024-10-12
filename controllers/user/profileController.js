@@ -27,11 +27,6 @@ const getProfilePage = async (req,res) => {
 const updateProfile = async (req,res) => {
     try {
         const {userId,name,phone} = req.body
-        const user = await User.findOne({name:name})
-        
-        if (user) {
-            return res.status(400).json({error:"User with this name already exists, please choose another name"})
-        }
 
         const updateUser = await User.findByIdAndUpdate(userId,{
             name:name,

@@ -11,6 +11,7 @@ const getShopPage = async (req,res) => {
         const product = await Product.find()
         const brand = await Brand.find()
         const user = req.session.user;
+        const sort = req.query.sort || 'priceAsc';
         let userData = null
         
 
@@ -23,7 +24,8 @@ const getShopPage = async (req,res) => {
             cat:category,
             product:product,
             brand:brand,
-            user:userData
+            user:userData,
+            selectedSort: sort
         })
     } catch (error) {
         console.error(error)
@@ -71,7 +73,7 @@ const sortProducts = async (req,res) => {
         const brand = await Brand.find()
         const user = req.session.user;
         let userData = null
-        const sort = req.query.sort;
+        const sort = req.query.sort || 'priceAsc';
         let sortCriteria;
         
         
@@ -112,7 +114,8 @@ const sortProducts = async (req,res) => {
         cat:category,
         product,
         brand:brand,
-        user:userData
+        user:userData,
+        selectedSort: sort
     })
     } catch (error) {
         res.status(500).json({message:"Internal server error"})

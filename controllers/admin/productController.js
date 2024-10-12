@@ -24,8 +24,8 @@ const addProducts = async (req,res) => {
     try {
         const products = req.body
         const productExists = await Product.findOne({
-            productName:products.productName,
-        })
+            productName: { $regex: new RegExp(`^${products.productName}$`, 'i') }
+        });        
 
         if(!productExists){
             const images = []
@@ -40,7 +40,7 @@ const addProducts = async (req,res) => {
                 }
             }
 
-            const categoryId = await Category.findOne({name:products.category})
+            const categoryId = await Category.findById(products.category)
 
             if(!categoryId){
                 return res.status(400).json({error:"Invalid Category Name"})
@@ -80,15 +80,15 @@ const getAllProducts = async (req,res) => {
         const limit = 4
 
         const productData = await Product.find({
-            $or:[
-                {productName:{$regex: new RegExp(".*"+search+".*","i")}},
-                {brand:{$regex: new RegExp(".*"+search+".*","i")}}
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                { brand: { $regex: new RegExp(".*" + search + ".*", "i") } }
             ]
         })
-        .limit(limit*1)
-        .skip((page-1)*limit)
-        .populate('category')
-        .exec()
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .populate('category')  // Populate category
+        .exec();        
 
         const count = await Product.find({
             $or:[

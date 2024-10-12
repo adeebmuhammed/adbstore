@@ -128,7 +128,16 @@
     
             const data = await response.json();
             
-            if (!data.success) {
+            if (data.success) {
+                /*Swal.fire({
+                                title: "Success!",
+                                text: "Order Confirmed Successfully",
+                                icon: "success",
+                                button: "OK",
+                            });*/
+                window.location.href = "/orders"
+            }
+            else {
                 Swal.fire({
                                 title: "Error!",
                                 text: data.error || "Failed to Placing Order",

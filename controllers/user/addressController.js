@@ -98,7 +98,7 @@ const addAddress = async (req, res) => {
         }
 
         // Return success message
-        res.status(201).json({ message: 'Address added successfully' }).redirect("/manage-addresses")
+        res.redirect("/manage-addresses")
     } catch (error) {
         // Send detailed error response
         console.error(error);

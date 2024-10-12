@@ -231,20 +231,20 @@
 
 
   function nameValidateChecking(e) {
-    const nameval = nameid.value
-    const namepattern = /^[A-Za-z]+$/
+    const nameval = nameid.value.trim();  // Trim spaces before validation
+    const namepattern = /^[A-Za-z\s]+$/;  // Allow alphabets and spaces
 
-    if (nameval.trim() === "") {
-      error1.style.display = "block"
-      error1.innerHTML = "please enter a valid name"
-    }else if(!namepattern.test(nameval)){
-      error1.style.display = "block"
-      error1.innerHTML = "name can only contain alphabets and spaces"
-    }else{
-      error1.style.display = "none"
-      error1.innerHTML = ""
+    if (nameval === "") {
+      error1.style.display = "block";
+      error1.innerHTML = "Please enter a valid name";
+    } else if (!namepattern.test(nameval)) {
+      error1.style.display = "block";
+      error1.innerHTML = "Name can only contain alphabets and spaces";
+    } else {
+      error1.style.display = "none";
+      error1.innerHTML = "";
     }
-  }
+}
 
   function emailValidateChecking(e) {
     const emailval = emailid.value
@@ -260,19 +260,26 @@
   }
 
   function phoneValidateChecking(e) {
-    const phoneval = phoneid.value
+    const phoneval = phoneid.value.trim(); // Trim any leading/trailing spaces
+    const phonePattern = /^[0-9]+$/; // Regex to ensure only numeric input
 
-    if (phoneval.trim() === "") {
-      error3.style.display = "block"
-      error3.innerHTML = "enter valid phone number"
-    }else if(phoneval.length<10 || phoneval.length>10){
-      error3.style.display = "block"
-      error3.innerHTML = "enter 10 digit"
-    }else{
-      error3.style.display = "none"
-      error3.innerHTML = ""
+    if (phoneval === "") {
+      error3.style.display = "block";
+      error3.innerHTML = "Enter a valid phone number";
+    } else if (!phonePattern.test(phoneval)) {
+      error3.style.display = "block";
+      error3.innerHTML = "Phone number can only contain digits";
+    } else if (phoneval.length !== 10) {
+      error3.style.display = "block";
+      error3.innerHTML = "Phone number must be 10 digits";
+    } else if (phoneval === "0000000000") {
+      error3.style.display = "block";
+      error3.innerHTML = "Phone number cannot be all zeros";
+    } else {
+      error3.style.display = "none";
+      error3.innerHTML = "";
     }
-  }
+}
 
   function passwordValidateChecking(e) {
     const passval = passid.value

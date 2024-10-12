@@ -125,17 +125,22 @@ document.getElementById('addressform').addEventListener('submit', function (even
         console.log("State validation failed");
     }
     if (!pincode || pincode.replace(/\s/g, '').length === 0) {
-        showError('error6', 'Pincode cannot be empty or contain only spaces.');
-        isValid = false;
-        console.log("Pincode validation failed");
-    }
+    showError('error6', 'Pincode cannot be empty or contain only spaces.');
+    isValid = false;
+    console.log("Pincode validation failed");
+} else if (!/^\d+$/.test(pincode)) {
+    showError('error6', 'Pincode must contain only numbers.');
+    isValid = false;
+    console.log("Pincode validation failed: contains non-numeric characters");
+}
+
 
     // If validation fails, don't submit the form
     if (isValid) {
         console.log("Form is valid, showing confirmation popup");
         Swal.fire({
             title: 'Are you sure?',
-            text: "You won't be able to revert this!",
+            //text: "You won't be able to revert this!",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -164,6 +169,7 @@ function showError(errorId, message) {
     if (errorElement) {
         errorElement.textContent = message;
         errorElement.style.display = 'block'; // Ensure the error message is visible
+        errorElement.style.color = 'red';
     }
 }
 </script>

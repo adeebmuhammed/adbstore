@@ -42,7 +42,7 @@
                             <select class="form-select border" name="brand" required>
                                 <option value="" disabled selected>Select a brand</option> <!-- Placeholder option -->
                                 <% for (let i = 0; i < brand.length; i++) { %>
-                                    <option value="<%= brand[i]._id %>">
+                                    <option value="<%= brand[i].brandName %>">
                                         <%= brand[i].brandName %>
                                     </option>
                                 <% } %>

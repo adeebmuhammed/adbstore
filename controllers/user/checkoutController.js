@@ -31,8 +31,6 @@ const getCheckoutPage = async (req, res) => {
 };
 
 const placeOrder = async (req, res) => {
-    console.log("req received");
-
     try {
         const { selectedAddress, paymentMethod } = req.body;
         const userId = req.user._id; // assuming you are storing userId in req.user

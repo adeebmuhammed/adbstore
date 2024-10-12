@@ -3,9 +3,11 @@
    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
 </head>
 <style>
-   .error-message{
-       color: red;
-   }
+   .error-message {
+    display: none;
+    color: red; /* To make sure the error message is visible */
+}
+
 
 
        .thumbnails-container {
@@ -56,22 +58,20 @@
                                <div id="description-error" class="error-message"></div>
                            </div>
                            <div class="row">
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Regular price</label>
-                                       <input placeholder="$" name="regularPrice" type="text"
-                                           class="form-control border">
-                                           <div id="regularPrice-error" class="error-message"></div>
-                                   </div>
-                               </div>
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Sale price</label>
-                                       <input placeholder="$" name="salePrice" type="text" class="form-control border">
-                                      
-                                   </div>
-                                   <div id="salePrice-error" class="error-message"></div>
-                               </div>
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Regular price</label>
+                                    <input placeholder="$" name="regularPrice" type="text" class="form-control border">
+                                    <div id="regularPrice-error" class="error-message"></div>
+                                </div>
+                             </div>
+                             <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">Sale price</label>
+                                    <input placeholder="$" name="salePrice" type="text" class="form-control border">
+                                    <div id="salePrice-error" class="error-message"></div>
+                                </div>
+                             </div>                             
                                <div class="col-lg-4">
                                    <div class="mb-4">
                                        <label class="form-label">Quantity</label>
@@ -206,8 +206,7 @@
                         
                            </div>
                            <div>
-                               <button class="btn btn-md rounded font-sm hover-up"  type="button" onclick="validateAndSubmit()
-">Publish</button>
+                               <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()">Publish</button>
                            </div>
                        </form>
                    </div>
@@ -321,96 +320,99 @@
         }
     }
 
+    // Function to display error messages
+function displayErrorMessage(elementId, message) {
+    var errorElement = document.getElementById(elementId);
+    errorElement.innerText = message;
+    errorElement.style.visibility = "visible";
+    errorElement.style.display = "block"; // Ensures it's properly shown
+}
+
+// Function to clear error messages
+function clearErrorMessages() {
+    const errorElements = document.getElementsByClassName('error-message');
+    Array.from(errorElements).forEach(element => {
+        element.innerText = '';          // Clear the error message text
+        element.style.visibility = "hidden";  // Hide the error message
+        element.style.display = "none";       // Make sure it's not displayed
+    });
+}
+
+// Function to validate form
+function validateForm() {
+    clearErrorMessages();  // Clear any previous error messages
+
+    const name = document.getElementsByName('productName')[0].value;
+    const description = document.getElementById('descriptionid').value;
+    const brand = document.getElementsByName('brand')[0].value;
+    const price = document.getElementsByName('regularPrice')[0].value;
+    const salePrice = document.getElementsByName('salePrice')[0].value;
+    const color = document.getElementsByName('color')[0].value;
+    const category = document.getElementsByName('category')[0].value;
+    const images = document.getElementById('input1');
+    const quantity = document.getElementsByName('quantity')[0].value;  // Access the first element and get value
+
+    let isValid = true;
+
+    // Product name validation
+    if (name.trim() === "") {
+        displayErrorMessage('productName-error', 'Please enter a product name.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
+        displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+        isValid = false;
+    }
+
+    // Description validation
+    if (description.trim() === "") {
+        displayErrorMessage('description-error', 'Please enter a product description.');
+        isValid = false;
+    } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
+        displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
+        isValid = false;
+    }
+
+    // Quantity validation
+    if (quantity.trim() === "" || parseInt(quantity) < 0 || isNaN(quantity)) {
+        displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
+        isValid = false;
+    }
+
+    // Regular price validation
+    if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
+        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
+        isValid = false;
+    }
+
+    // Sale price validation
+    if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
+        displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
+        isValid = false;
+    }
+
+    // Comparison between regular price and sale price
+    if (isValid && parseFloat(price) <= parseFloat(salePrice)) {
+        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
+        isValid = false;
+    }
+
+    // Color validation
+    if (color.trim() === "") {
+        displayErrorMessage('color-error', 'Please enter a color.');
+        isValid = false;
+    }
+
+    // Image validation
+    if (images.files.length === 0) {
+        displayErrorMessage('images-error', 'Please select an image.');
+        isValid = false;
+    }
+
+    return isValid;
+}
 
 
 
-    function validateForm() {
-              clearErrorMessages();
-              const name = document.getElementsByName('productName')[0].value;
-              const description = document.getElementById('descriptionid').value;
-              const brand = document.getElementsByName('brand')[0].value;
-              const price = document.getElementsByName('regularPrice')[0].value;
-              const saleprice = document.getElementsByName('salePrice')[0].value;
-              const color = document.getElementsByName('color')[0].value;
-              const category = document.getElementsByName('category')[0].value;
-              const images = document.getElementById('input1')
-              const quantity=document.getElementsByName('quantity')
-              let isValid = true
-              if (name.trim() === "") {
-      displayErrorMessage('productName-error', 'Please enter a product name.');
-      isValid = false;
-   } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-      displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
-      isValid = false;
-   }
-            
-   if (description.trim() === "") {
-      displayErrorMessage('description-error', 'Please enter a product description.');
-      isValid = false;
-   } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
-      displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
-      isValid = false;
-   }
-  
-  
-           
-  
-  
-              if ( parseInt(quantity) < 0) {
-                  displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-                  isValid = false;
-              }
-  
-  
-  
-  
-              if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                  displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-                  isValid = false;
-              }
-  
-  
-  
-  
-              if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-                  displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                  isValid = false;
-              }
-              if (parseFloat(price) <= parseFloat(saleprice)) {
-      displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-      isValid = false;
-   }
-  
-  
-              if (color.trim() === "") {
-                  displayErrorMessage('color-error', 'Please enter a color.');
-                  isValid = false;
-              }
-  
-  
-              if (images.files.length === 0) {
-                  displayErrorMessage("images-error",'Please select an image.');
-                  isValid = false;
-              }
-              return isValid;
-          }
-
-
-          function displayErrorMessage(elementId, message) {
-              var errorElement = document.getElementById(elementId);
-              errorElement.innerText = message;
-              errorElement.style.display = "block";
-          }
-  
-  
-          function clearErrorMessages() {
-              const errorElements = document.getElementsByClassName('error-message');
-              Array.from(errorElements).forEach(element => {
-                  element.innerText = '';
-              });
-              const errorMessage = document.getElementById('errorMessage');
-  
-  
-          }
+          
 </script>
 <%- include("../../views/partials/admin/footer") %>

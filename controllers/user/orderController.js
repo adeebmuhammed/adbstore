@@ -37,14 +37,30 @@ const cancelOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
 
-        // Find the order and update the status to 'Canceled'
-        const order = await Order.findById(orderId);
+        // Find the order
+        const order = await Order.findById(orderId).populate('orderedItems.product'); // Populate product details
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
         // Only cancel if the order is still pending
         if (order.status === 'Pending') {
+            // Update the product quantities for each ordered item
+            for (const item of order.orderedItems) {
+                const product = await Product.findById(item.product._id); // Find the product
+
+                if (product) {
+                    // Assuming sizes is an array of objects with size and quantity properties
+                    const sizeInfo = product.sizes.find(s => s.size === item.size); // Adjust based on your schema
+
+                    if (sizeInfo) {
+                        sizeInfo.quantity += item.quantity; // Increase the quantity back
+                        await product.save(); // Save the updated product
+                    }
+                }
+            }
+
+            // Update the order status to 'Canceled'
             order.status = 'Canceled';
             await order.save();
             return res.json({ success: true, message: 'Order canceled successfully' });

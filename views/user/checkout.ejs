@@ -45,21 +45,15 @@
                         <h4 class="order__title">Select Payment Method</h4>
                         <div class="checkout__payment__options">
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="paymentMethod" value="Credit Card" id="creditCard" disabled>
-                                <label class="form-check-label" for="creditCard">
-                                    Credit Card
+                                <input class="form-check-input" type="radio" name="paymentMethod" value="Online Payment" id="onlinepayment" required>
+                                <label class="form-check-label" for="onlinepayment">
+                                    Online Payment
                                 </label>
                             </div>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="paymentMethod" value="Debit Card" id="debitCard" disabled>
-                                <label class="form-check-label" for="debitCard">
-                                    Debit Card
-                                </label>
-                            </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="paymentMethod" value="Net Banking" id="netBanking" disabled>
-                                <label class="form-check-label" for="netBanking">
-                                    Net Banking
+                                <input class="form-check-input" type="radio" name="paymentMethod" value="Wallet" id="wallet" required>
+                                <label class="form-check-label" for="wallet">
+                                    Wallet
                                 </label>
                             </div>
                             <div class="form-check">
@@ -129,21 +123,72 @@
             const data = await response.json();
             
             if (data.success) {
-                /*Swal.fire({
-                                title: "Success!",
-                                text: "Order Confirmed Successfully",
-                                icon: "success",
-                                button: "OK",
-                            });*/
-                window.location.href = "/orders"
-            }
-            else {
-                Swal.fire({
-                                title: "Error!",
-                                text: data.error || "Failed to Placing Order",
-                                icon: "error",
-                                button: "OK",
-                });
-            }
+                if (paymentMethod === 'Online Payment') {
+    const { finalAmount, orderId, razorpayKey } = data; 
+
+    var options = {
+        "key": razorpayKey,
+        "amount": finalAmount * 100,
+        "currency": "INR",
+        "name": "Adb Store",
+        "description": "Purchase Description",
+        "order_id": orderId,
+        "handler": function (response) {
+            // After successful payment
+            verifyPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature);
+        },
+        "prefill": {
+            "name": "Customer Name",
+            "email": "customer@example.com",
+            "contact": "9999999999"
+        },
+        "theme": {
+            "color": "#F37254"
+        }
+    };
+
+    const rzp = new Razorpay(options);
+    rzp.open();
+} else {
+    // For COD or Wallet payment
+    window.location.href = `/order-confirmation/${data.message}`;
+}
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.error || "Failed to Place Order",
+                icon: "error",
+                button: "OK",
+            });
+        }
+    });
+
+    // Function to verify payment
+    async function verifyPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
+        const response = await fetch('/verify-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                razorpay_payment_id,
+                razorpay_order_id,
+                razorpay_signature
+            })
         });
+
+        const data = await response.json();
+        
+        if (data.success) {
+            window.location.href = `/order-confirmation/${data.message}`; // Redirect to confirmation page
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.error || "Payment verification failed",
+                icon: "error",
+                button: "OK",
+            });
+        }
+    }
+        
     </script>    

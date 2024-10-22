@@ -25,19 +25,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% order.orderedItems.forEach(item => { %>
+                    <% orderedItems.forEach(item => { %>
                     <tr>
                         <td><%= item.product.productName %></td>
                         <td><%= item.quantity %></td>
-                        <td>$<%= item.price %></td>
-                        <td>$<%= item.quantity * item.price %></td>
+                        <td>INR <%= item.price %></td>
+                        <td>INR <%= item.quantity * item.price %></td>
                     </tr>
                     <% }); %>
                 </tbody>
                 <tfoot>
                     <tr>
                         <td colspan="3" class="text-end"><strong>Total Price:</strong></td>
-                        <td><strong>$<%= totalPrice %></strong></td>
+                        <td><strong>INR <%= totalPrice %></strong></td>
                     </tr>
                 </tfoot>
             </table>

@@ -46,20 +46,28 @@ const addProducts = async (req,res) => {
                 return res.status(400).json({error:"Invalid Category Name"})
             }
 
+            let sizes = [];
+            if (products.sizes && Array.isArray(products.sizes)) {
+                sizes = products.sizes.map((size, index) => ({
+                    size: size, // Size value from form (e.g., '6', '7', etc.)
+                    quantity: products[`quantity${size}`] || 0 // Quantity corresponding to that size
+                }));
+            }
+
+            // Create a new product
             const newProduct = new Product({
-                productName:products.productName,
-                description:products.description,
-                brand:products.brand,
-                category:categoryId._id,
-                regularPrice:products.regularPrice,
-                salePrice:products.salePrice,
+                productName: products.productName,
+                description: products.description,
+                brand: products.brand,
+                category: categoryId._id,
+                regularPrice: products.regularPrice,
+                salePrice: products.salePrice,
                 createdOn: new Date(),
-                quantity:products.quantity,
-                sizes:products.sizes,
-                color:products.color,
-                productImage:images,
-                status:'Available'
-            })
+                sizes: sizes, // Add sizes with quantity
+                color: products.color,
+                productImage: images,
+                status: 'Available'
+            });
 
             await newProduct.save()
             return res.redirect("/admin/addProducts")
@@ -192,50 +200,70 @@ const getEditProduct = async (req,res) => {
     }
 }
 
-const editProduct = async (req,res) => {
+const editProduct = async (req, res) => {
     try {
-        const id = req.params.id
-        const product = await Product.findOne({_id:id})
-        const data = req.body
-        const existingProduct = await Product.findOne({
-            productName:data.productName,
-            _id:{$ne:id}
-        })
+        const id = req.params.id;
+        const data = req.body;
 
-        if(existingProduct){
-            return res.status(400).json({error:"Product with this name Already exists, please try with another name"})
+        // Check if the product name already exists except the current product
+        const existingProduct = await Product.findOne({
+            productName: data.productName,
+            _id: { $ne: id }
+        });
+
+        if (existingProduct) {
+            return res.status(400).json({ error: "Product with this name already exists, please try with another name" });
         }
 
-        const images = []
+        const images = [];
 
-        if(req.files && req.files.length>0){
-            for(let i=0;i<req.files.length;i++){
-                images.push(req.files[i].filename)
+        // Check if new images are uploaded
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                images.push(req.files[i].filename);
             }
         }
 
-        const updateFields = {
-            productName:data.productName,
-            description:data.description,
-            brand:data.brand,
-            category:product.category,
-            regularPrice:data.regularPrice,
-            salePrice:data.salePrice,
-            quantity:data.quantity,
-            sizes:data.sizes,
-            color:data.color
-        }
-        if(req.files.length>0){
-            updateFields.$push = {productImage:{$each:images}}
+        // Process sizes and corresponding quantities
+        let sizes = [];
+        if (data.sizes && Array.isArray(data.sizes)) {
+            sizes = data.sizes.map((size) => ({
+                size: size, // Get the size value
+                quantity: data[`quantity${size}`] || 0 // Get the corresponding quantity from the form
+            }));
         }
 
-        await Product.findByIdAndUpdate(id,updateFields,{new:true})
-        res.redirect("/admin/products")
+        // Prepare the fields to update
+        const updateFields = {
+            productName: data.productName,
+            description: data.description,
+            brand: data.brand,
+            category: data.category, // Assuming category is also in form submission
+            regularPrice: data.regularPrice,
+            salePrice: data.salePrice,
+            sizes: sizes, // Updated sizes array with quantity
+            color: data.color
+        };
+
+        // Only add new images if they exist
+        if (images.length > 0) {
+            updateFields.productImage = [...product.productImage, ...images]; // Merge old images with new ones
+        }
+
+        // Update the product
+        const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true });
+
+        if (updatedProduct) {
+            console.log("Product updated successfully");
+            return res.redirect("/admin/products");
+        } else {
+            return res.status(404).json({ error: "Product not found" });
+        }
     } catch (error) {
-        console.error(error)
-        res.redirect("/admin/pageerror")
+        console.error("Error updating product", error);
+        res.redirect("/admin/pageerror");
     }
-}
+};
 
 const deleteSingleImage= async(req,res)=>{
     try {

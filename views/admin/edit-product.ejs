@@ -82,14 +82,6 @@
                                    </div>
                                    <div id="salePrice-error" class="error-message"></div>
                                </div>
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Quantity</label>
-                                       <input name="quantity" type="text" value="<%=product.quantity%>"
-                                           class="form-control border">
-                                           <div id="quantity-error" class="error-message"></div>
-                                   </div>
-                               </div>
                            </div>
                            <div class="row">
                              
@@ -103,28 +95,46 @@
                                </div>
                                <div class="mb-4">
                                 <label class="form-label">Sizes</label>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="6" id="size6"
-                                        <% if(product.sizes.includes("6")) { %> checked <% } %>>
+                                        <% if (product.sizes.some(size => size.size === '6')) { %> checked <% } %>>
                                     <label class="form-check-label" for="size6">6</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity6" name="quantity6"
+                                        placeholder="Quantity" value="<%= product.sizes.find(size => size.size === '6')?.quantity || '' %>"
+                                        style="<% if (product.sizes.some(size => size.size === '6')) { %> display:block; <% } else { %> display:none; <% } %>">
                                 </div>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="7" id="size7"
-                                        <% if(product.sizes.includes("7")) { %> checked <% } %>>
+                                        <% if (product.sizes.some(size => size.size === '7')) { %> checked <% } %>>
                                     <label class="form-check-label" for="size7">7</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity7" name="quantity7"
+                                        placeholder="Quantity" value="<%= product.sizes.find(size => size.size === '7')?.quantity || '' %>"
+                                        style="<% if (product.sizes.some(size => size.size === '7')) { %> display:block; <% } else { %> display:none; <% } %>">
                                 </div>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="8" id="size8"
-                                        <% if(product.sizes.includes("8")) { %> checked <% } %>>
+                                        <% if (product.sizes.some(size => size.size === '8')) { %> checked <% } %>>
                                     <label class="form-check-label" for="size8">8</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity8" name="quantity8"
+                                        placeholder="Quantity" value="<%= product.sizes.find(size => size.size === '8')?.quantity || '' %>"
+                                        style="<% if (product.sizes.some(size => size.size === '8')) { %> display:block; <% } else { %> display:none; <% } %>">
                                 </div>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="9" id="size9"
-                                        <% if(product.sizes.includes("9")) { %> checked <% } %>>
+                                        <% if (product.sizes.some(size => size.size === '9')) { %> checked <% } %>>
                                     <label class="form-check-label" for="size9">9</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity9" name="quantity9"
+                                        placeholder="Quantity" value="<%= product.sizes.find(size => size.size === '9')?.quantity || '' %>"
+                                        style="<% if (product.sizes.some(size => size.size === '9')) { %> display:block; <% } else { %> display:none; <% } %>">
                                 </div>
+                            
                                 <div id="sizes-error" class="error-message"></div>
                             </div>
+                            
                             
                             </div>
                               
@@ -138,7 +148,7 @@
                                            <label class="form-label">Category</label>
                                            <select class="form-select border" style="width: 150px;" name="category">
                                             <% for(let i = 0; i < cat.length; i++) { %>
-                                                <option value="<%= cat[i].name %>">
+                                                <option value="<%= cat[i]._id %>">
                                                     <%= cat[i].name %>
                                                 </option>
                                             <% } %>
@@ -231,7 +241,7 @@
 
 
                                <button class="btn btn-md rounded font-sm hover-up" id="updatebtn"
-                                   type="button"  onclick="validateAndSubmit()">Update</button>
+                                   type="submit"  onclick="validateAndSubmit()">Update</button>
                            </div>
                        </form>
                    </div>
@@ -250,8 +260,34 @@
     }
     }
     
-    
-    
+
+    document.querySelectorAll('.form-check-input').forEach((checkbox) => {
+    checkbox.addEventListener('change', function () {
+        const quantityInput = document.getElementById(`quantity${this.value}`);
+        if (this.checked) {
+            // Show the quantity input when the checkbox is checked
+            quantityInput.style.display = 'block';
+        } else {
+            // Hide the quantity input when the checkbox is unchecked
+            quantityInput.style.display = 'none';
+            quantityInput.value = '';  // Clear the quantity value
+        }
+    });
+});
+
+function getSelectedSizesAndQuantities() {
+    const selectedSizes = [];
+
+    document.querySelectorAll('.form-check-input').forEach((checkbox) => {
+        if (checkbox.checked) {
+            const size = checkbox.value;  // Get the size
+            const quantity = document.getElementById(`quantity${size}`).value;  // Get the corresponding quantity
+            selectedSizes.push({ size, quantity });
+        }
+    });
+
+    return selectedSizes;
+}
     
     function validateForm() {
        let imageDatas = false
@@ -265,7 +301,7 @@
                const color = document.getElementsByName('color')[0].value;
                const category = document.getElementsByName('category')[0].value;
                const images = document.getElementById('input1')
-               const quantity=document.getElementsByName('quantity')
+               const selectedSizes = getSelectedSizesAndQuantities();
     imageDatas = document.getElementById("imageDatas")?.value;
                let isValid = true;    
                if (name.trim() === "") {
@@ -279,10 +315,32 @@
                } 
     
     
-               if ( parseInt(quantity) < 0) {
-                   displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-                   isValid = false;
-               }
+               if (validateSizesAndQuantities()) {
+        // Proceed with form submission if valid
+        console.log('Form is valid!');
+    } else {
+        // Handle invalid form
+        console.log('Form has errors.');
+        isValid = false
+    }
+
+    /*const productSizes = {{ JSON.stringify(product.sizes) }}; // Assuming you're passing the product object to the view
+
+    // Iterate over each size and pre-select the checkbox and show the quantity
+    productSizes.forEach(sizeObj => {
+        const sizeValue = sizeObj.size; // e.g., '6', '7', '8', '9'
+        const quantityValue = sizeObj.quantity; // e.g., 2, 3, etc.
+
+        // Find the corresponding checkbox and input for the size
+        const sizeCheckbox = document.getElementById(`size${sizeValue}`);
+        const quantityInput = document.getElementById(`quantity${sizeValue}`);
+
+        if (sizeCheckbox && quantityInput) {
+            sizeCheckbox.checked = true; // Check the checkbox for the size
+            quantityInput.style.display = 'block'; // Show the quantity input field
+            quantityInput.value = quantityValue; // Set the quantity value
+        }
+    });*/
     
     
     
@@ -323,6 +381,39 @@
     
     
            }
+
+           function validateSizesAndQuantities() {
+    let isValid = true;
+    let hasSelectedSize = false;
+
+    document.getElementById('sizes-error').textContent = '';  // Clear any previous errors
+
+    // Loop through all checkboxes to validate sizes and quantities
+    document.querySelectorAll('.form-check-input').forEach((checkbox) => {
+        if (checkbox.checked) {
+            hasSelectedSize = true;  // At least one size is selected
+            const size = checkbox.value;
+            const quantityInput = document.getElementById(`quantity${size}`);
+            const quantity = quantityInput.value;
+
+            // Validate quantity: it should be a non-empty, non-negative number
+            if (quantity.trim() === "" || parseInt(quantity) < 0 || isNaN(quantity)) {
+                displayErrorMessage(`quantity-error-${size}`, `Please enter a valid non-negative quantity for size ${size}.`);
+                isValid = false;
+            } else {
+                clearErrorMessage(`quantity-error-${size}`);
+            }
+        }
+    });
+
+    // Check if at least one size is selected
+    if (!hasSelectedSize) {
+        displayErrorMessage('sizes-error', 'Please select at least one size.');
+        isValid = false;
+    }
+
+    return isValid;
+}
     
     
     

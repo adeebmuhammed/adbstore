@@ -72,13 +72,6 @@
                                     <div id="salePrice-error" class="error-message"></div>
                                 </div>
                              </div>                             
-                               <div class="col-lg-4">
-                                   <div class="mb-4">
-                                       <label class="form-label">Quantity</label>
-                                       <input placeholder="" name="quantity" type="text" class="form-control border">
-                                       <div id="quantity-error" class="error-message"></div>
-                                   </div>
-                               </div>
                            </div>
                            <div class="row">
                               
@@ -91,24 +84,35 @@
                                </div>
                                <div class="mb-4">
                                 <label class="form-label">Sizes</label>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="6" id="size6">
                                     <label class="form-check-label" for="size6">6</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity6" name="quantity6" placeholder="Quantity" style="display:none;">
                                 </div>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="7" id="size7">
                                     <label class="form-check-label" for="size7">7</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity7" name="quantity7" placeholder="Quantity" style="display:none;">
                                 </div>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="8" id="size8">
                                     <label class="form-check-label" for="size8">8</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity8" name="quantity8" placeholder="Quantity" style="display:none;">
                                 </div>
+                            
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" name="sizes" value="9" id="size9">
                                     <label class="form-check-label" for="size9">9</label>
+                                    <input type="number" class="form-control mt-2 size-quantity" id="quantity9" name="quantity9" placeholder="Quantity" style="display:none;">
                                 </div>
+                            
                                 <div id="sizes-error" class="error-message"></div>
-                            </div>                        
+                            </div>
+                            
+                            
                            </div>
                            <div class="card mb-4">
                                <div class="card-body">
@@ -320,6 +324,35 @@
         }
     }
 
+    document.querySelectorAll('.form-check-input').forEach((checkbox) => {
+    checkbox.addEventListener('change', function () {
+        const quantityInput = document.getElementById(`quantity${this.value}`);
+        if (this.checked) {
+            // Show the quantity input when the checkbox is checked
+            quantityInput.style.display = 'block';
+        } else {
+            // Hide the quantity input when the checkbox is unchecked
+            quantityInput.style.display = 'none';
+            quantityInput.value = '';  // Clear the quantity value
+        }
+    });
+});
+
+function getSelectedSizesAndQuantities() {
+    const selectedSizes = [];
+
+    document.querySelectorAll('.form-check-input').forEach((checkbox) => {
+        if (checkbox.checked) {
+            const size = checkbox.value;  // Get the size
+            const quantity = document.getElementById(`quantity${size}`).value;  // Get the corresponding quantity
+            selectedSizes.push({ size, quantity });
+        }
+    });
+
+    return selectedSizes;
+}
+
+
     // Function to display error messages
 function displayErrorMessage(elementId, message) {
     var errorElement = document.getElementById(elementId);
@@ -350,7 +383,7 @@ function validateForm() {
     const color = document.getElementsByName('color')[0].value;
     const category = document.getElementsByName('category')[0].value;
     const images = document.getElementById('input1');
-    const quantity = document.getElementsByName('quantity')[0].value;  // Access the first element and get value
+    const selectedSizes = getSelectedSizesAndQuantities();
 
     let isValid = true;
 
@@ -373,9 +406,13 @@ function validateForm() {
     }
 
     // Quantity validation
-    if (quantity.trim() === "" || parseInt(quantity) < 0 || isNaN(quantity)) {
-        displayErrorMessage('quantity-error', 'Please enter a valid non-negative quantity.');
-        isValid = false;
+    if (validateSizesAndQuantities()) {
+        // Proceed with form submission if valid
+        console.log('Form is valid!');
+    } else {
+        // Handle invalid form
+        console.log('Form has errors.');
+        isValid = false
     }
 
     // Regular price validation
@@ -405,6 +442,39 @@ function validateForm() {
     // Image validation
     if (images.files.length === 0) {
         displayErrorMessage('images-error', 'Please select an image.');
+        isValid = false;
+    }
+
+    return isValid;
+}
+
+function validateSizesAndQuantities() {
+    let isValid = true;
+    let hasSelectedSize = false;
+
+    document.getElementById('sizes-error').textContent = '';  // Clear any previous errors
+
+    // Loop through all checkboxes to validate sizes and quantities
+    document.querySelectorAll('.form-check-input').forEach((checkbox) => {
+        if (checkbox.checked) {
+            hasSelectedSize = true;  // At least one size is selected
+            const size = checkbox.value;
+            const quantityInput = document.getElementById(`quantity${size}`);
+            const quantity = quantityInput.value;
+
+            // Validate quantity: it should be a non-empty, non-negative number
+            if (quantity.trim() === "" || parseInt(quantity) < 0 || isNaN(quantity)) {
+                displayErrorMessage(`quantity-error-${size}`, `Please enter a valid non-negative quantity for size ${size}.`);
+                isValid = false;
+            } else {
+                clearErrorMessage(`quantity-error-${size}`);
+            }
+        }
+    });
+
+    // Check if at least one size is selected
+    if (!hasSelectedSize) {
+        displayErrorMessage('sizes-error', 'Please select at least one size.');
         isValid = false;
     }
 

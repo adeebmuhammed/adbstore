@@ -1,0 +1,125 @@
+<%- include("../../views/partials/admin/header") %>
+
+    <div class="container mt-5">
+        <h2>Coupons</h2>
+        <div class="row">
+            <!-- Form to add a coupon -->
+            <div class="col-md-6">
+                <form id="couponForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Coupon Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="expireOn" class="form-label">Expiry Date</label>
+                        <input type="date" class="form-control" id="expireOn" name="expireOn" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="offerPrice" class="form-label">Offer Price</label>
+                        <input type="number" class="form-control" id="offerPrice" name="offerPrice" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="minimumPrice" class="form-label">Minimum Price</label>
+                        <input type="number" class="form-control" id="minimumPrice" name="minimumPrice" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="code" class="form-label">Coupon Code</label>
+                        <input type="text" class="form-control" id="code" name="code" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="couponImage" class="form-label">Coupon Image</label>
+                        <input type="file" class="form-control" id="couponImage" name="couponImage">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Coupon</button>
+                </form>                                
+            </div>
+
+            <!-- Table to display coupons -->
+            <div class="col-md-6">
+                <table class="table table-bordered mt-4">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Image</th>
+                            <th>Expiry Date</th>
+                            <th>Offer Price</th>
+                            <th>Minimum Price</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="couponTable">
+                        <% coupons.forEach(coupon => { %>
+                            <tr>
+                                <td><%= coupon.name %></td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-center"
+                                    style="
+                                      width: 40px;
+                                      height: 40px;
+                                      overflow: hidden;
+                                    ">
+                                        <img src="/uploads/re-image/<%= coupon.image[0] %>" alt="<%= coupon.name %>" style="width: 100%; height: auto">
+                                    </div>
+                                </td>
+                                <td><%= coupon.expireOn.toDateString() %></td> <!-- Change to expireOn -->
+                                <td><%= coupon.offerPrice %></td>
+                                <td><%= coupon.minimumPrice %></td>
+                                <td>
+                                    <!-- Add action buttons like edit or delete here -->
+                                    <form id="deleteCouponForm" style="display:inline;">
+                                        <input type="hidden" name="id" value="<%= coupon._id %>">
+                                        <button type="button" class="btn btn-danger" onclick="deleteCoupon('<%= coupon._id %>')">Delete</button>
+                                    </form>                                  
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>                    
+        </div>
+    </div>
+    <%- include("../../views/partials/admin/footer") %>
+
+    <script>
+        document.getElementById('couponForm').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent form from submitting the default way
+    
+            const formData = new FormData(this); // Create form data object
+    
+            try {
+                const response = await fetch('/admin/addCoupon', {
+                    method: 'POST',
+                    body: formData,
+                });
+    
+                const result = await response.json();
+    
+                if (response.ok) {
+                    window.location.reload()
+                } else {
+                    alert('Error: ' + result.error || 'Something went wrong');
+                }
+            } catch (error) {
+                alert('Network error or server is down. Please try again later.');
+            }
+        });
+
+        async function deleteCoupon(couponId) {
+        const response = await fetch('/admin/deleteCoupon', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ id: couponId }),
+        });
+
+        const result = await response.json();
+
+        // Check if the deletion was successful
+        if (result.success) {
+            window.location.reload();
+        } else {
+            alert(result.error || "Failed to delete the coupon."); // Show error message
+        }
+    }
+    </script>    

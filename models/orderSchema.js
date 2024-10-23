@@ -69,6 +69,10 @@ const orderSchema = new Schema({
     paymentMethod:{
         type:String,
         required:true
+    },
+    razorpayOrderId:{
+        type:String,
+        required:false
     }
 })
 

@@ -8,7 +8,7 @@ const couponSchema = new Schema({
         unique:true
     },
     createdOn:{
-        tye:Date,
+        type:Date,
         default:Date.now,
         required:true
     },
@@ -28,9 +28,14 @@ const couponSchema = new Schema({
         type:Boolean,
         default:true
     },
-    userId:{
-        type:Schema.Types.ObjectId,
-        ref:'User'
+    code:{
+        type:String,
+        required:true,
+        unique:true
+    },
+    image:{
+        type:[String],
+        required:true
     }
 })
 

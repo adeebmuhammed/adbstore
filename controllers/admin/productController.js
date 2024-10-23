@@ -77,7 +77,7 @@ const addProducts = async (req,res) => {
 
     } catch (error) {
         console.error("Error adding product",error)
-        res.redirect("/pageerror")
+        res.redirect("/admin/pageerror")
     }
 }
 

@@ -165,30 +165,37 @@
 
     // Function to verify payment
     async function verifyPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
-        const response = await fetch('/verify-payment', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                razorpay_payment_id,
-                razorpay_order_id,
-                razorpay_signature
-            })
-        });
+    console.log("Payment verification details:", {
+        razorpay_payment_id,
+        razorpay_order_id,
+        razorpay_signature
+    });
 
-        const data = await response.json();
-        
-        if (data.success) {
-            window.location.href = `/order-confirmation/${data.message}`; // Redirect to confirmation page
-        } else {
-            Swal.fire({
-                title: "Error!",
-                text: data.error || "Payment verification failed",
-                icon: "error",
-                button: "OK",
-            });
-        }
+    const response = await fetch('/verify-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature
+        })
+    });
+
+    const data = await response.json();
+    console.log("Response from server:", data);
+
+    if (data.success) {
+        window.location.href = `/order-confirmation/${data.message}`;
+    } else {
+        Swal.fire({
+            title: "Error!",
+            text: data.error || "Payment verification failed",
+            icon: "error",
+            button: "OK",
+        });
     }
+}
         
     </script>    

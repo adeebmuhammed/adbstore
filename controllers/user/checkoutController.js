@@ -3,6 +3,7 @@ const Cart = require("../../models/cartSchema")
 const User = require("../../models/userSchema")
 const Order = require("../../models/orderSchema")
 const Product = require("../../models/productSchema")
+const Coupon = require("../../models/couponSchema")
 const env = require('dotenv').config()
 const Razorpay = require("razorpay")
 const crypto = require('crypto')
@@ -40,7 +41,7 @@ const getCheckoutPage = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
-        const { selectedAddress, paymentMethod } = req.body;
+        const { selectedAddress, paymentMethod, couponCode } = req.body;
         const userId = req.user._id; // assuming you are storing userId in req.user
 
         // Fetch the cart for the user and populate the product details
@@ -76,7 +77,22 @@ const placeOrder = async (req, res) => {
             await product.save();
         }
 
-        const discount = 0; // Assuming no discount logic is applied yet, or you can calculate it here
+        let discount = 0;
+        let couponApplied
+        let finalAmount = totalPrice
+
+        if (couponCode && couponCode !== "") {
+            couponApplied = await Coupon.findOne({code:couponCode})
+
+        if (!couponApplied) {
+            return res.status(400).json({success:false, message : "Invalid Coupon Code"})
+        }else{
+            discount = couponApplied.offerPrice
+
+            finalAmount = totalPrice - (totalPrice * (discount / 100));
+        }
+        }
+        
 
         // Create a new order object (without razorpayOrderId initially)
         const newOrder = new Order({
@@ -88,12 +104,13 @@ const placeOrder = async (req, res) => {
             })),
             user: userId,
             totalprice: totalPrice,
-            finalAmount: totalPrice - discount,
+            finalAmount: finalAmount < totalPrice ? finalAmount : totalPrice,
             address: selectedAddress,
             invoiceDate: new Date(),
             status: 'Pending',
-            couponApplied: discount > 0,
-            paymentMethod: paymentMethod
+            couponApplied: couponApplied ? couponApplied._id : null,
+            paymentMethod: paymentMethod,
+            discount : totalPrice - finalAmount
         });
 
         // Clear the cart after placing the order
@@ -127,7 +144,7 @@ const placeOrder = async (req, res) => {
             await newOrder.save(); // Ensure newOrder is saved before returning
             return res.status(200).json({
                 success: true,
-                message: newOrder._id // Return the order ID for COD or Wallet
+                message: newOrder.orderId // Return the order ID for COD or Wallet
             });
         }                
     } catch (error) {

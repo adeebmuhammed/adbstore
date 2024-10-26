@@ -1,0 +1,102 @@
+<%- include("../../views/partials/admin/header") %>
+
+
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Sales Report</h2>
+
+        <!-- Filter Options -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h4>Generate Sales Report</h4>
+            </div>
+            <div class="card-body">
+                <form id="salesReportForm" action="/admin/generateSalesReport" method="POST">
+                    <label for="startDate">Start Date:</label>
+                    <input type="date" id="startDate" name="startDate">
+                
+                    <label for="endDate">End Date:</label>
+                    <input type="date" id="endDate" name="endDate">
+                
+                    <label for="filter">Filter:</label>
+                    <div class="btn-group mb-3" role="group">
+                        <button type="button" class="btn btn-primary">1 Day</button>
+                        <button type="button" class="btn btn-primary">1 Week</button>
+                        <button type="button" class="btn btn-primary">1 Month</button>
+                        <button type="button" class="btn btn-primary">1 Year</button>
+                    </div>                                        
+                
+                    <button type="submit">Generate Report</button>
+                </form>                
+            </div>
+        </div>
+
+    
+<%- include("../../views/partials/admin/footer") %>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('salesReportForm');
+        const filterButtons = document.querySelectorAll('.btn-primary');
+        let selectedFilter = null;
+
+        // Function to submit report request
+        function submitReportRequest() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            // Check if either a filter or date range is selected
+            if (!selectedFilter && (!startDate || !endDate)) {
+                console.error("Please provide either a filter or a valid date range.");
+                return;
+            }
+
+            // Prepare the data to send to the backend
+            const data = {
+                startDate: startDate || null,
+                endDate: endDate || null,
+                filter: selectedFilter || null
+            };
+
+            // Send data to the backend using fetch
+            fetch('/admin/generateSalesReport', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl; // Redirect to the report page
+                } else {
+                    // Update the displayed data if needed
+                    document.getElementById('overallSalesCount').textContent = data.overallSalesCount || 0;
+                    document.getElementById('overallOrderAmount').textContent = `INR ${data.overallOrderAmount.toFixed(2) || '0.00'}`;
+                    document.getElementById('overallDiscount').textContent = `INR ${data.overallDiscount.toFixed(2) || '0.00'}`;
+                }
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+
+        // Listen for form submission
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            selectedFilter = null; // Clear any filter if dates are chosen
+            submitReportRequest();
+        });
+
+        // Listen for filter button clicks
+        filterButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.preventDefault();
+                selectedFilter = button.textContent.trim(); // Set selected filter
+                document.getElementById('startDate').value = ''; // Clear start date
+                document.getElementById('endDate').value = ''; // Clear end date
+                submitReportRequest();
+            });
+        });
+    });
+</script>

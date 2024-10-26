@@ -9,6 +9,7 @@ const brandController = require("../controllers/admin/brandController")
 const productController = require("../controllers/admin/productController")
 const orderController = require("../controllers/admin/orderController")
 const couponContrller = require("../controllers/admin/couponController")
+const salesReportController = require("../controllers/admin/salesReportController")
 
 const storage = require("../helpers/multer")
 const multer = require('multer')
@@ -59,5 +60,9 @@ router.post('/change-order-status/:orderId', adminAuth, orderController.changeOr
 router.get("/coupon",adminAuth,couponContrller.getCouponPage)
 router.post("/addCoupon",adminAuth,uploads.single("couponImage"),couponContrller.addCoupon)
 router.post("/deleteCoupon",adminAuth,couponContrller.deleteCoupon)
+//Sales Report
+router.get("/salesReport",adminAuth,salesReportController.getSalesReport)
+router.post("/generateSalesReport",adminAuth,salesReportController.generateSalesReport)
+router.get("/salesReportDownload",adminAuth,salesReportController.salesReportDownload)
 
 module.exports = router

@@ -36,8 +36,12 @@
                 </tbody>
                 <tfoot>
                     <tr>
+                        <td colspan="3" class="text-end">Discount :</td>
+                        <td><%=order.discount%>%</td>
+                    </tr>
+                    <tr>         
                         <td colspan="3" class="text-end"><strong>Total Price:</strong></td>
-                        <td><strong>INR <%= totalPrice %></strong></td>
+                        <td><strong>INR <%= order.finalAmount %></strong></td>
                     </tr>
                 </tfoot>
             </table>

@@ -1,0 +1,81 @@
+<%-include("../../views/partials/user/header")%>
+
+
+          <div class="container mt-5">
+            <div class="row">
+              <!-- Sidebar -->
+              <div class="col-md-3">
+                <div class="list-group">
+                    <%- include("../../views/partials/user/profile-sidebar") %>
+                </div>
+              </div>
+        
+              <!-- Coupon Table -->
+              <div class="col-md-9">
+                <h2 class="text-center mb-4">Available Coupons</h2>
+        
+                <div class="table-responsive">
+                  <table class="table table-bordered table-striped">
+                    <thead class="table-dark">
+                      <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Offer Price</th>
+                        <th>Minimum Purchase</th>
+                        <th>Expiry Date</th>
+                        <th>Coupon Code</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% coupons.forEach(coupon => { %>
+                        <tr>
+                          <td>
+                            <div class="d-flex align-items-center justify-content-center"
+                                    style="
+                                      width: 40px;
+                                      height: 40px;
+                                      overflow: hidden;
+                                    ">
+                            <img src="/uploads/re-image/<%= coupon.image[0] %>" alt="<%= coupon.name %>" style="width: 100px; height: auto;">
+                            </div>
+                          </td>
+                          <td><%= coupon.name %></td>
+                          <td>₹<%= coupon.offerPrice %></td>
+                          <td>₹<%= coupon.minimumPrice %></td>
+                          <td><%= new Date(coupon.expireOn).toLocaleDateString() %></td>
+                          <td><strong id="couponCode-<%= coupon._id %>"><%= coupon.code %></strong></td>
+                          <td>
+                            <button class="btn btn-primary btn-sm" onclick="copyToClipboard('<%= coupon.code %>')">Copy Code</button>
+                          </td>
+                        </tr>
+                      <% }); %>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>      
+
+<%-include("../../views/partials/user/footer")%>
+
+<script>
+
+function copyToClipboard(couponCode) {
+
+    // Create a temporary textarea to copy the code
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.value = couponCode;
+    document.body.appendChild(tempTextArea);
+
+    // Select and copy the text
+    tempTextArea.select();
+    document.execCommand('copy');
+
+    // Remove the temporary textarea
+    document.body.removeChild(tempTextArea);
+
+    // Show an alert or message to indicate success
+    alert('Coupon code ' + couponCode + ' copied to clipboard!');
+  }
+</script>

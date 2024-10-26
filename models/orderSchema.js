@@ -63,8 +63,9 @@ const orderSchema = new Schema({
         required:true
     },
     couponApplied:{
-        type:Boolean,
-        default:false
+        type:Schema.Types.ObjectId,
+        ref:"Coupon",
+        required:false
     },
     paymentMethod:{
         type:String,

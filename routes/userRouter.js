@@ -8,6 +8,7 @@ const addressController = require("../controllers/user/addressController")
 const cartController = require("../controllers/user/cartController")
 const checkoutController = require("../controllers/user/checkoutController")
 const orderController = require("../controllers/user/orderController")
+const couponController = require("../controllers/user/couponController")
 
 const passport = require("passport")
 const {userAuth,adminAuth} = require("../middlewares/auth")
@@ -61,5 +62,7 @@ router.get("/order-confirmation/:orderId",userAuth,checkoutController.orderConfi
 //Order Management
 router.get("/orders",userAuth,orderController.getMyOrders)
 router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder)
+//Coupon Management
+router.get("/coupons",userAuth,couponController.getCouponPage)
 
 module.exports = router;

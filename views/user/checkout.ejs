@@ -68,6 +68,11 @@
     
                 <!-- Order Summary -->
                 <div class="col-lg-4 col-md-6">
+                    <div class="cart__discount">
+                        <h6>Discount codes</h6>
+                        <input type="text" id="couponCodeInput" placeholder="Coupon code">
+                    </div>                    
+
                     <div class="checkout__order">
                         <h4 class="order__title">Your order</h4>
                         <div class="checkout__order__products">Product <span>Total</span></div>
@@ -108,6 +113,7 @@
         document.querySelector('#place-order').addEventListener('click', async () => {
             const selectedAddress = document.querySelector('select[name="selectedAddress"]').value;
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+            const couponCode = document.getElementById('couponCodeInput').value;
     
             const response = await fetch('/place-order', {
                 method: 'POST',
@@ -116,7 +122,8 @@
                 },
                 body: JSON.stringify({
                     selectedAddress,
-                    paymentMethod
+                    paymentMethod,
+                    couponCode
                 })
             });
     

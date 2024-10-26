@@ -1,0 +1,71 @@
+<%- include("../../views/partials/admin/header") %>
+
+<!-- Report Content Wrapper -->
+<div id="reportContent">
+    <!-- Overall Stats -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-primary mb-2">Overall Sales Count</h5>
+                    <p id="overallSalesCount" class="display-6 text-secondary"><%= overallSalesCount || 0 %></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-success mb-2">Overall Order Amount</h5>
+                    <p id="overallOrderAmount" class="display-6 text-secondary">INR <%= overallOrderAmount ? overallOrderAmount.toFixed(2) : '0.00' %></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm text-center border-0">
+                <div class="card-body">
+                    <h5 class="card-title text-danger mb-2">Overall Discount</h5>
+                    <p id="overallDiscount" class="display-6 text-secondary">INR <%= overallDiscount ? overallDiscount.toFixed(2) : '0.00' %></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Download Report Button -->
+<div class="d-grid gap-2 d-md-flex justify-content-md-end">
+    <button class="btn btn-outline-primary me-md-2" type="button" onclick="downloadPDF()">Download PDF</button>
+</div>
+
+<%- include("../../views/partials/admin/footer") %>
+
+    <script>
+        function downloadPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const content = document.getElementById('reportContent');
+
+    html2canvas(content).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 190; // Adjust to fit page width
+        const pageHeight = 297; // A4 size in mm (portrait)
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Check if content exceeds one page, add pages if necessary
+        let heightLeft = imgHeight;
+        let position = 10;
+
+        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
+        doc.save("report.pdf");
+    });
+}
+
+    </script>

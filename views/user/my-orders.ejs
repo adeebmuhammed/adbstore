@@ -38,13 +38,13 @@
                                 <% }) %>
                             </td>
                             <td>
-                                <% if (order.status === 'Placed') { %>
-                                    <button class="btn btn-danger cancel-order-btn" data-order-id="<%= order._id %>">Cancel</button>
-                                <% } else if (order.status === 'Canceled' || 'Delivered') { %>
+                                <% if (order.status === 'Canceled') { %>
                                     <button class="btn btn-secondary" disabled>Canceled</button>
+                                <% } else if (order.status !== 'Delivered') { %>
+                                    <button class="btn btn-danger cancel-order-btn" data-order-id="<%= order._id %>">Cancel</button>
                                 <% } else { %>
                                     <span>N/A</span>
-                                <% } %>
+                                <% } %>                                
                             </td>                                                   
                         </tr>
                     <% }) %>

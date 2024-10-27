@@ -1,6 +1,8 @@
+const mongoose = require("mongoose")
 const Order = require("../../models/orderSchema")
 const Product = require("../../models/productSchema")
 const Address = require("../../models/addressSchema")
+const Wallet = require("../../models/walletSchema")
 
 const getMyOrders = async (req, res) => {
     try {
@@ -37,30 +39,55 @@ const cancelOrder = async (req, res) => {
     try {
         const { orderId } = req.params;
 
-        // Find the order
         const order = await Order.findById(orderId).populate('orderedItems.product'); // Populate product details
         if (!order) {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
 
-        // Only cancel if the order is still pending
-        if (order.status === 'Pending') {
-            // Update the product quantities for each ordered item
+        if (order.status === 'Pending' || order.status === 'Placed') {
             for (const item of order.orderedItems) {
-                const product = await Product.findById(item.product._id); // Find the product
+                const product = await Product.findById(item.product._id);
 
                 if (product) {
-                    // Assuming sizes is an array of objects with size and quantity properties
-                    const sizeInfo = product.sizes.find(s => s.size === item.size); // Adjust based on your schema
+                    const sizeInfo = product.sizes.find(s => s.size === item.size);
 
                     if (sizeInfo) {
-                        sizeInfo.quantity += item.quantity; // Increase the quantity back
-                        await product.save(); // Save the updated product
+                        sizeInfo.quantity += item.quantity;
+                        await product.save();
                     }
                 }
             }
 
-            // Update the order status to 'Canceled'
+  if (order.paymentMethod !== 'Cash on Delivery') {
+      const userId = order.user;
+      const refundAmount = order.finalAmount;
+
+      let wallet = await Wallet.findOne({ user_id: userId });
+
+      if (!wallet) {
+        wallet = new Wallet({
+          user_id: userId,
+          balance: 0,
+          transactions: []
+        });
+      }
+
+      wallet.balance += refundAmount;
+
+      wallet.transactions.push({
+        amount: refundAmount,
+        type: 'credit',
+        date: new Date(),
+        description: 'Refund for canceled order'
+      });
+
+      await wallet.save();
+
+      console.log('Order cancellation processed successfully and wallet updated');
+  } else {
+    console.log('Order cancellation does not require refund to wallet as it was Cash on Delivery');
+  }
+
             order.status = 'Canceled';
             await order.save();
             return res.json({ success: true, message: 'Order canceled successfully' });

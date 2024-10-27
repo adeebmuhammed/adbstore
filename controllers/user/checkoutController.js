@@ -17,21 +17,16 @@ const getCheckoutPage = async (req, res) => {
     try {
         const userData = await User.findById(req.session.user)
 
-        const userId = req.user._id;  // Assuming you have the user ID from the session or JWT
+        const userId = req.user._id;
 
-        // Fetch addresses from the database
         const addresses = await Address.findOne({ userId: userId });
 
-        // Fetch cart items from the database
-        const cart = await Cart.findOne({ userId: userId }).populate('items.productId');  // populate 'productId' to get product details
+        const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
         
-        // Prepare the items and total price to pass to the view
         const cartItems = cart ? cart.items : [];
         
-        // Calculate total price from the cart items
         const totalPrice = cartItems.reduce((total, item) => total + item.totalPrice, 0);
 
-        // Render the checkout page and pass addresses and cart details
         res.render("checkout", { addresses, cartItems, totalPrice,user:userData });
     } catch (error) {
         console.error(error);
@@ -42,38 +37,32 @@ const getCheckoutPage = async (req, res) => {
 const placeOrder = async (req, res) => {
     try {
         const { selectedAddress, paymentMethod, couponCode } = req.body;
-        const userId = req.user._id; // assuming you are storing userId in req.user
+        const userId = req.user._id;
 
-        // Fetch the cart for the user and populate the product details
         const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
 
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ success: false, message: 'Your cart is empty' });
         }
 
-        // Calculate total price from cart items
         let totalPrice = 0;
 
         for (const item of cart.items) {
             totalPrice += item.productId.salePrice * item.quantity;
 
-            // Find the product and check stock for the specific size
             const product = await Product.findById(item.productId._id);
-            const sizeInfo = product.sizes.find(s => s.size === item.size); // Find the matching size
+            const sizeInfo = product.sizes.find(s => s.size === item.size);
 
             if (!sizeInfo) {
                 return res.status(400).json({ success: false, message: `Size ${item.size} not found for product: ${product.productName}` });
             }
 
-            // Check if there is enough stock for the selected size
             if (sizeInfo.quantity < item.quantity) {
                 return res.status(400).json({ success: false, message: `Insufficient stock for size ${item.size} of product: ${product.productName}` });
             }
 
-            // Reduce the quantity for the selected size
             sizeInfo.quantity -= item.quantity;
 
-            // Save the updated product with the new size quantity
             await product.save();
         }
 

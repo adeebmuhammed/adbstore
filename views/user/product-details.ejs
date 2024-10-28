@@ -109,8 +109,11 @@
                             <% } %>
         
                             <div class="product__details__btns__option">
-                                <a href="#"><i class="fa fa-heart"></i> add to wishlist</a>
+                                <a href="javascript:void(0);" onclick="addToWishlist('<%= product._id %>')">
+                                    <i class="fa fa-heart"></i> add to wishlist
+                                </a>
                             </div>
+                            
                             <div class="product__details__last__option">
                                 <h5><span>Guaranteed Safe Checkout</span></h5>
                                 <img src="img/shop-details/details-payment.png" alt="">
@@ -282,6 +285,43 @@ document.addEventListener('DOMContentLoaded', function() {
     function closeZoomModal() {
         document.getElementById('zoomModal').style.display = 'none';
     }
+
+    function addToWishlist(productId) {
+    fetch('/addToWishlist', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ productId: productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: "Success!",
+                text: "Product added to Wishlist successfully!",
+                icon: "success",
+                confirmButtonText: "OK",
+            });
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.message || "Failed to add product to Wishlist",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: "Error!",
+            text: "An unexpected error occurred",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
+    });
+}
 
 
 

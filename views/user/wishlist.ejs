@@ -1,0 +1,77 @@
+<%- include("../../views/partials/user/header") %>
+
+<div class="container my-4">
+    <h2 class="text-center">Wishlist</h2>
+
+    <% if (!wishlistItems || wishlistItems.length === 0) { %>
+        <div class="alert alert-info text-center">
+            <h4>Your wishlist is empty!</h4>
+            <p>It seems you haven't added any products to your wishlist.</p>
+            <a href="/shop" class="btn btn-primary">Go to Shop</a>
+        </div>
+    <% } else { %>
+        <div class="row mt-4">
+            <!-- Loop through wishlist items -->
+            <% wishlistItems.forEach(item => { %>
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    <img src="/uploads/product-images/<%= item.productImage %>" class="card-img-top" alt="<%= item.productName %>">
+                    <div class="card-body">
+                        <h5 class="card-title"><%= item.productName %></h5>
+                        <p class="card-text"><%= item.description %></p>
+                        <p class="text-muted">Brand: <%= item.brand %></p>
+                        <p class="text-muted">Price: INR <%= item.salePrice %></p>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <button class="btn btn-danger btn-sm" onclick="removeFromWishlist('<%= item.productId %>')">Remove</button>
+                    </div>
+                </div>
+            </div>
+            <% }); %>
+        </div>
+    <% } %>
+</div>
+
+<%- include("../../views/partials/user/footer") %>
+
+
+    <script>
+        function removeFromWishlist(productId) {
+    fetch(`/removeFromWishlist/${productId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: "Success!",
+                text: "Product removed from Wishlist successfully!",
+                icon: "success",
+                confirmButtonText: "OK",
+            }).then(() => {
+                // Optionally reload the page or remove the item from the DOM
+                location.reload(); // Reloads the page to reflect the changes
+            });
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.message || "Failed to remove product from Wishlist",
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire({
+            title: "Error!",
+            text: "An unexpected error occurred",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
+    });
+}
+    </script>

@@ -10,6 +10,7 @@ const checkoutController = require("../controllers/user/checkoutController")
 const orderController = require("../controllers/user/orderController")
 const couponController = require("../controllers/user/couponController")
 const walletController = require("../controllers/user/walletController")
+const wishlistController = require("../controllers/user/wishlistController")
 
 const passport = require("passport")
 const {userAuth,adminAuth} = require("../middlewares/auth")
@@ -67,5 +68,9 @@ router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder)
 router.get("/coupons",userAuth,couponController.getCouponPage)
 //Wallet Management
 router.get("/wallet",userAuth,walletController.getWalletPage)
+//Wishlist Management
+router.get("/wishlist",userAuth,wishlistController.getWishlistPage)
+router.post("/addToWishlist",userAuth,wishlistController.addToWishlist)
+router.post("/removeFromWishlist/:productId", userAuth, wishlistController.removeFromWishlist);
 
 module.exports = router;

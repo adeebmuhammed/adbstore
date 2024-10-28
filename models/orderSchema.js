@@ -75,7 +75,7 @@ const orderSchema = new Schema({
         type:String,
         required:false
     }
-})
+},{ timestamps: true })
 
 
 const Order = mongoose.model("Order",orderSchema)

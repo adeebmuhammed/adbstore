@@ -4,6 +4,7 @@ const User = require("../../models/userSchema")
 const Order = require("../../models/orderSchema")
 const Product = require("../../models/productSchema")
 const Coupon = require("../../models/couponSchema")
+const Wallet = require("../../models/walletSchema")
 const env = require('dotenv').config()
 const Razorpay = require("razorpay")
 const crypto = require('crypto')
@@ -123,17 +124,45 @@ const placeOrder = async (req, res) => {
 
             return res.json({
                 success: true,
-                orderId: razorpayOrder.id, // Razorpay order ID
+                orderId: razorpayOrder.id, 
                 finalAmount: newOrder.finalAmount,
-                razorpayKey: process.env.RAZORPAY_KEY_ID, // Send Razorpay API key to frontend
-                message: newOrder.orderId // Return the new order ID
+                razorpayKey: process.env.RAZORPAY_KEY_ID,
+                message: newOrder.orderId 
             });
-        } else {
-            // Handle Cash on Delivery or other payment methods
-            await newOrder.save(); // Ensure newOrder is saved before returning
+        }
+        else if (paymentMethod === 'Wallet') {
+            const wallet = await Wallet.findOne({user_id:userId})
+            if (!wallet) {
+                return res.json({success:false,message:"Wallet Not Found"})
+            }
+
+            let balance = wallet.balance
+
+            if (balance<newOrder.finalAmount) {
+                return res.json({success:false,message:"Insufficient Balance in Your Wallet"})
+            }
+
+            wallet.balance -= newOrder.finalAmount
+
+            wallet.transactions.push({
+                amount: newOrder.finalAmount,
+                type: 'debit',
+                date: new Date(),
+                description: 'Order Payment'
+            });
+            await wallet.save();
+
+            await newOrder.save();
             return res.status(200).json({
                 success: true,
-                message: newOrder.orderId // Return the order ID for COD or Wallet
+                message: newOrder.orderId
+            });
+        }
+        else {
+            await newOrder.save();
+            return res.status(200).json({
+                success: true,
+                message: newOrder.orderId
             });
         }                
     } catch (error) {

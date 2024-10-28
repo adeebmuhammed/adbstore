@@ -1,0 +1,60 @@
+<%- include("../../views/partials/user/header") %>
+
+<div class="container my-5">
+  <div class="row">
+    <!-- Sidebar Column -->
+    <div class="col-md-3 mb-4">
+      <%- include("../../views/partials/user/profile-sidebar") %>
+    </div>
+
+    <!-- Wallet Content Column -->
+    <div class="col-md-9">
+      <h2 class="mb-4">Wallet</h2>
+
+      <!-- Balance Section -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <h4 class="card-title">Balance</h4>
+          <p class="card-text display-4" id="balance">INR <%= wallet.balance.toFixed(2) %></p>
+        </div>
+      </div>
+
+      <!-- Transaction History Table -->
+      <div class="card">
+        <div class="card-body">
+          <h4 class="card-title">Transaction History</h4>
+          <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Transaction ID</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody id="transaction-history">
+              <% if (wallet.transactions.length > 0) { %>
+                <% wallet.transactions.forEach(transaction => { %>
+                  <tr>
+                    <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+                    <td><%= transaction.transaction_id %></td>
+                    <td><%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></td>
+                    <td>INR <%= transaction.amount.toFixed(2) %></td>
+                    <td><%= transaction.description || 'N/A' %></td>
+                  </tr>
+                <% }) %>
+              <% } else { %>
+                <tr>
+                  <td colspan="5" class="text-center">No transactions found</td>
+                </tr>
+              <% } %>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include("../../views/partials/user/footer") %>

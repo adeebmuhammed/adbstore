@@ -13,10 +13,6 @@ const walletSchema = new Schema({
   },
   transactions: [
     {
-      transaction_id: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-      },
       amount: {
         type: Number,
         required: true
@@ -35,7 +31,7 @@ const walletSchema = new Schema({
       }
     }
   ]
-});
+},{ timestamps: true });
 
 const Wallet = mongoose.model('Wallet', walletSchema);
 

@@ -32,7 +32,7 @@
            <div class="col-lg-6">
                <div class="card mb-4">
                    <div class="card-body">
-                       <form method="post" action="/admin/addProducts" enctype="multipart/form-data" onsubmit="return validateForm()">
+                    <form method="post" action="/admin/addProducts" enctype="multipart/form-data" onsubmit="return validateForm()">
                            <div class="mb-4">
                                <label for="product_name" class="form-label">Product Name</label>
                                <input type="text" placeholder="Type here" name="productName"
@@ -210,7 +210,7 @@
                         
                            </div>
                            <div>
-                               <button class="btn btn-md rounded font-sm hover-up"  type="submit" onclick="validateAndSubmit()">Publish</button>
+                            <button class="btn btn-md rounded font-sm hover-up" type="submit" onclick="validateForm()">Publish</button>
                            </div>
                        </form>
                    </div>
@@ -373,75 +373,86 @@ function clearErrorMessages() {
 
 // Function to validate form
 function validateForm() {
+    
     clearErrorMessages();  // Clear any previous error messages
 
-    const name = document.getElementsByName('productName')[0].value;
-    const description = document.getElementById('descriptionid').value;
+    const name = document.getElementsByName('productName')[0].value.trim();
+    const description = document.getElementById('descriptionid').value.trim();
     const brand = document.getElementsByName('brand')[0].value;
     const price = document.getElementsByName('regularPrice')[0].value;
     const salePrice = document.getElementsByName('salePrice')[0].value;
-    const color = document.getElementsByName('color')[0].value;
+    const color = document.getElementsByName('color')[0].value.trim();
     const category = document.getElementsByName('category')[0].value;
-    const images = document.getElementById('input1');
-    const selectedSizes = getSelectedSizesAndQuantities();
+    const images = [document.getElementById('input1'), document.getElementById('input2'), document.getElementById('input3'), document.getElementById('input4')];
+    const selectedSizes = getSelectedSizesAndQuantities(); // assuming this function retrieves selected sizes with quantities
 
     let isValid = true;
 
-    // Product name validation
-    if (name.trim() === "") {
-        displayErrorMessage('productName-error', 'Please enter a product name.');
-        isValid = false;
-    } else if (!/^[a-zA-Z\s]+$/.test(name.trim())) {
-        displayErrorMessage('productName-error', 'Product name should contain only alphabetic characters.');
+    // Validate product name
+    if (!name) {
+        displayErrorMessage('productName-error', 'Product name is required.');
         isValid = false;
     }
 
-    // Description validation
-    if (description.trim() === "") {
-        displayErrorMessage('description-error', 'Please enter a product description.');
-        isValid = false;
-    } else if (!/^[a-zA-Z\s]+$/.test(description.trim())) {
-        displayErrorMessage('description-error', 'Product description should contain only alphabetic characters.');
+    // Validate description
+    if (!description) {
+        displayErrorMessage('description-error', 'Description is required.');
         isValid = false;
     }
 
-    // Quantity validation
-    if (validateSizesAndQuantities()) {
-        // Proceed with form submission if valid
-        console.log('Form is valid!');
+    // Validate brand
+    if (!brand) {
+        displayErrorMessage('brand-error', 'Please select a brand.');
+        isValid = false;
+    }
+
+    // Validate category
+    if (!category) {
+        displayErrorMessage('category-error', 'Please select a category.');
+        isValid = false;
+    }
+
+    // Validate regular price
+    if (!price || isNaN(price) || price <= 0) {
+        displayErrorMessage('regularPrice-error', 'Regular price must be a positive number.');
+        isValid = false;
+    }
+
+    // Validate sale price
+    if (!salePrice || isNaN(salePrice) || salePrice <= 0) {
+        displayErrorMessage('salePrice-error', 'Sale price must be a positive number.');
+        isValid = false;
+    }
+
+    // Validate color
+    if (!color) {
+        displayErrorMessage('color-error', 'Color is required.');
+        isValid = false;
+    }
+
+    // Validate selected sizes and quantities
+    if (!selectedSizes.length) {
+        displayErrorMessage('sizes-error', 'Please select at least one size.');
+        isValid = false;
     } else {
-        // Handle invalid form
-        console.log('Form has errors.');
-        isValid = false
+        for (let i = 0; i < selectedSizes.length; i++) {
+            if (selectedSizes[i].quantity <= 0 || isNaN(selectedSizes[i].quantity)) {
+                displayErrorMessage('sizes-error', 'Quantity for selected sizes must be a positive number.');
+                isValid = false;
+                break;
+            }
+        }
     }
 
-    // Regular price validation
-    if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-        displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-        isValid = false;
+    // Validate image uploads
+    let imageCount = 0;
+    for (let i = 0; i < images.length; i++) {
+        if (images[i].files.length > 0) {
+            imageCount++;
+        }
     }
-
-    // Sale price validation
-    if (!/^\d+(\.\d{1,2})?$/.test(salePrice) || parseFloat(salePrice) < 0) {
-        displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-        isValid = false;
-    }
-
-    // Comparison between regular price and sale price
-    if (isValid && parseFloat(price) <= parseFloat(salePrice)) {
-        displayErrorMessage('regularPrice-error', 'Regular price must be greater than sale price.');
-        isValid = false;
-    }
-
-    // Color validation
-    if (color.trim() === "") {
-        displayErrorMessage('color-error', 'Please enter a color.');
-        isValid = false;
-    }
-
-    // Image validation
-    if (images.files.length === 0) {
-        displayErrorMessage('images-error', 'Please select an image.');
+    if (imageCount !== 4) {
+        displayErrorMessage('images-error', 'You must upload exactly 4 images.');
         isValid = false;
     }
 

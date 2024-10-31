@@ -241,7 +241,7 @@
 
 
                                <button class="btn btn-md rounded font-sm hover-up" id="updatebtn"
-                                   type="submit"  onclick="validateAndSubmit()">Update</button>
+                                   type="submit"  onclick="validateForm()">Update</button>
                            </div>
                        </form>
                    </div>
@@ -289,81 +289,86 @@ function getSelectedSizesAndQuantities() {
     return selectedSizes;
 }
     
-    function validateForm() {
-       let imageDatas = false
-               console.log("validate form");
-               clearErrorMessages();
-               const name = document.getElementsByName('productName')[0].value;
-               const description = document.getElementsByName('descriptionData')[0].value;
-               const brand = document.getElementsByName('brand')[0].value;
-               const price = document.getElementsByName('regularPrice')[0].value;
-               const saleprice = document.getElementsByName('salePrice')[0].value;
-               const color = document.getElementsByName('color')[0].value;
-               const category = document.getElementsByName('category')[0].value;
-               const images = document.getElementById('input1')
-               const selectedSizes = getSelectedSizesAndQuantities();
-    imageDatas = document.getElementById("imageDatas")?.value;
-               let isValid = true;    
-               if (name.trim() === "") {
-       displayErrorMessage('productName-error', 'Please enter a product name.');
-       isValid = false;
+function validateForm() {
+    let imageDatas = false;
+    clearErrorMessages();  // Clears previous error messages
+
+    const name = document.getElementsByName('productName')[0].value.trim();
+    const description = document.getElementsByName('descriptionData')[0].value.trim();
+    const brand = document.getElementsByName('brand')[0].value;
+    const price = document.getElementsByName('regularPrice')[0].value;
+    const salePrice = document.getElementsByName('salePrice')[0].value;
+    const color = document.getElementsByName('color')[0].value.trim();
+    const category = document.getElementsByName('category')[0].value;
+    const images = [
+        document.getElementById('input1'),
+        document.getElementById('input2'),
+        document.getElementById('input3'),
+        document.getElementById('input4')
+    ];
+    const selectedSizes = getSelectedSizesAndQuantities();  // Assuming this function retrieves selected sizes with quantities
+
+    let isValid = true;
+
+    // Validate product name
+    if (!name) {
+        displayErrorMessage('productName-error', 'Product name is required.');
+        isValid = false;
     }
-              
-               if (description=== '') {
-                   displayErrorMessage('description-error', 'Please enter a product description.');
-                   isValid = false;
-               } 
-    
-    
-               if (validateSizesAndQuantities()) {
-        // Proceed with form submission if valid
-        console.log('Form is valid!');
+
+    // Validate description
+    if (!description) {
+        displayErrorMessage('description-error', 'Description is required.');
+        isValid = false;
+    }
+
+    // Validate brand
+    if (!brand) {
+        displayErrorMessage('brand-error', 'Please select a brand.');
+        isValid = false;
+    }
+
+    // Validate category
+    if (!category) {
+        displayErrorMessage('category-error', 'Please select a category.');
+        isValid = false;
+    }
+
+    // Validate regular price
+    if (!price || isNaN(price) || price <= 0) {
+        displayErrorMessage('regularPrice-error', 'Regular price must be a positive number.');
+        isValid = false;
+    }
+
+    // Validate sale price
+    if (!salePrice || isNaN(salePrice) || salePrice <= 0) {
+        displayErrorMessage('salePrice-error', 'Sale price must be a positive number.');
+        isValid = false;
+    }
+
+    // Validate color
+    if (!color) {
+        displayErrorMessage('color-error', 'Color is required.');
+        isValid = false;
+    }
+
+    // Validate selected sizes and quantities
+    if (!selectedSizes.length) {
+        displayErrorMessage('sizes-error', 'Please select at least one size.');
+        isValid = false;
     } else {
-        // Handle invalid form
-        console.log('Form has errors.');
-        isValid = false
+        for (let i = 0; i < selectedSizes.length; i++) {
+            if (selectedSizes[i].quantity <= 0 || isNaN(selectedSizes[i].quantity)) {
+                displayErrorMessage('sizes-error', 'Quantity for selected sizes must be a positive number.');
+                isValid = false;
+                break;
+            }
+        }
     }
 
-    /*const productSizes = {{ JSON.stringify(product.sizes) }}; // Assuming you're passing the product object to the view
-
-    // Iterate over each size and pre-select the checkbox and show the quantity
-    productSizes.forEach(sizeObj => {
-        const sizeValue = sizeObj.size; // e.g., '6', '7', '8', '9'
-        const quantityValue = sizeObj.quantity; // e.g., 2, 3, etc.
-
-        // Find the corresponding checkbox and input for the size
-        const sizeCheckbox = document.getElementById(`size${sizeValue}`);
-        const quantityInput = document.getElementById(`quantity${sizeValue}`);
-
-        if (sizeCheckbox && quantityInput) {
-            sizeCheckbox.checked = true; // Check the checkbox for the size
-            quantityInput.style.display = 'block'; // Show the quantity input field
-            quantityInput.value = quantityValue; // Set the quantity value
-        }
-    });*/
-    
-    
-    
-    
-               if (!/^\d+(\.\d{1,2})?$/.test(price) || parseFloat(price) < 0) {
-                   displayErrorMessage('regularPrice-error', 'Please enter a valid non-negative price.');
-                   isValid = false;
-               }
-              if (!/^\d+(\.\d{1,2})?$/.test(saleprice) || parseFloat(saleprice) < 0) {
-                   displayErrorMessage('salePrice-error', 'Please enter a valid non-negative price.');
-                   isValid = false;
-               }
-              
-               if (color.trim() === "") {
-                   displayErrorMessage('color-error', 'Please enter a color.');
-                   isValid = false;
-               }
-               if (!imageDatas && images.files.length === 0) {
-                   displayErrorMessage("images-error",'Please select an image.');
-                   isValid = false;
-               }
-               return isValid;
-           }
+    // Final validation check
+    return isValid;
+}
           
            function displayErrorMessage(elementId, message) {
                var errorElement = document.getElementById(elementId);

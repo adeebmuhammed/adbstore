@@ -5,33 +5,39 @@
         <div class="row">
             <!-- Form to add a coupon -->
             <div class="col-md-6">
-                <form id="couponForm" enctype="multipart/form-data">
+                <form id="couponForm" enctype="multipart/form-data" onsubmit="validateForm(event)">
                     <div class="mb-3">
                         <label for="name" class="form-label">Coupon Name</label>
-                        <input type="text" class="form-control" id="name" name="name" required>
+                        <input type="text" class="form-control" id="name" name="name">
+                        <div class="text-danger" id="nameError"></div>
                     </div>
                     <div class="mb-3">
                         <label for="expireOn" class="form-label">Expiry Date</label>
-                        <input type="date" class="form-control" id="expireOn" name="expireOn" required>
+                        <input type="date" class="form-control" id="expireOn" name="expireOn">
+                        <div class="text-danger" id="expireOnError"></div>
                     </div>
                     <div class="mb-3">
                         <label for="offerPrice" class="form-label">Offer Price</label>
-                        <input type="number" class="form-control" id="offerPrice" name="offerPrice" required>
+                        <input type="number" class="form-control" id="offerPrice" name="offerPrice">
+                        <div class="text-danger" id="offerPriceError"></div>
                     </div>
                     <div class="mb-3">
                         <label for="minimumPrice" class="form-label">Minimum Price</label>
-                        <input type="number" class="form-control" id="minimumPrice" name="minimumPrice" required>
+                        <input type="number" class="form-control" id="minimumPrice" name="minimumPrice">
+                        <div class="text-danger" id="minimumPriceError"></div>
                     </div>
                     <div class="mb-3">
                         <label for="code" class="form-label">Coupon Code</label>
-                        <input type="text" class="form-control" id="code" name="code" required>
+                        <input type="text" class="form-control" id="code" name="code">
+                        <div class="text-danger" id="codeError"></div>
                     </div>
                     <div class="mb-3">
                         <label for="couponImage" class="form-label">Coupon Image</label>
                         <input type="file" class="form-control" id="couponImage" name="couponImage">
+                        <div class="text-danger" id="couponImageError"></div>
                     </div>
                     <button type="submit" class="btn btn-primary">Add Coupon</button>
-                </form>                                
+                </form>                             
             </div>
 
             <!-- Table to display coupons -->
@@ -81,28 +87,91 @@
     <%- include("../../views/partials/admin/footer") %>
 
     <script>
-        document.getElementById('couponForm').addEventListener('submit', async function (event) {
-            event.preventDefault(); // Prevent form from submitting the default way
-    
-            const formData = new FormData(this); // Create form data object
-    
-            try {
-                const response = await fetch('/admin/addCoupon', {
-                    method: 'POST',
-                    body: formData,
-                });
-    
-                const result = await response.json();
-    
-                if (response.ok) {
-                    window.location.reload()
-                } else {
-                    alert('Error: ' + result.error || 'Something went wrong');
-                }
-            } catch (error) {
-                alert('Network error or server is down. Please try again later.');
-            }
+
+function validateForm(event) {
+    let isValid = true;
+
+    // Clear previous error messages
+    document.getElementById("nameError").textContent = "";
+    document.getElementById("expireOnError").textContent = "";
+    document.getElementById("offerPriceError").textContent = "";
+    document.getElementById("minimumPriceError").textContent = "";
+    document.getElementById("codeError").textContent = "";
+    document.getElementById("couponImageError").textContent = "";
+
+    // Validate each field
+    const name = document.getElementById("name").value.trim();
+    const expireOn = document.getElementById("expireOn").value;
+    const offerPrice = document.getElementById("offerPrice").value;
+    const minimumPrice = document.getElementById("minimumPrice").value;
+    const code = document.getElementById("code").value.trim();
+    const couponImage = document.getElementById("couponImage").files[0];
+
+    if (!name) {
+        document.getElementById("nameError").textContent = "Coupon name is required.";
+        isValid = false;
+    }
+
+    if (!expireOn) {
+        document.getElementById("expireOnError").textContent = "Expiry date is required.";
+        isValid = false;
+    }
+
+    if (!offerPrice || offerPrice <= 0 || offerPrice > 100) {
+        document.getElementById("offerPriceError").textContent = "Offer percentage must be a positive number and should be below 100.";
+        isValid = false;
+    }
+
+    if (!minimumPrice || minimumPrice <= 0) {
+        document.getElementById("minimumPriceError").textContent = "Minimum price must be a positive number.";
+        isValid = false;
+    }
+
+    if (!code) {
+        document.getElementById("codeError").textContent = "Coupon code is required.";
+        isValid = false;
+    }
+
+    if (couponImage && !/\.(jpg|jpeg|png|gif)$/i.test(couponImage.name)) {
+        document.getElementById("couponImageError").textContent = "Only image files are allowed (jpg, jpeg, png, gif).";
+        isValid = false;
+    }
+
+    // Prevent form submission if validation fails
+    if (!isValid) {
+        event.preventDefault();
+    }
+
+    return isValid;
+}
+
+document.getElementById('couponForm').addEventListener('submit', async function (event) {
+    event.preventDefault(); // Prevent form from submitting the default way
+
+    // Run validation first
+    if (!validateForm(event)) {
+        return; // Stop if the form is not valid
+    }
+
+    const formData = new FormData(this); // Create form data object
+
+    try {
+        const response = await fetch('/admin/addCoupon', {
+            method: 'POST',
+            body: formData,
         });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            window.location.reload();
+        } else {
+            alert('Error: ' + result.error || 'Something went wrong');
+        }
+    } catch (error) {
+        alert('Network error or server is down. Please try again later.');
+    }
+});
 
         async function deleteCoupon(couponId) {
         const response = await fetch('/admin/deleteCoupon', {

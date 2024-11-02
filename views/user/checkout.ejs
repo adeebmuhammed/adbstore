@@ -70,13 +70,25 @@
                 <div class="col-lg-4 col-md-6">
                     <div class="cart__discount">
                         <h6>Discount codes</h6>
-                        <input type="text" id="couponCodeInput" placeholder="Coupon code">
-                    </div>                    
+                        <% if (discount && discount > 0) { %>
+                            <!-- If a discount is applied, show the remove coupon button -->
+                            <form action="/removeCoupon" method="POST">
+                                <span>Coupon Applied: <%= appliedCouponCode %></span> <!-- Display the applied coupon code -->
+                                <button type="submit">Remove Coupon</button>
+                            </form>
+                        <% } else { %>
+                            <!-- Show the apply coupon form if no discount is applied -->
+                            <form action="/addCoupon" method="POST">
+                                <input type="text" id="couponCodeInput" name="couponCode" placeholder="Coupon code">
+                                <button type="submit">Apply</button>
+                            </form>
+                        <% } %>
+                    </div>                                                          
 
                     <div class="checkout__order">
                         <h4 class="order__title">Your order</h4>
                         <div class="checkout__order__products">Product <span>Total</span></div>
-    
+                    
                         <!-- Dynamically display cart items -->
                         <ul class="checkout__total__products">
                             <% cartItems.forEach((item, index) => { %>
@@ -85,19 +97,24 @@
                                 </li>
                             <% }) %>
                         </ul>
-    
-                        <!-- Subtotal and Total -->
+                    
+                        <!-- Subtotal, Discount, and Total -->
                         <ul class="checkout__total__all">
                             <li>Subtotal 
                                 <span><%= totalPrice.toFixed(2) %></span>
                             </li>
+                            <% if (discount && discount > 0) { %>
+                                <li>Discount 
+                                    <span>- <%= discount.toFixed(2) %></span>
+                                </li>
+                            <% } %>
                             <li>Total 
-                                <span><%= totalPrice.toFixed(2) %></span>
+                                <span><%= (totalPrice - (discount || 0)).toFixed(2) %></span>
                             </li>
                         </ul>
-    
+                    
                         <button type="submit" class="site-btn" id="place-order">PLACE ORDER</button>
-                    </div>
+                    </div>                    
                 </div>
             </div>
         </div>
@@ -113,7 +130,6 @@
         document.querySelector('#place-order').addEventListener('click', async () => {
             const selectedAddress = document.querySelector('select[name="selectedAddress"]').value;
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-            const couponCode = document.getElementById('couponCodeInput').value;
     
             const response = await fetch('/place-order', {
                 method: 'POST',
@@ -123,7 +139,6 @@
                 body: JSON.stringify({
                     selectedAddress,
                     paymentMethod,
-                    couponCode
                 })
             });
     

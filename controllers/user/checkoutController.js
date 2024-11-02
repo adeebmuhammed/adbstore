@@ -14,21 +14,33 @@ const razorpayInstance = new Razorpay({
     key_secret: process.env.RAZORPAY_KEY_SECRET
   });
 
-const getCheckoutPage = async (req, res) => {
+  const getCheckoutPage = async (req, res) => {
     try {
-        const userData = await User.findById(req.session.user)
-
+        const userData = await User.findById(req.session.user);
         const userId = req.user._id;
 
         const addresses = await Address.findOne({ userId: userId });
-
         const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
-        
+
         const cartItems = cart ? cart.items : [];
-        
         const totalPrice = cartItems.reduce((total, item) => total + item.totalPrice, 0);
 
-        res.render("checkout", { addresses, cartItems, totalPrice,user:userData });
+        let appliedCouponCode = '';
+        if (cart && cart.couponApplied) {
+            const appliedCoupon = await Coupon.findById(cart.couponApplied);
+            if (appliedCoupon) {
+                appliedCouponCode = appliedCoupon.code;
+            }
+        }
+
+        res.render("checkout", {
+            addresses,
+            cartItems,
+            totalPrice,
+            user: userData,
+            discount: cart ? cart.discount : 0,
+            appliedCouponCode
+        });
     } catch (error) {
         console.error(error);
         res.redirect("/pageNotFound");
@@ -37,7 +49,7 @@ const getCheckoutPage = async (req, res) => {
 
 const placeOrder = async (req, res) => {
     try {
-        const { selectedAddress, paymentMethod, couponCode } = req.body;
+        const { selectedAddress, paymentMethod} = req.body;
         const userId = req.user._id;
 
         const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
@@ -67,24 +79,11 @@ const placeOrder = async (req, res) => {
             await product.save();
         }
 
-        let discount = 0;
-        let couponApplied
-        let finalAmount = totalPrice
+        const discount = cart.discount;
+        const couponApplied = cart.couponApplied
+        let finalAmount = totalPrice - discount
 
-        if (couponCode && couponCode !== "") {
-            couponApplied = await Coupon.findOne({code:couponCode})
-
-        if (!couponApplied) {
-            return res.status(400).json({success:false, message : "Invalid Coupon Code"})
-        }else{
-            discount = couponApplied.offerPrice
-
-            finalAmount = totalPrice - (totalPrice * (discount / 100));
-        }
-        }
         
-
-        // Create a new order object (without razorpayOrderId initially)
         const newOrder = new Order({
             orderedItems: cart.items.map(item => ({
                 product: item.productId._id,

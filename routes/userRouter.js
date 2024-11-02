@@ -66,6 +66,8 @@ router.get("/orders",userAuth,orderController.getMyOrders)
 router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder)
 //Coupon Management
 router.get("/coupons",userAuth,couponController.getCouponPage)
+router.post("/addCoupon",userAuth,couponController.addCoupon)
+router.post("/removeCoupon",userAuth,couponController.removeCoupon)
 //Wallet Management
 router.get("/wallet",userAuth,walletController.getWalletPage)
 //Wishlist Management

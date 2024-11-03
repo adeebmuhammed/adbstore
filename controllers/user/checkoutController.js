@@ -174,58 +174,48 @@ const verifyPayment = async (req, res) => {
     try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
 
-        // Step 1: Log the received values to ensure they are coming through correctly
         console.log("Received values:");
         console.log("razorpay_payment_id:", razorpay_payment_id);
         console.log("razorpay_order_id:", razorpay_order_id);
         console.log("razorpay_signature:", razorpay_signature);
 
-        // Step 2: Create the signature string using the razorpay_order_id and razorpay_payment_id
         const generatedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
             .update(razorpay_order_id + "|" + razorpay_payment_id)
             .digest('hex');
 
-        // Step 3: Log the generated signature to compare it with the one received from Razorpay
         console.log("Generated signature:", generatedSignature);
         console.log("Signature from Razorpay:", razorpay_signature);
 
-        // Step 4: Compare the signatures to verify the payment
         if (generatedSignature === razorpay_signature) {
-            // Payment is verified
             const order = await Order.findOneAndUpdate(
-                { razorpayOrderId: razorpay_order_id }, // Use the correct field for Razorpay order ID
-                { status: 'Placed' },  // Update status as needed
+                { razorpayOrderId: razorpay_order_id },
+                { status: 'Placed' }, 
                 { new: true }
             );
 
-            // Step 5: Log and handle case when the order is not found
             if (!order) {
                 console.log("Order not found for Razorpay order ID:", razorpay_order_id);
                 return res.status(404).json({ success: false, message: "Order not found" });
             }
 
-            // Step 6: Send success response with the updated order details
             return res.status(200).json({
                 success: true,
                 message: `${order.orderId}`,
                 orderId: order.orderId
             });
         } else {
-            // Step 7: Handle invalid signature case
             console.log("Invalid signature for Razorpay payment verification.");
             return res.status(400).json({ success: false, message: "Invalid payment signature" });
         }
 
     } catch (error) {
-        // Step 8: Catch and log errors during the verification process
         console.error('Error verifying payment:', error);
         return res.status(500).json({ success: false, message: "Payment verification failed", error });
     }
 };
 
 const orderConfirmation = async (req,res) => {
-    console.log("req recieved");
     
     try {
         const userId = req.session.user
@@ -249,8 +239,7 @@ const orderConfirmation = async (req,res) => {
             return res.redirect('/pageNotFound');
         }
 
-        // Now find the specific address in the address array using the ObjectId
-        const addressIdToCheck = order.address; // This is the ObjectId you're using to reference the Address document
+        const addressIdToCheck = order.address;
         const specificAddress = addressDoc.address.find(addr => addr._id.equals(addressIdToCheck));
         
         res.render('order-confirmation', {

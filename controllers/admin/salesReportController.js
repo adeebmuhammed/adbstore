@@ -54,7 +54,10 @@ const generateSalesReport = async (req, res) => {
 
         console.log("Query Object:", query);
 
-        const orders = await Order.find(query).select('orderId totalprice discount finalAmount couponApplied createdOn');
+        const orders = await Order.find()
+        .populate("user", "name")
+        .populate("orderedItems.product", "name")
+        .exec();
         console.log("Orders Retrieved:", orders);
 
         if (orders.length > 0) {
@@ -68,6 +71,7 @@ const generateSalesReport = async (req, res) => {
                 overallSalesCount,
                 overallOrderAmount,
                 overallDiscount,
+                orders
             };
 
             return res.json({
@@ -75,6 +79,7 @@ const generateSalesReport = async (req, res) => {
                 overallSalesCount,
                 overallOrderAmount,
                 overallDiscount,
+                orders
             });            
             
         } else {
@@ -84,6 +89,7 @@ const generateSalesReport = async (req, res) => {
                 overallSalesCount:0,
                 overallOrderAmount:0,
                 overallDiscount:0,
+                orders:[]
             };
             
             return res.json({
@@ -100,16 +106,17 @@ const generateSalesReport = async (req, res) => {
 
 const salesReportDownload = async (req, res) => {
     try {
-        const { overallSalesCount, overallOrderAmount, overallDiscount } = req.session.salesReportData || {};
+        const { overallSalesCount, overallOrderAmount, overallDiscount, orders } = req.session.salesReportData || {};
 
-        if (overallSalesCount === undefined || overallOrderAmount === undefined || overallDiscount === undefined) {
+        if (overallSalesCount === undefined || overallOrderAmount === undefined || overallDiscount === undefined || orders === undefined) {
             return res.redirect('/admin/pageerror');
         }
 
         res.render("salesReportDownload", {
             overallSalesCount,
             overallOrderAmount,
-            overallDiscount
+            overallDiscount,
+            orders
         });
     } catch (error) {
         res.redirect("/admin/pageerror");

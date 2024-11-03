@@ -64,6 +64,7 @@ router.get("/order-confirmation/:orderId",userAuth,checkoutController.orderConfi
 //Order Management
 router.get("/orders",userAuth,orderController.getMyOrders)
 router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder)
+router.get("/orderDetails/:orderId",userAuth,orderController.getOrderDetails)
 //Coupon Management
 router.get("/coupons",userAuth,couponController.getCouponPage)
 router.post("/addCoupon",userAuth,couponController.addCoupon)

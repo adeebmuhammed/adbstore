@@ -29,6 +29,47 @@
             </div>
         </div>
     </div>
+
+    <!-- Orders Table -->
+    <div class="table-responsive">
+        <table class="table table-bordered">
+            <thead class="thead-light">
+                <tr>
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Ordered Items</th>
+                    <th>Total Price</th>
+                    <th>Discount</th>
+                    <th>Final Amount</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orders.forEach(order => { %>
+                    <tr>
+                        <td><%= order.orderId %></td>
+                        <td><%= order.user.name%></td>
+                        <td>
+                            <ul class="list-unstyled">
+                                <% order.orderedItems.forEach(item => { %>
+                                    <li>
+                                        Product: <%= item.product.productName %><br>
+                                        Size: <%= item.size %>, Quantity: <%= item.quantity %>, Price: INR <%= item.price.toFixed(2) %>
+                                    </li>
+                                <% }) %>
+                            </ul>
+                        </td>
+                        <td>INR <%= order.totalprice.toFixed(2) %></td>
+                        <td>INR <%= order.discount.toFixed(2) %></td>
+                        <td>INR <%= order.finalAmount.toFixed(2) %></td>
+                        <td><%= order.status %></td>
+                        <td><%= order.paymentMethod %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <!-- Download Report Button -->

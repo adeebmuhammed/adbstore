@@ -100,7 +100,42 @@ const cancelOrder = async (req, res) => {
     }
 };
 
+const getOrderDetails = async (req,res) => {
+    try {
+        const {orderId} = req.params
+        const order = await Order.findById(orderId)
+
+        const userId = req.user._id
+
+        if (!order) {
+            return res.redirect('/pageNotFound');
+        }
+
+        const addressDoc = await Address.findOne({userId:userId});
+        console.log(addressDoc);
+        
+
+        if (!addressDoc) {
+            return res.redirect('/pageNotFound');
+        }
+
+        const addressIdToCheck = order.address;
+        const specificAddress = addressDoc.address.find(addr => addr._id.equals(addressIdToCheck));
+        
+        res.render('order-details', {
+            order,
+            orderedItems: order.orderedItems || [],
+            totalPrice: order.totalprice,
+            specificAddress
+        });
+    } catch (error) {
+        console.error(error)
+        res.redirect('/pageNotFound')
+    }
+}
+
 module.exports = {
     getMyOrders,
-    cancelOrder
+    cancelOrder,
+    getOrderDetails
 }

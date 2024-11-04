@@ -2,8 +2,20 @@ const Coupon = require("../../models/couponSchema")
 
 const getCouponPage = async (req,res) => {
     try {
+        const page = req.query.page || 1
+        const limit = 4
+
         const coupons = await Coupon.find()
-        res.render("coupons", {coupons})
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+
+        const count = coupons.length
+
+        res.render("coupons", {
+            coupons,
+            currentPage:page,
+            totalPages:Math.ceil(count/limit)
+        })
     } catch (error) {
         res.redirect("/admin/pageerror")
         console.error(error)

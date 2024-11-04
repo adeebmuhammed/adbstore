@@ -78,7 +78,7 @@
                             </form>
                         <% } else { %>
                             <!-- Show the apply coupon form if no discount is applied -->
-                            <form action="/addCoupon" method="POST">
+                            <form id="applyCouponForm">
                                 <input type="text" id="couponCodeInput" name="couponCode" placeholder="Coupon code">
                                 <button type="submit">Apply</button>
                             </form>
@@ -156,7 +156,6 @@
         "description": "Purchase Description",
         "order_id": orderId,
         "handler": function (response) {
-            // After successful payment
             verifyPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature);
         },
         "prefill": {
@@ -172,7 +171,6 @@
     const rzp = new Razorpay(options);
     rzp.open();
 } else {
-    // For COD or Wallet payment
     window.location.href = `/order-confirmation/${data.message}`;
 }
         } else {
@@ -185,7 +183,6 @@
         }
     });
 
-    // Function to verify payment
     async function verifyPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
     console.log("Payment verification details:", {
         razorpay_payment_id,
@@ -219,5 +216,43 @@
         });
     }
 }
+
+    document.getElementById('applyCouponForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+        
+        const couponCode = document.getElementById('couponCodeInput').value;
+        
+        try {
+            const response = await fetch('/addCoupon', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ couponCode })
+            });
+            
+            const result = await response.json();
+            
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: result.message,
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: result.message,
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while applying the coupon.',
+            });
+        }
+    });
+
+    
         
     </script>    

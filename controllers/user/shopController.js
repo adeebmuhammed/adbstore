@@ -86,28 +86,27 @@ const sortProducts = async (req,res) => {
 
     switch (sort) {
         case 'priceAsc':
-            sortCriteria = { salePrice: 1 }; // Sort by price ascending
+            sortCriteria = { salePrice: 1 }; 
             break;
         case 'priceDesc':
-            sortCriteria = { salePrice: -1 }; // Sort by price descending
+            sortCriteria = { salePrice: -1 };
             break;
         case 'newest':
-            sortCriteria = { createdAt: -1 }; // Sort by newest
+            sortCriteria = { createdAt: -1 }; 
             break;
         case 'oldest':
-            sortCriteria = { createdAt: 1 }; // Sort by oldest
+            sortCriteria = { createdAt: 1 }; 
             break;
         case 'alphaAsc':
-            sortCriteria = { productName: 1 }; // Sort by name ascending
+            sortCriteria = { productName: 1 }; 
             break;
         case 'alphaDesc':
-            sortCriteria = { productName: -1 }; // Sort by name descending
+            sortCriteria = { productName: -1 };
             break;
         default:
-            sortCriteria = {}; // Default: no sorting
+            sortCriteria = {}; 
     }
 
-    // Fetch the products sorted based on the criteria
     const product = await Product.find().sort(sortCriteria);
 
     res.render("shop",{
@@ -123,8 +122,63 @@ const sortProducts = async (req,res) => {
     }
 }
 
+const categoryFilter = async (req,res) => {
+    try {
+        const {categoryId} = req.query
+        const category = await Category.find()
+        const brand = await Brand.find()
+        const user = req.session.user;
+        const sort = req.query.sort || 'priceAsc';
+
+        if(!categoryId){
+            return res.json({success:false,message:"Invalid category"})
+        }
+
+        const product = await Product.find({category:categoryId})
+
+        res.render("shop",{
+            cat:category,
+            product,
+            brand:brand,
+            user,
+            selectedSort: sort
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({success:false,message:"Internal server error"})
+    }
+}
+
+const searchProducts = async (req,res) => {
+    try {
+        const {search} = req.query
+        const category = await Category.find()
+        const brand = await Brand.find()
+        const user = req.session.user;
+        const sort = req.query.sort || 'priceAsc';
+
+        const product = await Product.find({
+            productName: { $regex: search, $options: 'i' }
+        });
+
+
+        res.render("shop",{
+            cat:category,
+            product,
+            brand:brand,
+            user,
+            selectedSort: sort
+        })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({success:false,message:"Internal server error"})
+    }
+}
+
 module.exports = {
     getShopPage,
     getProductDetails,
-    sortProducts
+    sortProducts,
+    categoryFilter,
+    searchProducts
 }

@@ -35,6 +35,8 @@ router.get("/logout",userController.logout)
 router.get("/shop",userAuth,shopController.getShopPage)
 router.get("/productDetails",userAuth,shopController.getProductDetails)
 router.get("/products",userAuth,shopController.sortProducts)
+router.get("/categoryFilter",userAuth,shopController.categoryFilter)
+router.get("/search",userAuth,shopController.searchProducts)
 //Profile Management
 router.get("/profile",userAuth,profileController.getProfilePage)
 router.post("/update-profile",userAuth,profileController.updateProfile)

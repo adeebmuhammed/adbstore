@@ -55,15 +55,21 @@
                                 <% }) %>
                             </td>
                             <td>
-                                <form id="statusChangeForm" action="/admin/change-order-status/<%= order._id %>" method="POST">
-                                    <select name="status" class="form-control" onchange="updateOrderStatus(event, '<%= order._id %>')">
-                                        <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                                        <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                                        <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                                        <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                                        <option value="Canceled" <%= order.status === 'Canceled' ? 'selected' : '' %>>Canceled</option>
-                                    </select>
-                                </form>
+                                <% if (order.status === 'Canceled') { %>
+                                    <button class="btn btn-secondary" disabled>Canceled</button>
+                                <% } else if (order.status !== 'Delivered') { %>
+                                    <form id="statusChangeForm" action="/admin/change-order-status/<%= order._id %>" method="POST">
+                                        <select name="status" class="form-control" onchange="updateOrderStatus(event, '<%= order._id %>')">
+                                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
+                                            <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
+                                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
+                                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                                            <option value="Canceled" <%= order.status === 'Canceled' ? 'selected' : '' %>>Canceled</option>
+                                        </select>
+                                    </form>
+                                <% }else{%>
+                                    <button class="btn btn-secondary" disabled>Delivered</button>
+                                <%}%>
                             </td>                            
                         </tr>
                     <% }) %>

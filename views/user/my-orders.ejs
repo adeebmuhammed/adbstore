@@ -41,6 +41,10 @@
                             <td>
                                 <% if (order.status === 'Canceled') { %>
                                     <button class="btn btn-secondary" disabled>Canceled</button>
+                                <% } else if (order.status == 'Pending') { %>
+                                    <button id="retry-payment-btn" data-order-id="<%= order.orderId %>">
+                                        Retry Payment
+                                    </button>                                    
                                 <% } else if (order.status !== 'Delivered') { %>
                                     <button class="btn btn-danger cancel-order-btn" data-order-id="<%= order._id %>">Cancel</button>
                                 <% } else { %>
@@ -57,59 +61,92 @@
 </div>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+    // Handle cancel order button
+    const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+    cancelButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            const orderId = this.getAttribute('data-order-id');
 
-        cancelButtons.forEach(button => {
-            button.addEventListener('click', function () {
-                const orderId = this.getAttribute('data-order-id');
-
-                Swal.fire({
-                    title: 'Are you sure?',
-                    text: "Do you really want to cancel this order?",
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Yes, cancel it!',
-                    cancelButtonText: 'No, keep it'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Send POST request to cancel the order
-                        fetch(`/cancel-order/${orderId}`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            }
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                Swal.fire(
-                                    'Canceled!',
-                                    'Your order has been canceled.',
-                                    'success'
-                                ).then(() => {
-                                    window.location.reload(); // Reload page to update the status
-                                });
-                            } else {
-                                Swal.fire(
-                                    'Error!',
-                                    data.message || 'Failed to cancel order.',
-                                    'error'
-                                );
-                            }
-                        })
-                        .catch(error => {
-                            console.error('Error:', error);
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to cancel this order?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, cancel it!',
+                cancelButtonText: 'No, keep it'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Send POST request to cancel the order
+                    fetch(`/cancel-order/${orderId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire(
+                                'Canceled!',
+                                'Your order has been canceled.',
+                                'success'
+                            ).then(() => {
+                                window.location.reload(); // Reload page to update the status
+                            });
+                        } else {
                             Swal.fire(
                                 'Error!',
-                                'An unexpected error occurred.',
+                                data.message || 'Failed to cancel order.',
                                 'error'
                             );
-                        });
-                    }
-                });
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire(
+                            'Error!',
+                            'An unexpected error occurred.',
+                            'error'
+                        );
+                    });
+                }
             });
         });
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+    const retryPaymentButton = document.getElementById('retry-payment-btn');
+
+    if (retryPaymentButton) {
+        const orderId = retryPaymentButton.getAttribute('data-order-id');
+        retryPaymentButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/retry-payment/${orderId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    // Handle successful payment retry
+                    console.log('Payment retry initialized:', data);
+                    // You can now open Razorpay or any other further actions.
+                } else {
+                    alert('Failed to initialize retry payment.');
+                }
+            } catch (error) {
+                console.error("Error during retry payment:", error);
+                alert("An error occurred. Please try again later.");
+            }
+        });
+    } else {
+        console.error('Retry payment button not found!');
+    }
+});
+
+
 </script>
 
 

@@ -53,6 +53,8 @@ const addCoupon = async (req, res) => {
 };
 
 const removeCoupon = async (req,res) => {
+    console.log("req recieved");
+    
     try {
         const userId = req.user._id
         const cart = await Cart.findOne({userId})

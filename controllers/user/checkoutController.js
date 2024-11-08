@@ -8,6 +8,7 @@ const Wallet = require("../../models/walletSchema")
 const env = require('dotenv').config()
 const Razorpay = require("razorpay")
 const crypto = require('crypto')
+const { log } = require("console")
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -254,9 +255,132 @@ const orderConfirmation = async (req,res) => {
     }
 };
 
+const paymentFailed = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+
+        res.render("payment-failed", { orderId });
+    } catch (error) {
+        console.error("Error loading payment failed page:", error);
+        res.status(500).send("An error occurred");
+    }
+};
+
+const retryPayment = async (req, res) => {
+    console.log("req recieved");
+    
+    try {
+        const { orderId } = req.params;
+        console.log(orderId);
+        
+
+        const order = await Order.findOne({ orderId });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        const options = {
+            amount: order.finalAmount * 100,
+            currency: "INR",
+            receipt: `${order._id}`,
+            payment_capture: 1
+        };
+        
+        const razorpayOrder = await razorpayInstance.orders.create(options);
+
+        // Save the Razorpay order ID in the new order
+        order.razorpayOrderId = razorpayOrder.id;
+        await order.save(); // Save the updated order
+
+        return res.json({
+            success: true,
+            orderId: razorpayOrder.id, 
+            finalAmount: order.finalAmount,
+            razorpayKey: process.env.RAZORPAY_KEY_ID,
+            message: order.orderId 
+        });
+    } catch (error) {
+        console.error("Error in retrying payment:", error);
+        res.status(500).json({ success: false, message: "Failed to initialize retry payment" });
+    }
+};
+
+const updateOrderStatus = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { status } = req.body;
+
+        const updatedOrder = await Order.findOneAndUpdate(
+            { orderId },
+            { status },
+            { new: true }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ success: false, message: "Order not found" });
+        }
+
+        res.json({ success: true, message: "Order status updated successfully" });
+    } catch (error) {
+        console.error("Error updating order status:", error);
+        res.status(500).json({ success: false, message: "Failed to update order status" });
+    }
+};
+
+const verifyRetryPayment = async (req, res) => {
+    try {
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body;
+
+        console.log("Retry Payment Verification details:", {
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature
+        });
+
+        // Generate signature
+        const generatedSignature = crypto
+            .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+            .update(razorpay_order_id + "|" + razorpay_payment_id)
+            .digest('hex');
+
+        console.log("Generated signature:", generatedSignature);
+        console.log("Signature from Razorpay:", razorpay_signature);
+
+        if (generatedSignature === razorpay_signature) {
+            const order = await Order.findOneAndUpdate(
+                { razorpayOrderId: razorpay_order_id },
+                { status: 'Paid' },
+                { new: true }
+            );
+
+            if (!order) {
+                console.log("Order not found for Razorpay order ID:", razorpay_order_id);
+                return res.status(404).json({ success: false, message: "Order not found" });
+            }
+
+            return res.status(200).json({
+                success: true,
+                message: `${order.orderId}`,
+                orderId: order.orderId
+            });
+        } else {
+            console.log("Invalid signature for Razorpay payment retry verification.");
+            return res.status(400).json({ success: false, message: "Invalid payment signature" });
+        }
+    } catch (error) {
+        console.error("Error verifying retry payment:", error);
+        return res.status(500).json({ success: false, message: "Retry payment verification failed", error });
+    }
+};
+
 module.exports = {
     getCheckoutPage,
     placeOrder,
     verifyPayment,
-    orderConfirmation
+    orderConfirmation,
+    paymentFailed,
+    retryPayment,
+    updateOrderStatus,
+    verifyRetryPayment
 }

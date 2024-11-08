@@ -1,0 +1,101 @@
+<%-include("../../views/partials/user/header")%>
+
+
+    <div class="container text-center mt-5">
+        <h1 class="text-danger">Payment Failed</h1>
+        <p class="mt-3">Unfortunately, your payment could not be completed. Please try again.</p>
+
+        <!-- Retry Payment Button -->
+        <form >
+            <button id="retry-payment" type="submit" class="btn btn-primary">Retry Payment</button>
+        </form>
+    </div>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <%-include("../../views/partials/user/footer")%>
+
+    <script>
+        document.getElementById('retry-payment').addEventListener('click', async () => {
+            try {
+                const response = await fetch(`/retry-payment/<%= orderId %>`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    console.log("respons",response);
+    
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log('Data:', data);
+                
+
+                if (data.success === true) {
+                    const options = {
+                    "key": razorpayKey,
+                    "amount": finalAmount * 100, // Convert amount to paise
+                    "currency": "INR",
+                    "name": "Adb Store",
+                    "description": "Purchase Description",
+                    "order_id": orderId,
+                    "handler": function (response) {
+                        verifyRetryPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature);
+                    },
+                    "modal": {
+                        "ondismiss": function () {
+                            window.location.href = `/payment-failed/${data.message}`;
+                        }
+                    },
+                    "prefill": {
+                        "name": "Customer Name",
+                        "email": "customer@example.com",
+                        "contact": "9999999999"
+                    },
+                    "theme": {
+                        "color": "#F37254"
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+
+                } else {
+                    alert("Failed to initialize retry payment. Please try again later.");
+                }
+            } catch (error) {
+                console.error("Error during retry payment initialization:", error);
+                alert("An error occurred. Please try again later.");
+            }
+        });
+
+        async function verifyRetryPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
+    const response = await fetch('/verify-retry-payment', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature
+        })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+        window.location.href = `/order-confirmation/${data.orderId}`;
+    } else {
+        Swal.fire({
+            title: "Error!",
+            text: data.message || "Payment verification failed",
+            icon: "error",
+            button: "OK",
+        });
+    }
+}
+    </script>

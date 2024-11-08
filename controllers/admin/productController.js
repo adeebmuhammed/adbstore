@@ -135,6 +135,10 @@ const addProductOffer = async (req,res) => {
             return res.json({status:false,message:"This products category already has a category offer"})
         }
 
+        if(isNaN(percentage)){
+            return res.json({status:false,message:"The offer percentage should be a positive number below 100"})
+        }
+
         if(percentage>100 || percentage<1){
             return res.json({status:false,message:"The offer percentage should be a positive number below 100"})
         }

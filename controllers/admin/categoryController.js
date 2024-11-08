@@ -59,6 +59,15 @@ const addCategoryOffer = async (req,res) => {
         if (!category) {
             return res.status(404).json({status:false,message:"Category not found"})
         }
+        
+        if(isNaN(percentage)){
+            return res.json({status:false,message:"The offer percentage should be a positive number below 100"})
+        }
+
+        if(percentage>100 || percentage<1){
+            return res.json({status:false,message:"The offer percentage should be a positive number below 100"})
+        }
+        
         const products = await Product.find({category:category._id})
         const hasProductOffer = products.some((product)=>product.productOffer > percentage)
 

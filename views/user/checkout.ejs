@@ -1,5 +1,20 @@
 <%-include("../../views/partials/user/header")%>
 
+<style>
+    .remove-coupon-btn {
+    background-color: #dc3545; /* Red background */
+    color: white;  /* White text */
+    border: 2px solid #000; /* Add a border for visibility */
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+
+</style>
+
     <!-- Breadcrumb Section Begin -->
     <section class="breadcrumb-option">
         <div class="container">
@@ -71,11 +86,12 @@
                     <div class="cart__discount">
                         <h6>Discount codes</h6>
                         <% if (discount && discount > 0) { %>
-                            <!-- If a discount is applied, show the remove coupon button -->
-                            <form action="/removeCoupon" method="POST">
-                                <span>Coupon Applied: <%= appliedCouponCode %></span> <!-- Display the applied coupon code -->
-                                <button type="submit">Remove Coupon</button>
+                            <form id="removeCouponForm" method="post">
+                                <button id="removeCoupon" type="submit" 
+                                style="background-color: #dc3545; color: white; padding: 20px 20px; font-size: 16px; border-radius: 5px; display: inline-block;"
+                                >Remove Coupon</button>
                             </form>
+                                                                                                                                       
                         <% } else { %>
                             <!-- Show the apply coupon form if no discount is applied -->
                             <form id="applyCouponForm">
@@ -125,63 +141,157 @@
     <%-include("../../views/partials/user/footer")%>
 
     <script>
-
-
-        document.querySelector('#place-order').addEventListener('click', async () => {
-            const selectedAddress = document.querySelector('select[name="selectedAddress"]').value;
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
-    
-            const response = await fetch('/place-order', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    selectedAddress,
-                    paymentMethod,
-                })
+    document.addEventListener('DOMContentLoaded', function() {
+        // Apply Coupon Event Listener
+        const applyCouponForm = document.getElementById('applyCouponForm');
+        if (applyCouponForm) {
+            applyCouponForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                const couponCode = document.getElementById('couponCodeInput').value.trim();
+                
+                if (!couponCode) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Empty Coupon Code',
+                        text: 'Please enter a valid coupon code.',
+                    });
+                    return;
+                }
+                
+                try {
+                    const response = await fetch('/addCoupon', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ couponCode })
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        window.location.reload();  // Reload the page if coupon is applied successfully
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: result.message,
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while applying the coupon.',
+                    });
+                }
             });
-    
-            const data = await response.json();
-            
-            if (data.success) {
-                if (paymentMethod === 'Online Payment') {
-    const { finalAmount, orderId, razorpayKey } = data; 
-
-    var options = {
-        "key": razorpayKey,
-        "amount": finalAmount * 100,
-        "currency": "INR",
-        "name": "Adb Store",
-        "description": "Purchase Description",
-        "order_id": orderId,
-        "handler": function (response) {
-            verifyPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature);
-        },
-        "prefill": {
-            "name": "Customer Name",
-            "email": "customer@example.com",
-            "contact": "9999999999"
-        },
-        "theme": {
-            "color": "#F37254"
         }
-    };
 
-    const rzp = new Razorpay(options);
-    rzp.open();
-} else {
-    window.location.href = `/order-confirmation/${data.message}`;
-}
+        // Remove Coupon Event Listener
+        const removeCouponButton = document.getElementById('removeCoupon');
+        if (removeCouponButton) {
+            removeCouponButton.addEventListener('click', async function(event) {
+                event.preventDefault();
+                console.log('Remove coupon clicked');
+                
+                try {
+                    const response = await fetch('/removeCoupon', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        window.location.reload(); // Reload the page if the coupon was removed
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: result.message || 'Failed to remove the coupon.',
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while removing the coupon.',
+                    });
+                }
+            });
+        }
+    });
+
+document.querySelector('#place-order').addEventListener('click', async () => {
+    const selectedAddress = document.querySelector('select[name="selectedAddress"]').value;
+    const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+    try {
+        const response = await fetch('/place-order', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                selectedAddress,
+                paymentMethod,
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            if (paymentMethod === 'Online Payment') {
+                const { finalAmount, orderId, razorpayKey } = data;
+
+                const options = {
+                    "key": razorpayKey,
+                    "amount": finalAmount * 100, // Convert amount to paise
+                    "currency": "INR",
+                    "name": "Adb Store",
+                    "description": "Purchase Description",
+                    "order_id": orderId,
+                    "handler": function (response) {
+                        verifyPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature);
+                    },
+                    "modal": {
+                        "ondismiss": function () {
+                            window.location.href = `/payment-failed/${data.message}`;
+                        }
+                    },
+                    "prefill": {
+                        "name": "Customer Name",
+                        "email": "customer@example.com",
+                        "contact": "9999999999"
+                    },
+                    "theme": {
+                        "color": "#F37254"
+                    }
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } else {
+                window.location.href = `/order-confirmation/${data.message}`;
+            }
         } else {
             Swal.fire({
                 title: "Error!",
                 text: data.error || "Failed to Place Order",
                 icon: "error",
-                button: "OK",
+                confirmButtonText: "OK",
             });
         }
-    });
+    } catch (error) {
+        console.error("Error placing order:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "An error occurred while placing the order. Please try again.",
+            icon: "error",
+            confirmButtonText: "OK",
+        });
+    }
+});
 
     async function verifyPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
     console.log("Payment verification details:", {
@@ -190,69 +300,47 @@
         razorpay_signature
     });
 
-    const response = await fetch('/verify-payment', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            razorpay_payment_id,
-            razorpay_order_id,
-            razorpay_signature
-        })
-    });
+    try {
+        const response = await fetch('/verify-payment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                razorpay_payment_id,
+                razorpay_order_id,
+                razorpay_signature
+            })
+        });
 
-    const data = await response.json();
-    console.log("Response from server:", data);
+        const data = await response.json();
+        console.log("Response from server:", data);
 
-    if (data.success) {
-        window.location.href = `/order-confirmation/${data.message}`;
-    } else {
+        if (data.success) {
+            window.location.href = `/order-confirmation/${data.message}`;
+        } else {
+            Swal.fire({
+                title: "Payment Verification Failed",
+                text: data.error || "An error occurred during payment verification.",
+                icon: "error",
+                confirmButtonText: "OK",
+            }).then(() => {
+                window.location.href = "/payment-failed";
+            });
+        }
+    } catch (error) {
+        console.error("Error verifying payment:", error);
         Swal.fire({
-            title: "Error!",
-            text: data.error || "Payment verification failed",
+            title: "Error",
+            text: "Unable to verify payment due to a network error.",
             icon: "error",
-            button: "OK",
+            confirmButtonText: "OK",
+        }).then(() => {
+            window.location.href = "/payment-failed";
         });
     }
 }
 
-    document.getElementById('applyCouponForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
-        const couponCode = document.getElementById('couponCodeInput').value;
-        
-        try {
-            const response = await fetch('/addCoupon', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ couponCode })
-            });
-            
-            const result = await response.json();
-            
-            if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Success!',
-                    text: result.message,
-                });
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: result.message,
-                });
-            }
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'An error occurred while applying the coupon.',
-            });
-        }
-    });
-
     
-        
+  
     </script>    

@@ -6,9 +6,9 @@
         <p class="mt-3">Unfortunately, your payment could not be completed. Please try again.</p>
 
         <!-- Retry Payment Button -->
-        <form >
-            <button id="retry-payment" type="submit" class="btn btn-primary">Retry Payment</button>
-        </form>
+        <form onsubmit="event.preventDefault();">
+            <button id="retry-payment" type="button" class="btn btn-primary">Retry Payment</button>
+        </form>        
     </div>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
@@ -16,86 +16,86 @@
 
     <script>
         document.getElementById('retry-payment').addEventListener('click', async () => {
-            try {
-                const response = await fetch(`/retry-payment/<%= orderId %>`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
+    try {
+        const orderId = "<%= orderId %>"; // Make sure this is properly set by EJS
+        const response = await fetch(`/retry-payment/${orderId}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    });
-    console.log("respons",response);
-    
 
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
+        const data = await response.json();
+        console.log('Data:', data);
 
-    const data = await response.json();
-    console.log('Data:', data);
-                
+        if (data.success) {
+            const { finalAmount, razorpayKey, orderId } = data;
 
-                if (data.success === true) {
-                    const options = {
-                    "key": razorpayKey,
-                    "amount": finalAmount * 100, // Convert amount to paise
-                    "currency": "INR",
-                    "name": "Adb Store",
-                    "description": "Purchase Description",
-                    "order_id": orderId,
-                    "handler": function (response) {
-                        verifyRetryPayment(response.razorpay_payment_id, response.razorpay_order_id, response.razorpay_signature);
-                    },
-                    "modal": {
-                        "ondismiss": function () {
-                            window.location.href = `/payment-failed/${data.message}`;
-                        }
-                    },
-                    "prefill": {
-                        "name": "Customer Name",
-                        "email": "customer@example.com",
-                        "contact": "9999999999"
-                    },
-                    "theme": {
-                        "color": "#F37254"
+            const options = {
+                key: razorpayKey,
+                amount: finalAmount * 100, // Convert to paise
+                currency: "INR",
+                name: "Adb Store",
+                description: "Purchase Description",
+                order_id: orderId,
+                handler: async function (response) {
+                    await verifyRetryPayment(
+                        response.razorpay_payment_id,
+                        response.razorpay_order_id,
+                        response.razorpay_signature
+                    );
+                },
+                modal: {
+                    ondismiss: function () {
+                        window.location.href = `/payment-failed/${data.message}`;
                     }
-                };
+                },
+                prefill: {
+                    name: "Customer Name",
+                    email: "customer@example.com",
+                    contact: "9999999999"
+                },
+                theme: { color: "#F37254" }
+            };
 
-                const rzp = new Razorpay(options);
-                rzp.open();
+            const rzp = new Razorpay(options);
+            rzp.open();
+        } else {
+            alert("Failed to initialize retry payment. Please try again later.");
+        }
+    } catch (error) {
+        console.error("Error during retry payment initialization:", error);
+        alert("An error occurred. Please try again later.");
+    }
+});
 
-                } else {
-                    alert("Failed to initialize retry payment. Please try again later.");
-                }
-            } catch (error) {
-                console.error("Error during retry payment initialization:", error);
-                alert("An error occurred. Please try again later.");
-            }
+async function verifyRetryPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
+    try {
+        const response = await fetch('/verify-retry-payment', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ razorpay_payment_id, razorpay_order_id, razorpay_signature })
         });
 
-        async function verifyRetryPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
-    const response = await fetch('/verify-retry-payment', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            razorpay_payment_id,
-            razorpay_order_id,
-            razorpay_signature
-        })
-    });
+        const data = await response.json();
 
-    const data = await response.json();
-
-    if (data.success) {
-        window.location.href = `/order-confirmation/${data.orderId}`;
-    } else {
-        Swal.fire({
-            title: "Error!",
-            text: data.message || "Payment verification failed",
-            icon: "error",
-            button: "OK",
-        });
+        if (data.success) {
+            // Redirect to the order confirmation page
+            window.location.href = `/order-confirmation/${data.orderId}`;
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.message || "Payment verification failed",
+                icon: "error",
+                button: "OK",
+            });
+        }
+    } catch (error) {
+        console.error("Error verifying retry payment:", error);
+        alert("An error occurred. Please try again later.");
     }
 }
+
     </script>

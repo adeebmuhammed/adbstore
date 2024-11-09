@@ -44,7 +44,7 @@
                                 <% } else if (order.status == 'Pending') { %>
                                     <button id="retry-payment-btn" data-order-id="<%= order.orderId %>">
                                         Retry Payment
-                                    </button>                                    
+                                    </button>                                                                        
                                 <% } else if (order.status !== 'Delivered') { %>
                                     <button class="btn btn-danger cancel-order-btn" data-order-id="<%= order._id %>">Cancel</button>
                                 <% } else { %>
@@ -59,95 +59,181 @@
         </div>
     </div>
 </div>
+
+<%-include("../../views/partials/user/footer")%>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-    // Handle cancel order button
-    const cancelButtons = document.querySelectorAll('.cancel-order-btn');
-    cancelButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            const orderId = this.getAttribute('data-order-id');
+        // Handle cancel order button
+        const cancelButtons = document.querySelectorAll('.cancel-order-btn');
+        cancelButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const orderId = this.getAttribute('data-order-id');
 
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to cancel this order?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Yes, cancel it!',
-                cancelButtonText: 'No, keep it'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    // Send POST request to cancel the order
-                    fetch(`/cancel-order/${orderId}`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        }
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            Swal.fire(
-                                'Canceled!',
-                                'Your order has been canceled.',
-                                'success'
-                            ).then(() => {
-                                window.location.reload(); // Reload page to update the status
-                            });
-                        } else {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to cancel this order?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, cancel it!',
+                    cancelButtonText: 'No, keep it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Send POST request to cancel the order
+                        fetch(`/cancel-order/${orderId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Canceled!',
+                                    'Your order has been canceled.',
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload(); // Reload page to update the status
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to cancel order.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
                             Swal.fire(
                                 'Error!',
-                                data.message || 'Failed to cancel order.',
+                                'An unexpected error occurred.',
                                 'error'
                             );
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        Swal.fire(
-                            'Error!',
-                            'An unexpected error occurred.',
-                            'error'
-                        );
-                    });
-                }
+                        });
+                    }
+                });
             });
         });
-    });
 
-    document.addEventListener('DOMContentLoaded', function() {
-    const retryPaymentButton = document.getElementById('retry-payment-btn');
+        // Handle retry payment button click
+        document.getElementById('retry-payment-btn').addEventListener('click', async () => {
+            const orderId = document.getElementById('retry-payment-btn').getAttribute('data-order-id');
 
-    if (retryPaymentButton) {
-        const orderId = retryPaymentButton.getAttribute('data-order-id');
-        retryPaymentButton.addEventListener('click', async () => {
             try {
-                const response = await fetch(`/retry-payment/${orderId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Initializing retry payment. Please wait.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
                     }
                 });
 
+                // Make a request to initialize retry payment
+                const response = await fetch(`/retry-payment/${orderId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
                 const data = await response.json();
+
                 if (data.success) {
-                    // Handle successful payment retry
-                    console.log('Payment retry initialized:', data);
-                    // You can now open Razorpay or any other further actions.
+                    Swal.close(); // Close the loading indicator
+                    const { finalAmount, razorpayKey, orderId } = data;
+
+                    const options = {
+                        key: razorpayKey,
+                        amount: finalAmount * 100, // Convert to paise
+                        currency: "INR",
+                        name: "Adb Store",
+                        description: "Purchase Description",
+                        order_id: orderId,
+                        handler: async function (response) {
+                            await verifyRetryPayment(
+                                response.razorpay_payment_id,
+                                response.razorpay_order_id,
+                                response.razorpay_signature
+                            );
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                Swal.fire({
+                                    title: 'Payment Canceled',
+                                    text: 'You canceled the payment process.',
+                                    icon: 'info'
+                                });
+                            }
+                        },
+                        prefill: {
+                            name: "Customer Name",
+                            email: "customer@example.com",
+                            contact: "9999999999"
+                        },
+                        theme: { color: "#F37254" }
+                    };
+
+                    const rzp = new Razorpay(options);
+                    rzp.open();
                 } else {
-                    alert('Failed to initialize retry payment.');
+                    Swal.fire(
+                        'Failed',
+                        data.message || "Failed to initialize retry payment. Please try again later.",
+                        'error'
+                    );
                 }
             } catch (error) {
-                console.error("Error during retry payment:", error);
-                alert("An error occurred. Please try again later.");
+                console.error("Error during retry payment initialization:", error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred. Please try again later.',
+                    'error'
+                );
             }
         });
-    } else {
-        console.error('Retry payment button not found!');
-    }
-});
 
+        // Verification function to verify payment on the server
+        async function verifyRetryPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
+            try {
+                Swal.fire({
+                    title: 'Verifying Payment',
+                    text: 'Please wait while we verify your payment.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
 
+                const response = await fetch('/verify-retry-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ razorpay_payment_id, razorpay_order_id, razorpay_signature })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: 'Payment verified successfully!',
+                        icon: 'success'
+                    }).then(() => {
+                        window.location.href = `/order-confirmation/${data.orderId}`;
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Error!",
+                        text: data.message || "Payment verification failed.",
+                        icon: "error"
+                    });
+                }
+            } catch (error) {
+                console.error("Error verifying retry payment:", error);
+                Swal.fire(
+                    'Error!',
+                    'An error occurred during payment verification. Please try again later.',
+                    'error'
+                );
+            }
+        }
+    });
 </script>
-
-
-<%-include("../../views/partials/user/footer")%>

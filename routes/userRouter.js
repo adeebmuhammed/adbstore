@@ -65,7 +65,7 @@ router.post('/verify-payment',userAuth, checkoutController.verifyPayment);
 router.get("/order-confirmation/:orderId",userAuth,checkoutController.orderConfirmation)
 router.get("/payment-failed/:orderId",userAuth,checkoutController.paymentFailed)
 router.post("/retry-payment/:orderId", userAuth, checkoutController.retryPayment)
-router.post("/update-order-status/:orderId", userAuth, checkoutController.updateOrderStatus)
+router.post('/verify-retry-payment',userAuth, checkoutController.verifyRetryPayment);
 //Order Management
 router.get("/orders",userAuth,orderController.getMyOrders)
 router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder)

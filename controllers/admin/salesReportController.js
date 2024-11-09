@@ -54,10 +54,10 @@ const generateSalesReport = async (req, res) => {
 
         console.log("Query Object:", query);
 
-        const orders = await Order.find()
-        .populate("user", "name")
-        .populate("orderedItems.product", "name")
-        .exec();
+        const orders = await Order.find(query) // Apply the query filter here
+            .populate("user", "name")
+            .populate("orderedItems.product", "name")
+            .exec();
         console.log("Orders Retrieved:", orders);
 
         if (orders.length > 0) {
@@ -86,10 +86,10 @@ const generateSalesReport = async (req, res) => {
             console.log("No orders found for the given criteria.");
 
             req.session.salesReportData = {
-                overallSalesCount:0,
-                overallOrderAmount:0,
-                overallDiscount:0,
-                orders:[]
+                overallSalesCount: 0,
+                overallOrderAmount: 0,
+                overallDiscount: 0,
+                orders: []
             };
             
             return res.json({

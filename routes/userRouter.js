@@ -69,6 +69,7 @@ router.post('/verify-retry-payment',userAuth, checkoutController.verifyRetryPaym
 //Order Management
 router.get("/orders",userAuth,orderController.getMyOrders)
 router.post("/cancel-order/:orderId",userAuth,orderController.cancelOrder)
+router.post("/return-order/:orderId",userAuth,orderController.returnOrder)
 router.get("/orderDetails/:orderId",userAuth,orderController.getOrderDetails)
 //Coupon Management
 router.get("/coupons",userAuth,couponController.getCouponPage)

@@ -134,8 +134,28 @@ const getOrderDetails = async (req,res) => {
     }
 }
 
+const returnOrder = async (req,res) => {
+    try {
+        const {orderId} = req.params
+
+        const order = await Order.findOne({orderId})
+        if (!order) {
+            return res.status(400).json({success:false,message:"Order Not Found"})
+        }
+
+        order.status = "Return Request"
+        order.save()
+
+        return res.status(200).json({success:true,message:"Return Requested Successfully"})
+    } catch (error) {
+        console.error("Error requesting return order:", error);
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
+
 module.exports = {
     getMyOrders,
     cancelOrder,
-    getOrderDetails
+    getOrderDetails,
+    returnOrder
 }

@@ -15,8 +15,7 @@ const orderSchema = new Schema({
     },
     orderedItems:[{
         product:{
-            type:Schema.Types.ObjectId,
-            ref:"Product",
+            type:String,
             required:true
         },
         size:{

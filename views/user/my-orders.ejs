@@ -44,7 +44,13 @@
                                 <% } else if (order.status == 'Pending') { %>
                                     <button id="retry-payment-btn" data-order-id="<%= order.orderId %>">
                                         Retry Payment
-                                    </button>                                                                        
+                                    </button>
+                                <% } else if (order.status == 'Delivered') { %>
+                                    <button id="requestReturn" data-order-id="<%= order.orderId %>">
+                                        Request Return
+                                    </button>
+                                <% } else if (order.status == 'Return Request') { %>
+                                    <button class="btn btn-secondary" disabled>Return requested</button>                                                                        
                                 <% } else if (order.status !== 'Delivered') { %>
                                     <button class="btn btn-danger cancel-order-btn" data-order-id="<%= order._id %>">Cancel</button>
                                 <% } else { %>
@@ -64,7 +70,7 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Handle cancel order button
+
         const cancelButtons = document.querySelectorAll('.cancel-order-btn');
         cancelButtons.forEach(button => {
             button.addEventListener('click', function () {
@@ -79,7 +85,7 @@
                     cancelButtonText: 'No, keep it'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        // Send POST request to cancel the order
+
                         fetch(`/cancel-order/${orderId}`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
@@ -92,7 +98,7 @@
                                     'Your order has been canceled.',
                                     'success'
                                 ).then(() => {
-                                    window.location.reload(); // Reload page to update the status
+                                    window.location.reload(); 
                                 });
                             } else {
                                 Swal.fire(
@@ -115,7 +121,54 @@
             });
         });
 
-        // Handle retry payment button click
+        const returnButton = document.getElementById('requestReturn');
+        returnButton.addEventListener('click', function () {
+                const orderId = this.getAttribute('data-order-id');
+
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: "Do you really want to return this order?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, return it!',
+                    cancelButtonText: 'No, keep it'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        fetch(`/return-order/${orderId}`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                Swal.fire(
+                                    'Return Requested!',
+                                    'Your order has been return requested.',
+                                    'success'
+                                ).then(() => {
+                                    window.location.reload(); 
+                                });
+                            } else {
+                                Swal.fire(
+                                    'Error!',
+                                    data.message || 'Failed to request return order.',
+                                    'error'
+                                );
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            Swal.fire(
+                                'Error!',
+                                'An unexpected error occurred.',
+                                'error'
+                            );
+                        });
+                    }
+                });
+            });
+
         document.getElementById('retry-payment-btn').addEventListener('click', async () => {
             const orderId = document.getElementById('retry-payment-btn').getAttribute('data-order-id');
 
@@ -129,7 +182,6 @@
                     }
                 });
 
-                // Make a request to initialize retry payment
                 const response = await fetch(`/retry-payment/${orderId}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
@@ -138,12 +190,12 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    Swal.close(); // Close the loading indicator
+                    Swal.close();
                     const { finalAmount, razorpayKey, orderId } = data;
 
                     const options = {
                         key: razorpayKey,
-                        amount: finalAmount * 100, // Convert to paise
+                        amount: finalAmount * 100, 
                         currency: "INR",
                         name: "Adb Store",
                         description: "Purchase Description",
@@ -191,7 +243,6 @@
             }
         });
 
-        // Verification function to verify payment on the server
         async function verifyRetryPayment(razorpay_payment_id, razorpay_order_id, razorpay_signature) {
             try {
                 Swal.fire({

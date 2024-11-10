@@ -87,7 +87,7 @@ const placeOrder = async (req, res) => {
         
         const newOrder = new Order({
             orderedItems: cart.items.map(item => ({
-                product: item.productId._id,
+                product: item.productName,
                 size: item.size,
                 quantity: item.quantity,
                 price: item.productId.salePrice * item.quantity
@@ -103,24 +103,21 @@ const placeOrder = async (req, res) => {
             discount : totalPrice - finalAmount
         });
 
-        // Clear the cart after placing the order
         cart.items = [];
         await cart.save();
 
         if (paymentMethod === 'Online Payment') {
-            // Create Razorpay order
             const options = {
                 amount: totalPrice * 100,
                 currency: "INR",
-                receipt: `${newOrder._id}`, // Use newOrder._id for receipt
+                receipt: `${newOrder._id}`,
                 payment_capture: 1
             };
             
             const razorpayOrder = await razorpayInstance.orders.create(options);
 
-            // Save the Razorpay order ID in the new order
             newOrder.razorpayOrderId = razorpayOrder.id;
-            await newOrder.save(); // Save the updated order
+            await newOrder.save(); 
 
             return res.json({
                 success: true,
@@ -328,7 +325,6 @@ const verifyRetryPayment = async (req, res) => {
             return res.status(400).json({ success: false, message: "Incomplete payment verification details" });
         }
 
-        // Generate signature using the secret key
         const generatedSignature = crypto
             .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
             .update(`${razorpay_order_id}|${razorpay_payment_id}`)
@@ -337,7 +333,6 @@ const verifyRetryPayment = async (req, res) => {
         console.log("Generated signature:", generatedSignature);
         console.log("Signature from Razorpay:", razorpay_signature);
 
-        // Check if the generated signature matches the one from Razorpay
         if (generatedSignature === razorpay_signature) {
             const order = await Order.findOneAndUpdate(
                 { razorpayOrderId: razorpay_order_id },

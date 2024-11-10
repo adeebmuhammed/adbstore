@@ -54,7 +54,7 @@ const generateSalesReport = async (req, res) => {
 
         console.log("Query Object:", query);
 
-        const orders = await Order.find(query) // Apply the query filter here
+        const orders = await Order.find(query)
             .populate("user", "name")
             .populate("orderedItems.product", "name")
             .exec();

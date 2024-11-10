@@ -27,7 +27,7 @@
                 <tbody>
                     <% orderedItems.forEach(item => { %>
                     <tr>
-                        <td><%= item.product.productName %></td>
+                        <td><%= item.product %></td>
                         <td><%= item.quantity %></td>
                         <td>INR <%= item.price %></td>
                         <td>INR <%= item.quantity * item.price %></td>

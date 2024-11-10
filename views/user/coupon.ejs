@@ -20,7 +20,7 @@
                       <tr>
                         <th>Image</th>
                         <th>Name</th>
-                        <th>Offer Price</th>
+                        <th>Offer Percentage</th>
                         <th>Minimum Purchase</th>
                         <th>Expiry Date</th>
                         <th>Coupon Code</th>
@@ -41,7 +41,7 @@
                             </div>
                           </td>
                           <td><%= coupon.name %></td>
-                          <td>₹<%= coupon.offerPrice %></td>
+                          <td><%= coupon.offerPrice %>%</td>
                           <td>₹<%= coupon.minimumPrice %></td>
                           <td><%= new Date(coupon.expireOn).toLocaleDateString() %></td>
                           <td><strong id="couponCode-<%= coupon._id %>"><%= coupon.code %></strong></td>

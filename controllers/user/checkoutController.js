@@ -87,7 +87,8 @@ const placeOrder = async (req, res) => {
         
         const newOrder = new Order({
             orderedItems: cart.items.map(item => ({
-                product: item.productName,
+                product: item.productId._id,
+                productName:item.productId.productName, 
                 size: item.size,
                 quantity: item.quantity,
                 price: item.productId.salePrice * item.quantity
@@ -100,11 +101,11 @@ const placeOrder = async (req, res) => {
             status: 'Pending',
             couponApplied: couponApplied ? couponApplied._id : null,
             paymentMethod: paymentMethod,
-            discount : totalPrice - finalAmount
+            discount: totalPrice - finalAmount
         });
-
+        
         cart.items = [];
-        await cart.save();
+        await cart.save();        
 
         if (paymentMethod === 'Online Payment') {
             const options = {
@@ -149,6 +150,7 @@ const placeOrder = async (req, res) => {
             });
             await wallet.save();
 
+            newOrder.status = 'Placed'
             await newOrder.save();
             return res.status(200).json({
                 success: true,
@@ -156,6 +158,8 @@ const placeOrder = async (req, res) => {
             });
         }
         else {
+            newOrder.status = 'Placed'
+
             await newOrder.save();
             return res.status(200).json({
                 success: true,

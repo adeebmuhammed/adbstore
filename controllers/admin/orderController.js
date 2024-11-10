@@ -6,19 +6,15 @@ const getOrderList = async (req,res) => {
     try {
         const orders = await Order.find().lean();
 
-        // Fetch address and product details manually (similar to user-side)
         for (const order of orders) {
-            // Fetch address manually
             const userAddressData = await Address.findOne({ userId: order.user }).lean();
 
-            // Find the specific address in the address array using the ObjectId
             const specificAddress = userAddressData.address.find(addr => addr._id.equals(order.address));
-            order.addressDetails = specificAddress; // Assign the found address to order
+            order.addressDetails = specificAddress;
 
-            // Fetch product details for each ordered item
             for (const item of order.orderedItems) {
                 const product = await Product.findById(item.product).lean();
-                item.productDetails = product; // Add product details to each item
+                item.productDetails = product; 
             }
         }
 
@@ -34,7 +30,6 @@ const changeOrderStatus = async (req, res) => {
         const orderId = req.params.orderId;
         const newStatus = req.body.status;
 
-        // Update order status
         const updatedOrder = await Order.findByIdAndUpdate(orderId, { status: newStatus }, { new: true });
 
         if (updatedOrder) {

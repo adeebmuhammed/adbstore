@@ -55,12 +55,7 @@
                         <div class="product__details__text">
                             <h4><%= product.productName %></h4>
                             <div class="rating">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-o"></i>
-                                <span> - 5 Reviews</span>
+                                Product Offer : <%=product.productOffer ? product.productOffer : 0%>%
                             </div>
                             <h3><%= product.salePrice %><span><%= product.regularPrice %></span></h3>
                             <p><%= product.description %></p>
@@ -119,6 +114,7 @@
                                 <img src="img/shop-details/details-payment.png" alt="">
                                 <ul>
                                     <li><span>Categories:</span> <%= cat.name %></li>
+                                    <li>Category Offer : <%=cat.categoryOffer ? cat.categoryOffer : 0%>%</li>
                                 </ul>
                             </div>
                         </div>

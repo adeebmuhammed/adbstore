@@ -109,7 +109,7 @@ const placeOrder = async (req, res) => {
 
         if (paymentMethod === 'Online Payment') {
             const options = {
-                amount: totalPrice * 100,
+                amount: finalAmount * 100,
                 currency: "INR",
                 receipt: `${newOrder._id}`,
                 payment_capture: 1
@@ -291,7 +291,6 @@ const retryPayment = async (req, res) => {
         const razorpayOrder = await razorpayInstance.orders.create(options);
 
         order.razorpayOrderId = razorpayOrder.id;
-        order.status = 'Placed'
         await order.save(); 
 
         console.log("order saved successfully",{

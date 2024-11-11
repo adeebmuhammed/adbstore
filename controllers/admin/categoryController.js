@@ -30,7 +30,6 @@ const categoryInfo = async (req,res) => {
 const addCategory = async (req,res) => {
     const {name,description} = req.body
     try {
-        // Check for case-insensitive match using regex
         const existingCategory = await Category.findOne({ 
             name: { $regex: new RegExp(`^${name}$`, 'i') } 
         });

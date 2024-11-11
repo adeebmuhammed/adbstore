@@ -15,7 +15,7 @@
             <% wishlistItems.forEach(item => { %>
             <div class="col-md-4 mb-4">
                 <div class="card h-100">
-                    <img src="/uploads/product-images/<%= item.productImage %>" class="card-img-top" alt="<%= item.productName %>">
+                    <a href="/productDetails?id=<%=item.productId%>"><img src="/uploads/product-images/<%= item.productImage %>" class="card-img-top" alt="<%= item.productName %>"></a>
                     <div class="card-body">
                         <h5 class="card-title"><%= item.productName %></h5>
                         <p class="card-text"><%= item.description %></p>

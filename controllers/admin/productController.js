@@ -49,12 +49,11 @@ const addProducts = async (req,res) => {
             let sizes = [];
             if (products.sizes && Array.isArray(products.sizes)) {
                 sizes = products.sizes.map((size, index) => ({
-                    size: size, // Size value from form (e.g., '6', '7', etc.)
-                    quantity: products[`quantity${size}`] || 0 // Quantity corresponding to that size
+                    size: size, 
+                    quantity: products[`quantity${size}`] || 0 
                 }));
             }
 
-            // Create a new product
             const newProduct = new Product({
                 productName: products.productName,
                 description: products.description,
@@ -63,7 +62,7 @@ const addProducts = async (req,res) => {
                 regularPrice: products.regularPrice,
                 salePrice: products.salePrice,
                 createdOn: new Date(),
-                sizes: sizes, // Add sizes with quantity
+                sizes: sizes, 
                 color: products.color,
                 productImage: images,
                 status: 'Available'

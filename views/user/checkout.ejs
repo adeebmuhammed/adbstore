@@ -109,6 +109,8 @@
                         <ul class="checkout__total__products">
                             <% cartItems.forEach((item, index) => { %>
                                 <li><%= index + 1 %>. <%= item.productId.productName %> 
+                                    <span>Size : <%=item.size%></span>
+                                    <span>Qty : <%=item.quantity%></span>
                                     <span><%= item.totalPrice.toFixed(2) %></span>
                                 </li>
                             <% }) %>

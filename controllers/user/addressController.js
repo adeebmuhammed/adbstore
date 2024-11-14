@@ -3,22 +3,20 @@ const Address = require("../../models/addressSchema")
 
 const getManageAddresses = async (req, res) => {
     try {
-        const user = req.session.user;
-        const addressDoc = await Address.findOne({ userId: user._id }); // Find the address document for the user
-        const userData = await User.findById(req.session.user);
+        const userId = req.session.user;
+        const addressDoc = await Address.findOne({ userId }); 
+        const userData = await User.findById(userId);
 
-        // If no addresses exist
         if (!addressDoc || addressDoc.address.length === 0) {
             return res.render("manage-addresses", {
                 message: "No addresses added. Add a new address to get started!",
-                addresses: [], // Empty array
+                addresses: [],
                 user: userData,
             });
         }
 
-        // Render the addresses
         res.render("manage-addresses", {
-            addresses: addressDoc.address, // Send the addresses array from the document
+            addresses: addressDoc.address, 
             user: userData,
             message: null,
         });
@@ -43,7 +41,8 @@ const getAddAddress = async (req,res) => {
 
 const addAddress = async (req, res) => {  
     try {
-        // Destructure fields from the request body
+        const userId = req.session.user
+
         const {
             name,
             houseName,
@@ -51,23 +50,20 @@ const addAddress = async (req, res) => {
             city,
             state,
             pincode,
-            mobile, // Assuming 'mobile' is equivalent to 'phone' in the schema
-            altPhone, // Optional field
-            addressType // Optional field
+            mobile, 
+            altPhone, 
+            addressType
         } = req.body;
 
-        // Ensure all required fields are present
         if (!name || !houseName || !street || !city || !state || !pincode || !mobile) {
             return res.status(400).json({ message: 'All required fields must be provided.' });
         }
 
-        // Find the user by ID stored in the session
-        const user = await User.findById(req.session.user);
+        const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'User not found.' });
         }
 
-        // Create the new address object according to the schema
         const newAddress = {
             name,
             houseName,
@@ -76,31 +72,26 @@ const addAddress = async (req, res) => {
             state,
             pincode,
             phone: mobile,
-            altPhone: altPhone || '', // Optional, provide default if not provided
-            addressType: addressType || 'home' // Default address type if not provided
+            altPhone: altPhone || '',
+            addressType: addressType || 'home'
         };
 
-        // Check if the user already has an address document
-        const addressDoc = await Address.findOne({ userId: user._id });
+        const addressDoc = await Address.findOne({ userId });
 
         if (addressDoc) {
-            // If document exists, update (push) the new address to the address array
             await Address.updateOne(
-                { userId: user._id },
-                { $push: { address: newAddress } } // Push the new address into the array
+                { userId },
+                { $push: { address: newAddress } }
             );
         } else {
-            // If document does not exist, create it with the new address
             await Address.create({
                 userId: user._id,
-                address: [newAddress] // Initialize with the first address
+                address: [newAddress]
             });
         }
 
-        // Return success message
         res.redirect("/manage-addresses")
     } catch (error) {
-        // Send detailed error response
         console.error(error);
         res.status(500).json({ message: 'Internal Server error' });
     }
@@ -108,24 +99,21 @@ const addAddress = async (req, res) => {
 
 const getEditAddress = async (req, res) => {
     try {
-        const { addressId } = req.params;  // Address ID to edit
-        const userId = req.user._id;  // Assuming you have the user's ID
+        const { addressId } = req.params;
+        const userId = req.session.user;
 
-        // Find the user document and address array by userId
         const userAddressData = await Address.findOne({ userId: userId });
 
         if (!userAddressData) {
             return res.status(404).json({ message: 'User addresses not found' });
         }
 
-        // Find the specific address within the address array
-        const address = userAddressData.address.id(addressId); // Find subdocument
+        const address = userAddressData.address.id(addressId); 
 
         if (!address) {
             return res.status(404).json({ message: 'Address not found' });
         }
 
-        // Render the edit-address page with the retrieved address details
         res.render('edit-address', { address });
     } catch (error) {
         console.error('Error editing address:', error);

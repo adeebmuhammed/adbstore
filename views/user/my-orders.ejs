@@ -8,6 +8,7 @@
         <!-- Orders Table -->
         <div class="col-md-9">
             <h1>My Orders</h1>
+            <% if (orders.length > 0) { %>
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
@@ -62,6 +63,9 @@
                     <% }) %>
                 </tbody>                
             </table>
+            <% } else { %>
+                <p>No orders found. Start shopping to place your first order!</p>
+            <% } %>
         </div>
     </div>
 </div>

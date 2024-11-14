@@ -6,9 +6,13 @@ const Wallet = require("../../models/walletSchema")
 
 const getMyOrders = async (req, res) => {
     try {
-        const userId = req.user._id; 
+        const userId = req.session.user; 
 
-        const orders = await Order.find({ user: userId }).lean(); 
+        const orders = await Order.find({ user: userId }).lean();
+        
+        if(orders.length<1){
+            return res.render('my-orders', { orders:[] })
+        }
 
         for (const order of orders) {
             const userAddressData = await Address.findOne({ userId: userId }).lean();

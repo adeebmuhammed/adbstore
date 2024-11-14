@@ -1,12 +1,13 @@
 <%-include("../../views/partials/user/header")%>
 
-<div class="container my-5">
+<div class="container my-5" >
     <div class="text-center">
         <h1 class="display-4">Thank You for Your Order!</h1>
         <p class="lead">Your order has been successfully placed.</p>
     </div>
 
     <!-- Order Summary -->
+    <div id="invoice">
     <div class="card mt-4">
         <div class="card-header">
             <h4>Order Summary</h4>
@@ -65,6 +66,7 @@
             </p>
         </div>
     </div>
+    </div>
 
     <!-- Confirmation Message -->
     <div class="alert alert-success mt-4" role="alert">
@@ -73,7 +75,43 @@
 
     <div class="text-center mt-4">
         <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+        <button onclick="downloadPDF()" class="btn btn-success">Invoice Download</button>
     </div>
 </div>
 
     <%-include("../../views/partials/user/footer")%>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+
+    <script>
+        function downloadPDF() {
+    const { jsPDF } = window.jspdf; // Access jsPDF from window.jspdf
+    const doc = new jsPDF();
+    const content = document.getElementById('invoice');
+
+    html2canvas(content).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const imgWidth = 190; // Adjust to fit page width
+        const pageHeight = 297; // A4 size in mm (portrait)
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        // Check if content exceeds one page, add pages if necessary
+        let heightLeft = imgHeight;
+        let position = 10;
+
+        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+            position = heightLeft - imgHeight;
+            doc.addPage();
+            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+        }
+
+        doc.save("invoice.pdf");
+    });
+}
+
+    </script>

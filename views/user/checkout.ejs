@@ -45,14 +45,18 @@
                         <h4 class="order__title">Select Address</h4>
                         <div class="checkout__address__list">
                             <!-- Dynamically display addresses -->
-                            <select name="selectedAddress" class="form-control" required>
-                                <% addresses.address.forEach((address, index) => { %>
-                                    <option value="<%= address._id %>">
-                                        <%= address.name %>, <%= address.houseName %>, <%= address.street %>, <%= address.city %>, <%= address.state %> - <%= address.pincode %>
-                                    </option>
-                                <% }) %>
-                            </select>
-                        </div>
+                            <% if (addresses && addresses.address && addresses.address.length > 0) { %>
+                                <select name="selectedAddress" class="form-control" required>
+                                    <% addresses.address.forEach((address, index) => { %>
+                                        <option value="<%= address._id %>">
+                                            <%= address.name %>, <%= address.houseName %>, <%= address.street %>, <%= address.city %>, <%= address.state %> - <%= address.pincode %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                            <% } else { %>
+                                <p class="text text-danger">You haven't added any addresses. Please add an address from your Profile.</p>
+                            <% } %>
+                        </div>                        
                     </div>
     
                     <!-- Payment Method Selection -->

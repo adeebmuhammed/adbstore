@@ -18,9 +18,10 @@ const razorpayInstance = new Razorpay({
   const getCheckoutPage = async (req, res) => {
     try {
         const userData = await User.findById(req.session.user);
-        const userId = req.user._id;
+        const userId = req.session.user;
 
         const addresses = await Address.findOne({ userId: userId });
+
         const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
 
         const cartItems = cart ? cart.items : [];
@@ -40,7 +41,7 @@ const razorpayInstance = new Razorpay({
             totalPrice,
             user: userData,
             discount: cart ? cart.discount : 0,
-            appliedCouponCode
+            appliedCouponCode,
         });
     } catch (error) {
         console.error(error);
@@ -51,7 +52,7 @@ const razorpayInstance = new Razorpay({
 const placeOrder = async (req, res) => {
     try {
         const { selectedAddress, paymentMethod} = req.body;
-        const userId = req.user._id;
+        const userId = req.session.user;
 
         const cart = await Cart.findOne({ userId: userId }).populate('items.productId');
 

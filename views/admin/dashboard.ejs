@@ -1,10 +1,141 @@
 <%- include("../../views/partials/admin/header") %>
-<section class="content-main">
+<section class="content-main container">
     <div class="content-header">
-        <div>
-            <h2 class="content-title card-title">Dashboard </h2>
+        <h2 class="content-title card-title">Admin Dashboard</h2>
+    </div>
+
+    <!-- Filters for Chart -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Sales Overview</h5>
+            <select id="chartFilter" class="form-select w-auto" aria-label="Filter">
+                <option value="yearly">Yearly</option>
+                <option value="monthly">Monthly</option>
+                <option value="weekly">Weekly</option>
+            </select>
         </div>
-       
+        <div class="card-body">
+            <canvas id="salesChart" class="w-100"></canvas>
+        </div>
+    </div>
+
+    <!-- Best-Selling Products Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Top 10 Best-Selling Products</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Product Name</th>
+                        <th scope="col">Sales Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% products.forEach((product, index) => { %>
+                        <tr>
+                            <th scope="row"><%= index + 1 %></th>
+                            <td><%= product.productName %></td>
+                            <td><%= product.saleCount %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Best-Selling Categories Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Top 10 Best-Selling Categories</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Category Name</th>
+                        <th scope="col">Sales Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% categories.forEach((category, index) => { %>
+                        <tr>
+                            <th scope="row"><%= index + 1 %></th>
+                            <td><%= category.name %></td>
+                            <td><%= category.saleCount %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Best-Selling Brands Table -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Top 10 Best-Selling Brands</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Brand Name</th>
+                        <th scope="col">Sales Count</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% brands.forEach((brand, index) => { %>
+                        <tr>
+                            <th scope="row"><%= index + 1 %></th>
+                            <td><%= brand.brandName %></td>
+                            <td><%= brand.saleCount %></td>
+                        </tr>
+                    <% }) %>
+                </tbody>
+            </table>
+        </div>
     </div>
 </section>
+
 <%- include("../../views/partials/admin/footer") %>
+
+<script>
+    const loadChartData = async (filter) => {
+    const response = await fetch(`/admin/sales-data?filter=${filter}`);
+    const data = await response.json();
+
+    if (data.success) {
+        const salesData = data.data;
+
+        const labels = salesData.map(item => item._id); // Product names or IDs
+        const salesCounts = salesData.map(item => item.salesCount); // Sales count per product
+
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Sales Count',
+                    data: salesCounts,
+                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+};
+</script>

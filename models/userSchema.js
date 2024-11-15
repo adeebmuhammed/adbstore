@@ -24,7 +24,6 @@ const userSchema = new Schema({
         unique:true,
         required: false,
         sparse:true,
-        //default:null
     },
     password:{
         type:String,

@@ -3,12 +3,14 @@ const Cart = require("../../models/cartSchema")
 const User = require("../../models/userSchema")
 const Order = require("../../models/orderSchema")
 const Product = require("../../models/productSchema")
+const Category = require("../../models/categorySchema")
 const Coupon = require("../../models/couponSchema")
 const Wallet = require("../../models/walletSchema")
 const env = require('dotenv').config()
 const Razorpay = require("razorpay")
 const crypto = require('crypto')
 const { log } = require("console")
+const Brand = require("../../models/brandSchema")
 
 const razorpayInstance = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -66,6 +68,9 @@ const placeOrder = async (req, res) => {
             totalPrice += item.productId.salePrice * item.quantity;
 
             const product = await Product.findById(item.productId._id);
+            const brand = await Brand.findOne({brandName:product.brand})
+            const category = await Category.findById(product.category)
+
             const sizeInfo = product.sizes.find(s => s.size === item.size);
 
             if (!sizeInfo) {
@@ -78,7 +83,13 @@ const placeOrder = async (req, res) => {
 
             sizeInfo.quantity -= item.quantity;
 
+            product.saleCount += item.quantity
+            category.saleCount += item.quantity
+            brand.saleCount += item.quantity
+
             await product.save();
+            await category.save();
+            await brand.save();
         }
 
         const discount = cart.discount;

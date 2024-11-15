@@ -18,6 +18,11 @@ const brandSchema = new Schema({
     createdAt:{
         type:Date,
         default:Date.now
+    },
+    saleCount:{
+        type:Number,
+        required:false,
+        default:0
     }
 },{ timestamps: true })
 

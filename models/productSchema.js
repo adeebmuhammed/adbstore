@@ -49,6 +49,11 @@ const productSchema = new Schema({
         required: true,
         default: "Available"
     },
+    saleCount:{
+        type:Number,
+        required:false,
+        default:0
+    },
     sizes: {
         type: [{
             size: { type: String, required: true },

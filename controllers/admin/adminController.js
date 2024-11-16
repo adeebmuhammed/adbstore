@@ -42,119 +42,102 @@ const login = async (req,res) => {
 const loadDashboard = async (req, res) => {
     try {
         if (req.session.admin) {
-            const [products, categories, brands] = await Promise.all([
-                Product.find().sort({ saleCount: -1 }).limit(10).lean(),
-                Category.find().sort({ saleCount: -1 }).limit(10).lean(),
-                Brand.find().sort({ saleCount: -1 }).limit(10).lean()
-            ]);
+            const orders = await Order.find({ status: { $ne: "Canceled" } })
+                .populate({
+                    path: "orderedItems.product",
+                    populate: [
+                        { path: "category", select: "_id name" } 
+                    ]
+                });
+
+            const productSales = {};
+            const categorySales = {};
+            const brandSales = {};
+
+            orders.forEach((order) => {
+                order.orderedItems.forEach((item) => {
+                    if (item.product) {
+                        productSales[item.product._id] = (productSales[item.product._id] || 0) + item.quantity;
+
+                        if (item.product.category) {
+                            const categoryId = item.product.category._id.toString();
+                            categorySales[categoryId] = (categorySales[categoryId] || 0) + item.quantity;
+                        }
+
+                        if (item.product.brand) {
+                            const brandName = item.product.brand; 
+                            brandSales[brandName] = (brandSales[brandName] || 0) + item.quantity;
+                        }
+                    }
+                });
+            });
+
+            const products = await Product.find({});
+            const categories = await Category.find({});
+            const brands = await Brand.find({});
 
             return res.render("dashboard", {
                 products,
                 categories,
-                brands
+                brands,
+                productSales,
+                categorySales,
+                brandSales
             });
         }
     } catch (error) {
         res.redirect("/admin/pageerror");
+        console.error(error);
     }
 };
 
 const salesData = async (req, res) => {
-    const filter = req.query.filter;
-    let salesData = [];
-
     try {
+        const { filter } = req.query;
+
+        const currentDate = new Date();
+        let startDate, endDate, groupFormat;
+
+        // Define date ranges and grouping format based on filter
         if (filter === 'yearly') {
-            salesData = await getSalesCountByYear();
+            startDate = new Date(currentDate.getFullYear() - 3, 0, 1); // Start of 3 years ago
+            endDate = new Date(currentDate.getFullYear() + 1, 0, 1); // Start of next year
+            groupFormat = { $year: "$createdOn" }; // Group by year
         } else if (filter === 'monthly') {
-            salesData = await getSalesCountByMonth();
+            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1); // Start of 6 months ago
+            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1); // Start of next month
+            groupFormat = { $month: "$createdOn" }; // Group by month
         } else if (filter === 'weekly') {
-            salesData = await getSalesCountByWeek();
+            startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 27); // 4 weeks ago
+            endDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() + 1); // Tomorrow
+            groupFormat = { $week: "$createdOn" }; 
         }
 
-        res.json({ success: true, data: salesData });
+        const data = await Order.aggregate([
+            {
+                $match: {
+                    createdOn: { $gte: startDate, $lt: endDate },
+                    status: { $ne: "Canceled" } 
+                }
+            },
+            {
+                $group: {
+                    _id: groupFormat, 
+                    totalSales: { $sum: "$finalAmount" } 
+                }
+            },
+            { $sort: { _id: 1 } }
+        ]);
+
+        const labels = data.map(item => item._id.toString());
+        const salesData = data.map(item => item.totalSales);
+
+        res.json({ labels, salesData });
     } catch (error) {
-        console.error("Error fetching sales data:", error);
-        res.status(500).json({ success: false, message: 'Error fetching sales data' });
+        console.error(error);
+        res.status(500).json({ error: 'Failed to fetch sales data' });
     }
 };
-
-// Function to get sales count for the current year
-const getSalesCountByYear = async () => {
-    const currentYear = new Date().getFullYear();
-    return await Order.aggregate([
-        { 
-            $match: {
-                status: { $in: ['Delivered', 'Placed'] },
-                createdOn: {
-                    $gte: new Date(currentYear, 0, 1),
-                    $lt: new Date(currentYear + 1, 0, 1)
-                }
-            }
-        },
-        { $unwind: "$orderedItems" },
-        {
-            $group: {
-                _id: "$orderedItems.product",
-                salesCount: { $sum: "$orderedItems.quantity" }
-            }
-        },
-        { $sort: { salesCount: -1 } }, // Sort by salesCount
-        { $limit: 10 } // Limit to top 10 products
-    ]);
-};
-
-// Function to get sales count for the current month
-const getSalesCountByMonth = async () => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    return await Order.aggregate([
-        { 
-            $match: {
-                status: { $in: ['Delivered', 'Placed'] },
-                createdOn: {
-                    $gte: new Date(currentYear, currentMonth, 1),
-                    $lt: new Date(currentYear, currentMonth + 1, 1)
-                }
-            }
-        },
-        { $unwind: "$orderedItems" },
-        {
-            $group: {
-                _id: "$orderedItems.product",
-                salesCount: { $sum: "$orderedItems.quantity" }
-            }
-        },
-        { $sort: { salesCount: -1 } },
-        { $limit: 10 }
-    ]);
-};
-
-// Function to get sales count for the current week
-const getSalesCountByWeek = async () => {
-    const currentDate = new Date();
-    const startOfWeek = currentDate.setDate(currentDate.getDate() - currentDate.getDay()); // Sunday
-    const endOfWeek = startOfWeek + 7 * 24 * 60 * 60 * 1000; // Next Saturday
-
-    return await Order.aggregate([
-        { 
-            $match: {
-                status: { $in: ['Delivered', 'Placed'] },
-                createdOn: { $gte: new Date(startOfWeek), $lt: new Date(endOfWeek) }
-            }
-        },
-        { $unwind: "$orderedItems" },
-        {
-            $group: {
-                _id: "$orderedItems.product",
-                salesCount: { $sum: "$orderedItems.quantity" }
-            }
-        },
-        { $sort: { salesCount: -1 } },
-        { $limit: 10 }
-    ]);
-};
-
 
 const logout = async (req,res) => {
     try {

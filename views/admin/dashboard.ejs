@@ -5,73 +5,87 @@
     </div>
 
     <!-- Filters for Chart -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Sales Overview</h5>
-            <select id="chartFilter" class="form-select w-auto" aria-label="Filter">
-                <option value="yearly">Yearly</option>
-                <option value="monthly">Monthly</option>
-                <option value="weekly">Weekly</option>
-            </select>
-        </div>
-        <div class="card-body">
-            <canvas id="salesChart" class="w-100"></canvas>
-        </div>
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Sales Overview</h5>
+        <select id="chartFilter" class="form-select w-auto" aria-label="Filter">
+            <option value="yearly">Yearly</option>
+            <option value="monthly">Monthly</option>
+            <option value="weekly">Weekly</option>
+        </select>
     </div>
+    <div class="card-body">
+        <canvas id="salesChart" class="w-100"></canvas>
+    </div>
+</div>
 
     <!-- Best-Selling Products Table -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Top 10 Best-Selling Products</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Product Name</th>
-                        <th scope="col">Sales Count</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% products.forEach((product, index) => { %>
-                        <tr>
-                            <th scope="row"><%= index + 1 %></th>
-                            <td><%= product.productName %></td>
-                            <td><%= product.saleCount %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        </div>
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Top 10 Best-Selling Products</h5>
     </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Product Name</th>
+                    <th scope="col">Sales Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% products
+                    .map(product => ({ 
+                        productName: product.productName, 
+                        saleCount: productSales[product._id] || 0 
+                    }))
+                    .sort((a, b) => b.saleCount - a.saleCount) // Sort by sales count descending
+                    .slice(0, 10) // Take top 10
+                    .forEach((product, index) => { %>
+                    <tr>
+                        <th scope="row"><%= index + 1 %></th>
+                        <td><%= product.productName %></td>
+                        <td><%= product.saleCount %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
 
     <!-- Best-Selling Categories Table -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h5>Top 10 Best-Selling Categories</h5>
-        </div>
-        <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Category Name</th>
-                        <th scope="col">Sales Count</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% categories.forEach((category, index) => { %>
-                        <tr>
-                            <th scope="row"><%= index + 1 %></th>
-                            <td><%= category.name %></td>
-                            <td><%= category.saleCount %></td>
-                        </tr>
-                    <% }) %>
-                </tbody>
-            </table>
-        </div>
+<div class="card mb-4">
+    <div class="card-header">
+        <h5>Top 10 Best-Selling Categories</h5>
     </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Category Name</th>
+                    <th scope="col">Sales Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% categories
+                    .map(category => ({ 
+                        name: category.name, 
+                        saleCount: categorySales[category._id] || 0 
+                    }))
+                    .sort((a, b) => b.saleCount - a.saleCount) // Sort by sales count descending
+                    .slice(0, 10) // Take top 10
+                    .forEach((category, index) => { %>
+                    <tr>
+                        <th scope="row"><%= index + 1 %></th>
+                        <td><%= category.name %></td>
+                        <td><%= category.saleCount %></td>
+                    </tr>
+                <% }) %>
+            </tbody>
+        </table>
+    </div>
+</div>
 
     <!-- Best-Selling Brands Table -->
     <div class="card mb-4">
@@ -88,7 +102,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% brands.forEach((brand, index) => { %>
+                    <% 
+                    brands
+                        .map(brand => ({
+                            brandName: brand.brandName,
+                            saleCount: brandSales[brand.brandName] || 0 // Use brandName to access sales count
+                        }))
+                        .sort((a, b) => b.saleCount - a.saleCount) // Sort by sales count descending
+                        .slice(0, 10) // Take top 10 brands
+                        .forEach((brand, index) => { 
+                    %>
                         <tr>
                             <th scope="row"><%= index + 1 %></th>
                             <td><%= brand.brandName %></td>
@@ -98,32 +121,31 @@
                 </tbody>
             </table>
         </div>
-    </div>
+    </div>    
+
 </section>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <%- include("../../views/partials/admin/footer") %>
 
 <script>
-    const loadChartData = async (filter) => {
-    const response = await fetch(`/admin/sales-data?filter=${filter}`);
-    const data = await response.json();
+    const ctx = document.getElementById('salesChart').getContext('2d');
+    let salesChart;
 
-    if (data.success) {
-        const salesData = data.data;
-
-        const labels = salesData.map(item => item._id); // Product names or IDs
-        const salesCounts = salesData.map(item => item.salesCount); // Sales count per product
-
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        new Chart(ctx, {
+    // Initialize the chart
+    function initChart(labels, data) {
+        if (salesChart) {
+            salesChart.destroy(); // Destroy existing chart instance to reinitialize
+        }
+        salesChart = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
                 datasets: [{
-                    label: 'Sales Count',
-                    data: salesCounts,
-                    backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                    borderColor: 'rgba(54, 162, 235, 1)',
+                    label: 'Total Revenue',
+                    data: data,
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
                     borderWidth: 1
                 }]
             },
@@ -137,5 +159,24 @@
             }
         });
     }
-};
+
+    // Fetch sales data based on filter
+    async function fetchSalesData(filter) {
+        try {
+            const response = await fetch(`/admin/sales-data?filter=${filter}`);
+            const { labels, salesData } = await response.json();
+            initChart(labels, salesData);
+        } catch (error) {
+            console.error('Failed to fetch sales data:', error);
+        }
+    }
+
+    // Handle filter change
+    document.getElementById('chartFilter').addEventListener('change', (e) => {
+        const filter = e.target.value;
+        fetchSalesData(filter);
+    });
+
+    // Initialize chart with default filter
+    fetchSalesData('yearly');
 </script>

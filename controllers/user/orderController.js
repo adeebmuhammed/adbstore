@@ -6,30 +6,45 @@ const Wallet = require("../../models/walletSchema")
 
 const getMyOrders = async (req, res) => {
     try {
-        const userId = req.session.user; 
+        const userId = req.session.user;
 
         const orders = await Order.find({ user: userId }).lean();
-        
-        if(orders.length<1){
-            return res.render('my-orders', { orders:[] })
+
+        if (orders.length < 1) {
+            return res.render('my-orders', { orders: [] });
         }
 
-        for (const order of orders) {
-            const userAddressData = await Address.findOne({ userId: userId }).lean();
+        const userAddressData = await Address.findOne({ userId }).lean();
 
-            const specificAddress = userAddressData.address.find(addr => addr._id.equals(order.address));
-            order.addressDetails = specificAddress; 
+        // If no address document exists for the user, set address details to null
+        const addressMap = userAddressData
+            ? userAddressData.address.reduce((map, addr) => {
+                  map[addr._id.toString()] = addr;
+                  return map;
+              }, {})
+            : {};
 
-            for (const item of order.orderedItems) {
-                const product = await Product.findById(item.productId).lean();
-                item.productDetails = product; 
-            }
-        }
+        const enrichedOrders = await Promise.all(
+            orders.map(async (order) => {
+                // Assign address details
+                order.addressDetails = addressMap[order.address?.toString()] || null;
 
-        res.render('my-orders', { orders });
+                const enrichedItems = await Promise.all(
+                    order.orderedItems.map(async (item) => {
+                        const product = await Product.findById(item.productId).lean();
+                        return { ...item, productDetails: product || null };
+                    })
+                );
+
+                order.orderedItems = enrichedItems;
+                return order;
+            })
+        );
+
+        res.render('my-orders', { orders: enrichedOrders });
     } catch (error) {
         console.error("Error fetching orders:", error);
-        res.status(500).send("Error fetching orders");
+        res.status(500).send("An error occurred while fetching orders. Please try again later.");
     }
 };
 

@@ -28,7 +28,12 @@
                             <td><%= order.orderId %></td>
                             <td><%= order.status %></td>
                             <td>₹<%= order.totalprice %></td>
-                            <td><%= order.addressDetails ? order.addressDetails.houseName + ', ' + order.addressDetails.street + ', ' + order.addressDetails.city + ', ' + order.addressDetails.state + ', ' + order.addressDetails.pincode : 'Address not found' %></td>
+                            <td>
+                                <%= order.addressDetails 
+                                    ? `${order.addressDetails.houseName}, ${order.addressDetails.street}, ${order.addressDetails.city}, ${order.addressDetails.state}, ${order.addressDetails.pincode}` 
+                                    : 'Address not found' 
+                                %>
+                            </td>                            
                             <td>
                                 <% order.orderedItems.forEach(item => { %>
                                     <div><%= item.productName ? item.productName : 'Product not found' %></div>

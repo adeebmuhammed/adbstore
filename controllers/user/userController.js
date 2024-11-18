@@ -170,8 +170,6 @@ const loadLogin = async(req,res)=>{
 const login = async (req, res) => {
     try {
         const { email, password } = req.body;
-
-        // Check if the password is coming from the request
         if (!password) {
             return res.render("login", { message: "Password is required" });
         }
@@ -184,7 +182,6 @@ const login = async (req, res) => {
             return res.render("login", { message: "User is blocked by admin" });
         }
 
-        // Log both passwords to verify values
         console.log("Password:", password);
         console.log("Hashed Password:", findUser.password);
 

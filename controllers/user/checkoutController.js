@@ -68,8 +68,6 @@ const placeOrder = async (req, res) => {
             totalPrice += item.productId.salePrice * item.quantity;
 
             const product = await Product.findById(item.productId._id);
-            const brand = await Brand.findOne({brandName:product.brand})
-            const category = await Category.findById(product.category)
 
             const sizeInfo = product.sizes.find(s => s.size === item.size);
 
@@ -83,13 +81,11 @@ const placeOrder = async (req, res) => {
 
             sizeInfo.quantity -= item.quantity;
 
-            product.saleCount += item.quantity
-            category.saleCount += item.quantity
-            brand.saleCount += item.quantity
-
             await product.save();
-            await category.save();
-            await brand.save();
+        }
+
+        if (paymentMethod === 'Cash on Delivery' && totalPrice>1000) {
+            return res.status(400).json({ success: false, error: "Amount above 1000 is not allowed for cash on delivery" });
         }
 
         const discount = cart.discount;

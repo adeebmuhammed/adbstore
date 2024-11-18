@@ -20,8 +20,8 @@ router.get("/pageerror",adminController.pageerror)
 // Login Management
 router.get("/login",adminController.loadLogin)
 router.post("/login",adminController.login)
-router.get("/",adminController.loadDashboard)
-router.get('/sales-data',adminController.salesData)
+router.get("/",adminAuth,adminController.loadDashboard)
+router.get('/sales-data',adminAuth,adminController.salesData)
 router.get("/logout",adminController.logout)
 // Customer management
 router.get("/users",adminAuth,customerController.customerInfo)

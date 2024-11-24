@@ -50,22 +50,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseTwo">Branding</a>
-                                    </div>
-                                    <div id="collapseTwo" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__brand">
-                                                <ul>
-                                                    <%for(let i=0;i<brand.length;i++){%>
-                                                        <li><a href="#"><%=brand[i].brandName%></a></li>
-                                                        <%}%>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
                             </div>
                         </div>
                     </div>
@@ -83,44 +68,49 @@
                         </select>
                     </div>                                        
                     <div class="row">
-                        <%for(let i=0;i<product.length;i++){%>
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item sale">
-                                <div class="product__item__pic set-bg" data-setbg="/uploads/product-images/<%= product[i].productImage[0] %>">
-                                    
-                                    <span class="label"><a href="/productDetails?id=<%=product[i]._id%>">For More Details</a></span>
-                                </div>
-                                <div class="product__item__text">
-                                    <h6><%=product[i].productName%></h6>
-                                    <div class="rating">
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star"></i>
-                                        <i class="fa fa-star-o"></i>
-                                    </div>
-                                    <h5>INR <%=product[i].salePrice%></h5>
-                                    <div class="product__color__select">
-                                        <label for="pc-34">
-                                            <input type="radio" id="pc-34">
-                                        </label>
-                                        <label class="active black" for="pc-35">
-                                            <input type="radio" id="pc-35">
-                                        </label>
-                                        <label class="grey" for="pc-36">
-                                            <input type="radio" id="pc-36">
-                                        </label>
-                                    </div>
-                                </div>
+                        <% if (product.length <= 0) { %>
+                            <div class="col-12 text-center">
+                                <p>No products are available In this category. Please check back later.</p>
                             </div>
-                        </div>
-                        <%}%>
-                        
+                        <% } else { %>
+                            <% for (let i = 0; i < product.length; i++) { %>
+                                <div class="col-lg-4 col-md-6 col-sm-6">
+                                    <div class="product__item sale">
+                                        <div class="product__item__pic set-bg" data-setbg="/uploads/product-images/<%= product[i].productImage[0] %>">
+                                            <span class="label"><a href="/productDetails?id=<%= product[i]._id %>">For More Details</a></span>
+                                        </div>
+                                        <div class="product__item__text">
+                                            <h6><%= product[i].productName %></h6>
+                                            <div class="rating">
+                                                <i class="fa fa-star"></i>
+                                                <i class="fa fa-star"></i>
+                                                <i class="fa fa-star"></i>
+                                                <i class="fa fa-star"></i>
+                                                <i class="fa fa-star-o"></i>
+                                            </div>
+                                            <h5>INR <%= product[i].salePrice %></h5>
+                                            <div class="product__color__select">
+                                                <label for="pc-34">
+                                                    <input type="radio" id="pc-34">
+                                                </label>
+                                                <label class="active black" for="pc-35">
+                                                    <input type="radio" id="pc-35">
+                                                </label>
+                                                <label class="grey" for="pc-36">
+                                                    <input type="radio" id="pc-36">
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% } %>
+                        <% } %>
                     </div>
+                    
                     <div class="row">
                         <div class="col-lg-12">
                             <div class="product__pagination">
-                                <a class="active" href="#">1</a>
+                                <a class="active">1</a>
                                 <a href="#">2</a>
                                 <a href="#">3</a>
                                 <span>...</span>

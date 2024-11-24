@@ -7,13 +7,18 @@ const session = require("express-session")
 const {generateOtp} = require("../../helpers/generateOtp")
 const {sendVerificationEmail} = require("../../helpers/sendVerificationMail")
 const {securePassword} = require("../../helpers/securePassword")
+const Cart = require("../../models/cartSchema")
 
 const getProfilePage = async (req,res) => {
     try {
         const userData = await User.findById(req.session.user)
         if(userData){
+            const cart = await Cart.findOne({userId:userData._id})
+            const itemsCount = cart?.items?.length || 0;
+
             res.render("profile",{
-                user:userData
+                user:userData,
+                items:itemsCount
             })
         }else{
             res.redirect("/pageNotFound")
@@ -46,7 +51,14 @@ const updateProfile = async (req,res) => {
 
 const getForgotPassword = async (req,res) => {
     try {
-        res.render("forgot-password")
+        const userData = await User.findById(req.session.user)
+        const cart = await Cart.findOne({userId:userData._id})
+        const itemsCount = cart?.items?.length || 0;
+            
+        res.render("forgot-password",{
+            user:userData,
+            items:itemsCount
+        })
     } catch (error) {
         res.redirect("/pageNotFound")
     }

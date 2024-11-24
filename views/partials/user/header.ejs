@@ -137,13 +137,25 @@
                                    <a href="/logout">Logout</a>
                                </div>
                            </div>
+                           <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
+                       <a href="/wishlist"><img src="img/icon/heart.png" alt=""></a>
+                       <a href="/cart" class="cart-icon">
+                        <img src="img/icon/cart.png" alt="Cart">
+                        <% if (items && items > 0) { %>
+                          <span class="cart-count"><%= items %></span>
+                        <% } else { %>
+                          <span class="cart-count">0</span>
+                        <% } %>
+                    </a> 
                        <%}else {%>
                        <a href="/signup" class="sign-in-link">Sign Up</a>
                        <a href="/login" class="sign-in-link">Log in</a>
-                       <%}%>
                        <a href="#" class="search-switch"><img src="img/icon/search.png" alt=""></a>
                        <a href="/wishlist"><img src="img/icon/heart.png" alt=""></a>
-                       <a href="/cart"><img src="img/icon/cart.png" alt=""></a>
+                       <a href="/cart" class="cart-icon">
+                        <img src="img/icon/cart.png" alt="Cart">
+                        </a>
+                       <%}%>                                        
                    </div>
                </div>
            </div>

@@ -8,7 +8,7 @@ const getMyOrders = async (req, res) => {
     try {
         const userId = req.session.user;
 
-        const orders = await Order.find({ user: userId }).lean();
+        const orders = await Order.find({ user: userId }).sort({createdAt:-1}).lean();
 
         if (orders.length < 1) {
             return res.render('my-orders', { orders: [] });
@@ -16,7 +16,6 @@ const getMyOrders = async (req, res) => {
 
         const userAddressData = await Address.findOne({ userId }).lean();
 
-        // If no address document exists for the user, set address details to null
         const addressMap = userAddressData
             ? userAddressData.address.reduce((map, addr) => {
                   map[addr._id.toString()] = addr;

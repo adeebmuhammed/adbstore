@@ -18,7 +18,6 @@ const addCoupon = async (req, res) => {
         const { couponCode } = req.body;
 
         const coupon = await Coupon.findOne({ code: couponCode, isListed: true });
-        
         if (!coupon) {
             return res.status(400).json({ message: 'Invalid coupon code.' });
         }
@@ -28,33 +27,32 @@ const addCoupon = async (req, res) => {
             return res.status(400).json({ message: 'Coupon has expired.' });
         }
 
-        const cart = await Cart.findOne({ userId: req.user._id });
-
+        const cart = await Cart.findOne({ userId: req.session.user });
         if (!cart || cart.items.length === 0) {
             return res.status(400).json({ message: 'Cart is empty.' });
         }
 
         const totalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
-
         let discount = 0;
         if (totalPrice >= coupon.minimumPrice) {
             discount = (totalPrice * coupon.offerPrice) / 100;
-            discount = Math.min(discount, totalPrice);
+            discount = Math.min(discount, totalPrice); 
+        }else{
+            return res.status(400).json({ message: `Total price should be greater than ${coupon.minimumPrice}` });
         }
 
         cart.discount = discount;
-        cart.couponApplied = coupon._id
+        cart.couponApplied = coupon._id;
         await cart.save();
 
-        res.status(200).json({ success: true, message: 'Coupon applied successfully!'});
+        res.status(200).json({ success: true, message: 'Coupon applied successfully!', discount });
     } catch (error) {
+        console.error('Error applying coupon:', error);
         res.status(500).json({ message: 'An error occurred while applying the coupon.', error });
     }
 };
 
 const removeCoupon = async (req,res) => {
-    console.log("req recieved");
-    
     try {
         const userId = req.user._id
         const cart = await Cart.findOne({userId})

@@ -1,17 +1,39 @@
 <%-include("../../views/partials/user/header")%>
 
 <style>
-    .remove-coupon-btn {
-    background-color: #dc3545; /* Red background */
-    color: white;  /* White text */
-    border: 2px solid #000; /* Add a border for visibility */
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+
+.discount-section {
+    display: flex; /* Makes the section a flex container */
+    justify-content: space-between; /* Ensures even spacing between h6 and button */
+    align-items: flex-start; /* Align items to the top */
+    padding: 5px 0; /* Reduce padding for less space */
 }
 
+.discount-section h6 {
+    margin: 0; /* Remove default margin for heading */
+    font-size: 16px; /* Adjust font size if needed */
+    font-weight: bold; /* Optional: Make the text bold */
+    margin-bottom: 5px; /* Reduce bottom margin to bring the form closer */
+}
+
+#removeCouponForm {
+    margin: 0; /* Remove default margin */
+    display: flex; /* Align items in the form */
+    align-items: center; /* Vertically aligns button in the form */
+}
+
+#removeCoupon {
+    background-color: #000; /* Red button background */
+    color: #fff; /* White text */
+    padding: 6px 12px; /* Slightly increased padding for better text visibility */
+    font-size: 14px; /* Font size for button text */
+    border-radius: 5px; /* Optional: Rounded corners */
+    border: none; /* Remove border */
+    cursor: pointer; /* Show pointer cursor on hover */
+    margin-top: -5px; /* Adjust button position upward */
+    height: auto; /* Ensures button height adjusts to the text */
+    line-height: 1.5; /* Helps center the text vertically */
+}
 
 </style>
 
@@ -90,12 +112,12 @@
                     <div class="cart__discount">
                         <h6>Discount codes</h6>
                         <% if (discount && discount > 0) { %>
-                            <form id="removeCouponForm" method="post">
-                                <button id="removeCoupon" type="submit" 
-                                style="background-color: #dc3545; color: white; padding: 20px 20px; font-size: 16px; border-radius: 5px; display: inline-block;"
-                                >Remove Coupon</button>
-                            </form>
-                                                                                                                                       
+                            <div class="discount-section">
+                                <h6>Coupon Applied</h6>
+                                <form id="removeCouponForm" method="post">
+                                    <button id="removeCoupon" type="submit">Remove</button>
+                                </form> 
+                            </div>                                                                                                                              
                         <% } else { %>
                             <!-- Show the apply coupon form if no discount is applied -->
                             <form id="applyCouponForm">
@@ -175,7 +197,13 @@
                     const result = await response.json();
                     
                     if (response.ok) {
-                        window.location.reload();  // Reload the page if coupon is applied successfully
+                        const { discount } = result;
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Coupon Applied',
+                            text: `Discount Applied: INR ${discount.toFixed(2)}`,
+                        })
+                        .then(() => window.location.reload());
                     } else {
                         Swal.fire({
                             icon: 'error',

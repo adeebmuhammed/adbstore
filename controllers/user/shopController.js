@@ -2,6 +2,7 @@ const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 const Category = require("../../models/categorySchema")
 const Brand = require("../../models/brandSchema")
+const Cart = require("../../models/cartSchema")
 const env = require('dotenv').config()
 const path = require('path')
 
@@ -11,6 +12,7 @@ const getShopPage = async (req,res) => {
         const product = await Product.find()
         const brand = await Brand.find()
         const user = req.session.user;
+        const cart = await Cart.find({userId:user})
         const sort = req.query.sort || 'priceAsc';
         let userData = null
         
@@ -20,11 +22,15 @@ const getShopPage = async (req,res) => {
         }else {
             return res.redirect("/login");
         }
+
+        const itemsCount = cart?.items?.length || 0;
+
         res.render("shop",{
             cat:category,
             product:product,
             brand:brand,
             user:userData,
+            items:itemsCount,
             selectedSort: sort
         })
     } catch (error) {
@@ -40,10 +46,11 @@ const getProductDetails = async (req,res) => {
         const availableSizes = product.sizes;
         const category = await Category.findById(product.category)
         const user = req.session.user;
+        const cart = await Cart.find({userId:user})
         let userData = null
         const relatedProducts = await Product.find({
-            category: product.category, // Find products in the same category
-            _id: { $ne: id }, // Exclude the current product
+            category: product.category,
+            _id: { $ne: id }, 
         }).limit(4);
         
 
@@ -52,13 +59,16 @@ const getProductDetails = async (req,res) => {
         }else {
             return res.redirect("/login");
         }
+
+        const itemsCount = cart?.items?.length || 0;
         
         res.render("product-details",{
             product:product,
             cat:category,
             user:userData,
             availableSizes:availableSizes,
-            relatedProducts:relatedProducts
+            relatedProducts:relatedProducts,
+            items:itemsCount
         })
     } catch (error) {
         console.error(error)
@@ -72,6 +82,7 @@ const sortProducts = async (req,res) => {
         const category = await Category.find()
         const brand = await Brand.find()
         const user = req.session.user;
+        const cart = await Cart.find({userId:user})
         let userData = null
         const sort = req.query.sort || 'priceAsc';
         let sortCriteria;
@@ -109,11 +120,14 @@ const sortProducts = async (req,res) => {
 
     const product = await Product.find().sort(sortCriteria);
 
+    const itemsCount = cart?.items?.length || 0;
+
     res.render("shop",{
         cat:category,
         product,
         brand:brand,
         user:userData,
+        items:itemsCount,
         selectedSort: sort
     })
     } catch (error) {
@@ -128,6 +142,7 @@ const categoryFilter = async (req,res) => {
         const category = await Category.find()
         const brand = await Brand.find()
         const user = req.session.user;
+        const cart = await Cart.find({userId:user})
         const sort = req.query.sort || 'priceAsc';
 
         if(!categoryId){
@@ -136,11 +151,14 @@ const categoryFilter = async (req,res) => {
 
         const product = await Product.find({category:categoryId})
 
+        const itemsCount = cart?.items?.length || 0;
+
         res.render("shop",{
             cat:category,
             product,
             brand:brand,
             user,
+            items:itemsCount,
             selectedSort: sort
         })
     } catch (error) {
@@ -155,11 +173,14 @@ const searchProducts = async (req,res) => {
         const category = await Category.find()
         const brand = await Brand.find()
         const user = req.session.user;
+        const cart = await Cart.find({userId:user})
         const sort = req.query.sort || 'priceAsc';
 
         const product = await Product.find({
             productName: { $regex: search, $options: 'i' }
         });
+
+        const itemsCount = cart?.items?.length || 0;
 
 
         res.render("shop",{
@@ -167,6 +188,7 @@ const searchProducts = async (req,res) => {
             product,
             brand:brand,
             user,
+            items:itemsCount,
             selectedSort: sort
         })
     } catch (error) {

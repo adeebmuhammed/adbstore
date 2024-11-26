@@ -39,18 +39,24 @@
                                     <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
                                         <div class="card-body">
                                             <div class="shop__sidebar__categories">
-                                                
-                                                <ul class="nice-scroll">
-                                                    <%for(let i=0;i<cat.length;i++){%>
-                                                    <li><a href="/categoryFilter?categoryId=<%=cat[i]._id%>"><%=cat[i].name%></a></li>
-                                                    <%}%>
-                                                </ul>
-                                                
+                                                <form id="categoryFilterForm">
+                                                    <ul class="nice-scroll">
+                                                        <% for (let i = 0; i < cat.length; i++) { %>
+                                                            <li>
+                                                                <label>
+                                                                    <input type="checkbox" name="categories" value="<%= cat[i]._id %>">
+                                                                    <%= cat[i].name %>
+                                                                </label>
+                                                            </li>
+                                                        <% } %>
+                                                    </ul>
+                                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                
+                                    
+                                </div> 
                             </div>
                         </div>
                     </div>
@@ -131,5 +137,24 @@
     const selectedOption = document.getElementById("sortOptions").value;
     window.location.href = `/products?sort=${selectedOption}`;
 }
+
+
+$('#categoryFilterForm').on('submit', function (e) {
+    e.preventDefault();
+    
+    const selectedCategories = [];
+    $("input[name='categories']:checked").each(function () {
+        selectedCategories.push($(this).val());
+    });
+
+    // If no categories are selected, reload the page without any filters
+    if (selectedCategories.length === 0) {
+        window.location.href = '/categoryFilter';  // Reload with no filter
+    } else {
+        // Reload the page with selected categories as query parameters
+        window.location.href = '/categoryFilter?' + $.param({ categories: selectedCategories });
+    }
+});
+                                    
 
     </script>

@@ -51,9 +51,8 @@ const getWishlistPage = async (req, res) => {
             addedOn: item.addedOn,
         })) : [];
 
-        const itemsCount = cart?.items?.length || 0;
 
-        res.render('wishlist', { wishlistItems,items:itemsCount });
+        res.render('wishlist', { wishlistItems, });
     } catch (error) {
         console.error('Error retrieving wishlist:', error);
         res.status(500).send("An error occurred while loading the wishlist");

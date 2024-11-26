@@ -75,6 +75,7 @@ const forgotEmailValid = async (req,res) => {
             if(emailSent){
                 req.session.userOtp = otp
                 req.session.email = email
+
                 res.render("forgotPassword-otp")
                 console.log("OTP : ",otp);
                 

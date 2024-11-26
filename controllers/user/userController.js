@@ -10,13 +10,10 @@ const loadHomepage = async (req, res) => {
 
         if (user) {
             const userData = await User.findOne({ _id: user });
-            const cart = await Cart.findOne({ userId: user });
 
-            const itemsCount = cart?.items?.length || 0;
-
-            return res.render("home", { user: userData, items: itemsCount });
+            return res.render("home", { user: userData, });
         } else {
-            return res.render("home", { user: null, items: 0 });
+            return res.render("home", { user: null, });
         }
     } catch (error) {
         console.error("Error loading home page:", error);
@@ -126,6 +123,7 @@ const verifyOtp = async(req,res)=>{
 
             await saveUserData.save()
             req.session.user = saveUserData._id;
+            req.session.items = 0
             res.json({success:true,redirectUrl:"/"})
         }else{
             res.status(400).json({success:false,message:"Invalid OTP, Please try again"})

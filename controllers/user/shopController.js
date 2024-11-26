@@ -12,7 +12,6 @@ const getShopPage = async (req,res) => {
         const product = await Product.find()
         const brand = await Brand.find()
         const user = req.session.user;
-        const cart = await Cart.find({userId:user})
         const sort = req.query.sort || 'priceAsc';
         let userData = null
         
@@ -23,14 +22,12 @@ const getShopPage = async (req,res) => {
             return res.redirect("/login");
         }
 
-        const itemsCount = cart?.items?.length || 0;
 
         res.render("shop",{
             cat:category,
             product:product,
             brand:brand,
             user:userData,
-            items:itemsCount,
             selectedSort: sort
         })
     } catch (error) {
@@ -46,7 +43,6 @@ const getProductDetails = async (req,res) => {
         const availableSizes = product.sizes;
         const category = await Category.findById(product.category)
         const user = req.session.user;
-        const cart = await Cart.find({userId:user})
         let userData = null
         const relatedProducts = await Product.find({
             category: product.category,
@@ -60,7 +56,6 @@ const getProductDetails = async (req,res) => {
             return res.redirect("/login");
         }
 
-        const itemsCount = cart?.items?.length || 0;
         
         res.render("product-details",{
             product:product,
@@ -68,7 +63,6 @@ const getProductDetails = async (req,res) => {
             user:userData,
             availableSizes:availableSizes,
             relatedProducts:relatedProducts,
-            items:itemsCount
         })
     } catch (error) {
         console.error(error)
@@ -82,7 +76,6 @@ const sortProducts = async (req,res) => {
         const category = await Category.find()
         const brand = await Brand.find()
         const user = req.session.user;
-        const cart = await Cart.find({userId:user})
         let userData = null
         const sort = req.query.sort || 'priceAsc';
         let sortCriteria;
@@ -120,14 +113,11 @@ const sortProducts = async (req,res) => {
 
     const product = await Product.find().sort(sortCriteria);
 
-    const itemsCount = cart?.items?.length || 0;
-
     res.render("shop",{
         cat:category,
         product,
         brand:brand,
         user:userData,
-        items:itemsCount,
         selectedSort: sort
     })
     } catch (error) {
@@ -136,36 +126,41 @@ const sortProducts = async (req,res) => {
     }
 }
 
-const categoryFilter = async (req,res) => {
+const categoryFilter = async (req, res) => {
     try {
-        const {categoryId} = req.query
-        const category = await Category.find()
-        const brand = await Brand.find()
+        const { categories } = req.query; 
+        const category = await Category.find();
+        const brand = await Brand.find();
         const user = req.session.user;
-        const cart = await Cart.find({userId:user})
         const sort = req.query.sort || 'priceAsc';
 
-        if(!categoryId){
-            return res.json({success:false,message:"Invalid category"})
+        if (!categories || categories.length === 0) {
+            const allProducts = await Product.find(); 
+            return res.render("shop", {
+                cat: category,
+                product: allProducts,
+                brand: brand,
+                user,
+                selectedSort: sort
+            });
         }
+        
 
-        const product = await Product.find({category:categoryId})
+        const filterCriteria = { category: { $in: categories } };
+        const product = await Product.find(filterCriteria);
 
-        const itemsCount = cart?.items?.length || 0;
-
-        res.render("shop",{
-            cat:category,
+        res.render("shop", {
+            cat: category,
             product,
-            brand:brand,
+            brand: brand,
             user,
-            items:itemsCount,
             selectedSort: sort
-        })
+        });
     } catch (error) {
-        console.error(error)
-        return res.status(500).json({success:false,message:"Internal server error"})
+        console.error(error);
+        return res.status(500).json({ success: false, message: "Internal server error" });
     }
-}
+};
 
 const searchProducts = async (req,res) => {
     try {
@@ -173,14 +168,12 @@ const searchProducts = async (req,res) => {
         const category = await Category.find()
         const brand = await Brand.find()
         const user = req.session.user;
-        const cart = await Cart.find({userId:user})
         const sort = req.query.sort || 'priceAsc';
 
         const product = await Product.find({
             productName: { $regex: search, $options: 'i' }
         });
 
-        const itemsCount = cart?.items?.length || 0;
 
 
         res.render("shop",{
@@ -188,7 +181,6 @@ const searchProducts = async (req,res) => {
             product,
             brand:brand,
             user,
-            items:itemsCount,
             selectedSort: sort
         })
     } catch (error) {

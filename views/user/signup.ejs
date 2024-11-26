@@ -301,13 +301,11 @@
 
   document.addEventListener("DOMContentLoaded", () => {
     signform.addEventListener("submit", (e) => {
-      // Perform all validations on form submission
       nameValidateChecking();
       emailValidateChecking();
       phoneValidateChecking();
       passwordValidateChecking();
 
-      // Prevent form submission if there are any errors
       if (error1.innerHTML || error2.innerHTML || error3.innerHTML || error4.innerHTML || error5.innerHTML) {
         e.preventDefault();
       }

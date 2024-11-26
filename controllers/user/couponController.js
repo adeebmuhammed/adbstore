@@ -54,7 +54,7 @@ const addCoupon = async (req, res) => {
 
 const removeCoupon = async (req,res) => {
     try {
-        const userId = req.user._id
+        const userId = req.session.user
         const cart = await Cart.findOne({userId})
 
         if (!cart) {

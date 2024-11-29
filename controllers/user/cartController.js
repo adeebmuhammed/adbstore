@@ -7,20 +7,16 @@ const getCartPage = async (req, res) => {
         const userId = req.session.user
         const userData = await User.findById(userId)
 
-        // Assuming req.user contains the logged-in user's information
         const cart = await Cart.findOne({ userId }).populate('items.productId');
 
         if (!cart || cart.items.length === 0) {
-            // If cart is empty, pass a message to the template
             return res.render("cart", { cart: null, message: "Your cart is empty. Add something to the cart!" });
         }
 
-        // Calculate the total price for each item (in case you need this calculation dynamically)
         cart.items.forEach(item => {
             item.totalPrice = item.quantity * item.salePrice;
         });
 
-        // Pass cart details to the template
         res.render("cart", { cart,user:userData});
     } catch (error) {
         console.error(error);

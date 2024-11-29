@@ -1,5 +1,6 @@
 const mongoose = require("mongoose")
 const Order = require("../../models/orderSchema")
+const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 const Address = require("../../models/addressSchema")
 const Wallet = require("../../models/walletSchema")
@@ -7,6 +8,7 @@ const Wallet = require("../../models/walletSchema")
 const getMyOrders = async (req, res) => {
     try {
         const userId = req.session.user;
+        const user = await User.findOne({_id:userId})
 
         const orders = await Order.find({ user: userId }).sort({createdAt:-1}).lean();
 
@@ -25,7 +27,6 @@ const getMyOrders = async (req, res) => {
 
         const enrichedOrders = await Promise.all(
             orders.map(async (order) => {
-                // Assign address details
                 order.addressDetails = addressMap[order.address?.toString()] || null;
 
                 const enrichedItems = await Promise.all(
@@ -40,7 +41,7 @@ const getMyOrders = async (req, res) => {
             })
         );
 
-        res.render('my-orders', { orders: enrichedOrders });
+        res.render('my-orders', { orders: enrichedOrders,user });
     } catch (error) {
         console.error("Error fetching orders:", error);
         res.status(500).send("An error occurred while fetching orders. Please try again later.");
@@ -117,7 +118,8 @@ const getOrderDetails = async (req,res) => {
         const {orderId} = req.params
         const order = await Order.findById(orderId)
 
-        const userId = req.user._id
+        const userId = req.session.user;
+        const user = await User.findOne({_id:userId})
 
         if (!order) {
             return res.redirect('/pageNotFound');
@@ -138,7 +140,8 @@ const getOrderDetails = async (req,res) => {
             order,
             orderedItems: order.orderedItems || [],
             totalPrice: order.totalprice,
-            specificAddress
+            specificAddress,
+            user
         });
     } catch (error) {
         console.error(error)

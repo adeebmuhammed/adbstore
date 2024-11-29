@@ -25,14 +25,15 @@
     />
     <style>
       body,
-      html {
-        height: 100%;
-        margin: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        background-color: #f8f9fa;
-      }
+html {
+  height: 100%;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Nunito Sans', sans-serif;
+}
+
       .container {
         display: flex;
         justify-content: center;
@@ -42,83 +43,102 @@
       .card {
         width: 100%;
         max-width: 800px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        overflow: hidden;
       }
       .login-section {
         display: flex;
-        justify-content: space-between;
         flex-wrap: wrap;
+        background: #ffffff;
       }
       .login-form,
       .login-image {
         flex: 1;
-        padding: 10px;
+        padding: 20px;
       }
       .login-form {
-        max-width: 50%;
+        max-width: 60%;
+        background: #f9f9f9;
+        border-right: 1px solid #ddd;
       }
       .login-image {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        max-width: 40%;
-      }
+    max-width: 40%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: url('img/shoe.jpg') 
+      no-repeat center center/cover;
+    color: #fff;
+  }
       .login-image img {
-        max-width: 100%;
+        max-width: 80%;
         height: auto;
-      }
-      .social-btns {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 10px;
-      }
-      .social-btns button {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-      }
-      .form-group label {
-        font-size: 0.875rem; /* Decrease label size */
-      }
-      .form-control {
-        font-size: 0.875rem; /* Decrease input text size */
-        padding: 0.5rem; /* Decrease padding */
-      }
-      .btn-primary {
-        padding: 0.5rem 1rem; /* Decrease button padding */
-        font-size: 0.875rem; /* Decrease button text size */
-      }
-      .card-title {
-        font-size: 1.25rem; /* Decrease card title size */
+        margin-bottom: 15px;
       }
       .login-image .sign-up-link {
-        color: #333;
+        color: #200020;
+        font-weight: bold;
         text-decoration: none;
       }
       .login-image .sign-up-link:hover {
-        color: #ff7f50;
-      }
-      .error-message {
-        color: red;
-        font-size: 0.75rem;
-        display: none;
-      }
-      .forgot-password-link{
-        font-size: 0.875rem;
-        text-decoration: none;
         color: #007bff;
       }
-      .forgot-password-link:hover{
-        color: #0056b3;
-        text-decoration: underline;
+      .card-title {
+        font-size: 1.5rem;
+        font-weight: bold;
+        text-align: center;
+        color: #333;
+        margin-bottom: 20px;
       }
-    </style>
+      .form-group label {
+        font-size: 0.9rem;
+        color: #555;
+      }
+      .form-control {
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 0.8rem;
+        font-size: 0.9rem;
+      }
+      .btn-primary {
+        background: #007bff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+        border-radius: 5px;
+        transition: background 0.3s ease;
+      }
+      .btn-primary:hover {
+        background: #0056b3;
+      }
+      .social-btns a {
+        width: 40px;
+        height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid #ddd;
+        margin: 5px;
+        transition: transform 0.3s ease, background 0.3s ease;
+      }
+      .social-btns a:hover {
+        transform: scale(1.1);
+        background: #f8f9fa;
+      }
+      .forgot-password-link {
+        font-size: 0.875rem;
+        color: #007bff;
+        text-decoration: none;
+      }
+      .forgot-password-link:hover {
+        text-decoration: underline;
+        color: #0056b3;
+      }
+    </style>    
   </head>
   <body>
     <div class="container">

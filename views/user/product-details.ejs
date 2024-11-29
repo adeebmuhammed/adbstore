@@ -249,7 +249,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     text: "Product added to cart successfully!",
                     icon: "success",
                     button: "OK",
-                });
+                }).then(()=>{
+                    window.location.reload()
+                })
             } else {
                 // Show error message
                 Swal.fire({

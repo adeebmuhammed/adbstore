@@ -117,7 +117,7 @@ const placeOrder = async (req, res) => {
 
         if (paymentMethod === 'Online Payment') {
             const options = {
-                amount: finalAmount * 100,
+                amount: Math.round(finalAmount * 100),
                 currency: "INR",
                 receipt: `${newOrder._id}`,
                 payment_capture: 1
@@ -228,7 +228,8 @@ const verifyPayment = async (req, res) => {
 const orderConfirmation = async (req,res) => {
     
     try {
-        const userId = req.session.user
+        const userId = req.session.user;
+        const user = await User.findOne({_id:userId})
 
         const orderId = String(req.params.orderId);
         console.log(orderId);
@@ -256,7 +257,8 @@ const orderConfirmation = async (req,res) => {
             order,
             orderedItems: order.orderedItems || [],
             totalPrice: order.totalprice,
-            specificAddress
+            specificAddress,
+            user
         });
     } catch (error) {
         console.error('Error fetching order or rendering:', error);
@@ -276,12 +278,12 @@ const paymentFailed = async (req, res) => {
 };
 
 const retryPayment = async (req, res) => {
-    console.log("req recieved");
-    
     try {
         const { orderId } = req.params;
         console.log(orderId);
-        
+
+        const userId = req.session.user;
+        const user = await User.findOne({_id:userId})
 
         const order = await Order.findOne({ orderId });
 
@@ -314,7 +316,8 @@ const retryPayment = async (req, res) => {
             orderId: razorpayOrder.id, 
             finalAmount: order.finalAmount,
             razorpayKey: process.env.RAZORPAY_KEY_ID,
-            message: order.orderId 
+            message: order.orderId ,
+            user
         });
     } catch (error) {
         console.error("Error in retrying payment:", error);

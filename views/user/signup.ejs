@@ -23,195 +23,194 @@
       rel="stylesheet"
     />
     <style>
-      .header__nav__option .sign-in-link {
-        font-size: 16px;
+      body {
+        background-color: #f8f9fa;
+        font-family: "Nunito Sans", sans-serif;
+      }
+      .signup-container {
+        max-width: 500px;
+        margin: 50px auto;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 30px;
+      }
+      .card-title {
+        text-align: center;
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 20px;
         color: #333;
-        margin-right: 15px;
-        text-decoration: none;
+      }
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .form-group label {
         font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 5px;
+        display: block;
       }
-      .header__nav__option .sign-in-link:hover {
-        color: #ff7f50;
+      .form-control {
+        height: 40px;
+        border-radius: 5px;
+        font-size: 0.95rem;
       }
-      .signup-section {
-        display: flex;
-        justify-content: space-between;
-        flex-wrap: wrap;
+      .btn-primary {
+        width: 100%;
+        font-size: 1rem;
+        font-weight: 600;
+        height: 40px;
+        border-radius: 5px;
+        background-color: #007bff;
+        border: none;
       }
-      .signup-form,
-      .signup-image {
-        flex: 1;
-        padding: 10px;
+      .btn-primary:hover {
+        background-color: #0056b3;
       }
-      .signup-form {
-        max-width: 50%;
+      .text-center {
+        text-align: center;
       }
-      .signup-image {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        max-width: 40%;
-      }
-      .signup-image img {
-        max-width: 100%;
-        height: auto;
+      .alert {
+        margin-top: 15px;
+        font-size: 0.9rem;
       }
       .social-btns {
         display: flex;
-        flex-direction: column;
-        align-items: center;
-        margin-top: 10px;
-      }
-      .social-btns button {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
+        gap: 10px;
+        margin-top: 15px;
       }
-      .spacer {
-        height: 30px; /* Adjust the height as needed */
+      .social-btns img {
+        width: 30px;
+        height: 30px;
       }
-      .form-group label {
-        font-size: 0.875rem; /* Decrease label size */
-      }
-      .form-control {
-        font-size: 0.875rem; /* Decrease input text size */
-        padding: 0.5rem; /* Decrease padding */
-      }
-      .btn-primary {
-        padding: 0.5rem 1rem; /* Decrease button padding */
-        font-size: 0.875rem; /* Decrease button text size */
-      }
-      .card-title {
-        font-size: 1.25rem; /* Decrease card title size */
-      }
-      .signup-image .sign-in-link {
-        color: #333;
+      .sign-in-link {
+        color: #007bff;
+        font-weight: 600;
         text-decoration: none;
       }
-      .signup-image .sign-in-link:hover {
-        color: #ff7f50;
+      .sign-in-link:hover {
+        color: #0056b3;
+      }
+
+      /* Style for password visibility icon */
+      .password-container {
+        position: relative;
+      }
+      .password-container input {
+        padding-right: 40px; /* Space for the eye icon */
+      }
+      .eye-icon {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
       }
       .error-message{
         color: red;
-        font-size: 0.75rem;
-        display: none;
       }
     </style>
   </head>
   <body>
-    <div class="container mt-5 mb-1">
-      <div class="row justify-content-center">
-        <div class="col-md-8">
-          <div class="card">
-            <div class="card-body signup-section">
-              <div class="signup-form">
-                <h3 class="card-title text-center">Sign Up</h3>
-
-                <form id="signform" method="post" action="/signup">
-                  <div class="form-group">
-                    <label for="name">Full Name</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="name"
-                      id="name"
-                      placeholder="Enter Name"
-                    />
-                    <div id="error1" class="error-message"></div>
-                  </div>
-                  <div class="form-group">
-                    <label for="email">Email address</label>
-                    <input
-                      type="email"
-                      class="form-control"
-                      name="email"
-                      id="email"
-                      placeholder="Enter email"
-                    />
-                    <div id="error2" class="error-message"></div>
-                  </div>
-                  <div class="form-group">
-                    <label for="phone">Phone Number</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      name="phone"
-                      id="phone"
-                      placeholder="Enter phone number"
-                    />
-                    <div id="error3" class="error-message"></div>
-                  </div>
-                  <div class="form-group">
-                    <label for="password">Password</label>
-                    <input
-                      type="password"
-                      class="form-control"
-                      name="password"
-                      id="password"
-                      placeholder="Password"
-                    />
-                    <div id="error4" class="error-message"></div>
-                  </div>
-                  <div class="form-group">
-                    <label for="confirm-password">Confirm Password</label>
-                    <input
-                      type="password"
-                      class="form-control"
-                      name="cPassword"
-                      id="confirm-password"
-                      placeholder="Confirm Password"
-                    />
-                    <div id="error5" class="error-message"></div>
-                  </div>
-                  <%if(locals.message && message.length>0){%>
-                    <div class="alert alert-danger text-center">
-                      <%=message%>
-                    </div>
-                    <%}%>
-                  <div
-                    class="d-flex justify-content-between align-items-center"
-                  >
-
-                  <button type="submit" class="btn btn-primary">
-                    Sign Up
-                  </button>
-
-                    <div class="mt-2px">
-                      <p>or sign up with</p>
-                    </div>
-                    <div class="social-btns">
-                      <a href="/auth/google" class="btn btn-outline-danger">
-                        <img
-                          src="img/googlesignup.webp"
-                          alt="Google Logo"
-                          style="width: 24px; height: 24px"
-                        />
-                      </a>
-                    </div>
-                  </div>
-                </form>
-              </div>
-              <div class="signup-image">
-                <div class="text-center mt-2">
-                  <a href="/login" class="sign-in-link"
-                    >Already registered? Log in</a
-                  >
-                </div>
-              </div>
-            </div>
-          </div>
+    <div class="signup-container">
+      <h3 class="card-title">Sign Up</h3>
+      <form id="signform" method="post" action="/signup">
+        <div class="form-group">
+          <label for="name">Full Name</label>
+          <input
+            type="text"
+            class="form-control"
+            name="name"
+            id="name"
+            placeholder="Enter Name"
+          />
+          <div id="error1" class="error-message"></div>
         </div>
-      </div>
+        <div class="form-group">
+          <label for="email">Email Address</label>
+          <input
+            type="email"
+            class="form-control"
+            name="email"
+            id="email"
+            placeholder="Enter email"
+          />
+          <div id="error2" class="error-message"></div>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number</label>
+          <input
+            type="text"
+            class="form-control"
+            name="phone"
+            id="phone"
+            placeholder="Enter phone number"
+          />
+          <div id="error3" class="error-message"></div>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input
+            type="password"
+            class="form-control"
+            name="password"
+            id="password"
+            placeholder="Password"
+          />
+          <div id="error4" class="error-message"></div>
+        </div>
+        <div class="form-group password-container">
+          <label for="confirm-password">Confirm Password</label>
+          <input
+            type="password"
+            class="form-control"
+            name="cPassword"
+            id="confirm-password"
+            placeholder="Confirm Password"
+          />
+          <i class="fas fa-eye eye-icon" id="togglePassword" style="padding-top: 30px;"></i>
+          <div id="error5" class="error-message"></div>
+        </div>
+        <%if(locals.message && message.length>0){%>
+          <div class="alert alert-danger text-center">
+            <%=message%>
+          </div>
+        <%}%>
+        <button type="submit" class="btn btn-primary">Sign Up</button>
+        <div class="text-center mt-3">or sign up with</div>
+        <div class="social-btns">
+          <a href="/auth/google">
+            <img
+              src="img/googlesignup.webp"
+              alt="Google Logo"
+            />
+          </a>
+        </div>
+        <div class="text-center mt-3">
+          <a href="/login" class="sign-in-link">Already registered? Log in</a>
+        </div>
+      </form>
     </div>
-    <div class="spacer"></div>
-    <%- include("../../views/partials/user/footer") %>
+
+    <script>
+      // Toggle password visibility
+      const togglePassword = document.getElementById("togglePassword");
+      const password = document.getElementById("confirm-password");
+
+      togglePassword.addEventListener("click", function () {
+        // Toggle the type attribute
+        const type = password.type === "password" ? "text" : "password";
+        password.type = type;
+        // Toggle the eye icon
+        this.classList.toggle("fa-eye-slash");
+      });
+    </script>
   </body>
 </html>
+
+
 
 
 <script>

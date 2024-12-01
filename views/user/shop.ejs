@@ -1,3 +1,35 @@
+<style>
+    .pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin: 20px 0;
+}
+
+.pagination-link {
+  text-decoration: none;
+  padding: 8px 12px;
+  font-size: 14px;
+  color: #000; /* Black text */
+  border: 1px solid #000; /* Black border */
+  border-radius: 4px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.pagination-link:hover {
+  background-color: #000; /* Black background */
+  color: #fff; /* White text */
+}
+
+.current-page {
+  background-color: #000; /* Black background */
+  color: #fff; /* White text */
+  font-weight: bold;
+  pointer-events: none;
+}
+
+</style>
 <%-include("../../views/partials/user/header")%>
 
     <!-- Breadcrumb Section Begin -->
@@ -32,31 +64,36 @@
                         </div>
                         <div class="shop__sidebar__accordion">
                             <div class="accordion" id="accordionExample">
-                                <div class="card">
-                                    <div class="card-heading">
-                                        <a data-toggle="collapse" data-target="#collapseOne">Categories</a>
-                                    </div>
-                                    <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
-                                        <div class="card-body">
-                                            <div class="shop__sidebar__categories">
-                                                <form id="categoryFilterForm">
-                                                    <ul class="nice-scroll">
-                                                        <% for (let i = 0; i < cat.length; i++) { %>
-                                                            <li>
-                                                                <label>
-                                                                    <input type="checkbox" name="categories" value="<%= cat[i]._id %>">
-                                                                    <%= cat[i].name %>
-                                                                </label>
-                                                            </li>
-                                                        <% } %>
-                                                    </ul>
-                                                    <button type="submit" class="btn btn-primary">Filter</button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                </div> 
+                            <% const selectedCategories = Array.isArray(categories) ? categories : (categories ? [categories] : []);%>
+
+<div class="card">
+    <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+        <div class="card-body">
+            <div class="shop__sidebar__categories">
+                <form id="categoryFilterForm" method="get" action="/your-shop-route">
+                    <ul class="nice-scroll">
+                        <% for (let i = 0; i < cat.length; i++) { %>
+                            <li>
+                                <label>
+                                    <input 
+                                        type="checkbox" 
+                                        name="categories" 
+                                        value="<%= cat[i]._id %>" 
+                                        <%= selectedCategories.includes(cat[i]._id.toString()) ? 'checked' : '' %> 
+                                    >
+                                    <%= cat[i].name %>
+                                </label>
+                            </li>
+                        <% } %>
+                    </ul>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+                                
                             </div>
                         </div>
                     </div>
@@ -113,17 +150,23 @@
                         <% } %>
                     </div>
                     
-                    <div class="row">
-                        <div class="col-lg-12">
-                            <div class="product__pagination">
-                                <a class="active">1</a>
-                                <a href="#">2</a>
-                                <a href="#">3</a>
-                                <span>...</span>
-                                <a href="#">21</a>
-                            </div>
-                        </div>
-                    </div>
+                    <div class="pagination-container">
+                        <% if (currentPage > 1) { %>
+                        <a href="?page=<%= currentPage - 1 %>" class="pagination-link">&laquo; Previous</a>
+                        <% } %>
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                        <% if (i === currentPage) { %>
+                        <span class="pagination-link current-page"><%= i %></span>
+                        <% } else { %>
+                        <a href="?page=<%= i %>" class="pagination-link"><%= i %></a>
+                        <% } %>
+                        <% } %>
+                        <% if (currentPage < totalPages) { %>
+                        <a href="?page=<%= currentPage + 1 %>" class="pagination-link">Next &raquo;</a>
+                        <% } %>
+                      </div>
+                      
+                  
                 </div>
             </div>
         </div>

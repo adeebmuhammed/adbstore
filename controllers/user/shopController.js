@@ -8,8 +8,16 @@ const path = require('path')
 
 const getShopPage = async (req,res) => {
     try {
+        const page = req.query.page || 1
+        const limit = 10
+
         const category = await Category.find()
+
         const product = await Product.find()
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        const count = product.length
+
         const brand = await Brand.find()
         const user = req.session.user;
         const sort = req.query.sort || 'priceAsc';
@@ -28,7 +36,10 @@ const getShopPage = async (req,res) => {
             product:product,
             brand:brand,
             user:userData,
-            selectedSort: sort
+            selectedSort: sort,
+            currentPage:page,
+            totalPages:Math.ceil(count/limit),
+            categories:[]
         })
     } catch (error) {
         console.error(error)
@@ -72,6 +83,8 @@ const getProductDetails = async (req,res) => {
 
 const sortProducts = async (req,res) => {
     try {
+        const page = req.query.page || 1
+        const limit = 10
 
         const category = await Category.find()
         const brand = await Brand.find()
@@ -111,14 +124,18 @@ const sortProducts = async (req,res) => {
             sortCriteria = {}; 
     }
 
-    const product = await Product.find().sort(sortCriteria);
+    const product = await Product.find().sort(sortCriteria).limit(limit * 1).skip((page - 1) * limit)
+    const count = product.length
 
     res.render("shop",{
         cat:category,
         product,
         brand:brand,
         user:userData,
-        selectedSort: sort
+        selectedSort: sort,
+        currentPage:page,
+        totalPages:Math.ceil(count/limit),
+        categories:[]
     })
     } catch (error) {
         res.status(500).json({message:"Internal server error"})
@@ -128,6 +145,9 @@ const sortProducts = async (req,res) => {
 
 const categoryFilter = async (req, res) => {
     try {
+        const page = req.query.page || 1
+        const limit = 10
+
         const { categories } = req.query; 
         const category = await Category.find();
         const brand = await Brand.find();
@@ -135,27 +155,36 @@ const categoryFilter = async (req, res) => {
         const sort = req.query.sort || 'priceAsc';
 
         if (!categories || categories.length === 0) {
-            const allProducts = await Product.find(); 
+            const allProducts = await Product.find().limit(limit * 1).skip((page - 1) * limit)
+            const count = product.length
+
             return res.render("shop", {
                 cat: category,
                 product: allProducts,
                 brand: brand,
                 user,
-                selectedSort: sort
+                selectedSort: sort,
+                currentPage:page,
+                totalPages:Math.ceil(count/limit)
             });
         }
         
 
         const filterCriteria = { category: { $in: categories } };
-        const product = await Product.find(filterCriteria);
+        const product = await Product.find(filterCriteria).limit(limit * 1).skip((page - 1) * limit)
+        const count = product.length
 
         res.render("shop", {
             cat: category,
             product,
-            brand: brand,
+            brand,
             user,
-            selectedSort: sort
+            selectedSort: sort,
+            currentPage: page,
+            totalPages: Math.ceil(count / limit),
+            categories: Array.isArray(req.query.categories) ? req.query.categories : [req.query.categories].filter(Boolean)
         });
+        
     } catch (error) {
         console.error(error);
         return res.status(500).json({ success: false, message: "Internal server error" });
@@ -164,6 +193,9 @@ const categoryFilter = async (req, res) => {
 
 const searchProducts = async (req,res) => {
     try {
+        const page = req.query.page || 1
+        const limit = 10
+
         const {search} = req.query
         const category = await Category.find()
         const brand = await Brand.find()
@@ -172,7 +204,8 @@ const searchProducts = async (req,res) => {
 
         const product = await Product.find({
             productName: { $regex: search, $options: 'i' }
-        });
+        }).limit(limit * 1).skip((page - 1) * limit)
+        const count = product.length
 
 
 
@@ -181,7 +214,10 @@ const searchProducts = async (req,res) => {
             product,
             brand:brand,
             user,
-            selectedSort: sort
+            selectedSort: sort,
+            currentPage:page,
+            totalPages:Math.ceil(count/limit),
+            categories:[]
         })
     } catch (error) {
         console.error(error)

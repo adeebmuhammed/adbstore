@@ -138,16 +138,58 @@ html {
         text-decoration: underline;
         color: #0056b3;
       }
+      #right-head {
+  font-family: 'Roboto', sans-serif; /* Use a modern font */
+  font-size: 2rem; /* Make the font larger */
+  font-weight: 700; /* Make it bold */
+  color: #343a40; /* Dark gray for contrast */
+  text-align: center; /* Center align the heading */
+  margin-bottom: 20px; /* Add space below the heading */
+  text-transform: uppercase; /* Capitalize all letters */
+  letter-spacing: 1px; /* Add slight spacing between letters */
+  background: linear-gradient(90deg, #007bff, #6c757d); /* Gradient effect */
+  -webkit-background-clip: text; /* Use the gradient as text color */
+  -webkit-text-fill-color: transparent; /* Make the gradient visible */
+  position: absolute;
+  margin-top: 50px;
+  margin-left: 30px;
+}
+h2 {
+  font-family: 'Arial', sans-serif; /* Clean and modern font */
+  font-size: 3rem; /* Larger size for prominence */
+  font-weight: 800; /* Bold for emphasis */
+  color: #333; /* Dark color for readability */
+  text-align: center; /* Center align the heading */
+  text-transform: uppercase; /* Uppercase letters for a stronger effect */
+  letter-spacing: 2px; /* Slight spacing between letters */
+  margin: 40px 0; /* Space above and below */
+  position: relative; /* For adding a decorative line */
+}
+
+h2::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 3px;
+  background-color: #007bff; /* Blue color for the line */
+}
+
+
     </style>    
   </head>
   <body>
-    <div class="container">
-      <div class="card">
-        <div class="card-body login-section">
-          <div class="login-form mt-5">
+    <h2>Adb Store</h2>
+    <div class="container d-flex align-items-center justify-content-center vh-100">
+      <div class="card shadow" style="width: 800px; border-radius: 15px; overflow: hidden;">
+        <div class="row">
+          <!-- Login Form Section -->
+          <div class="col-md-6 p-4">
             <h3 class="card-title text-center">Log In</h3>
             <form id="loginform" method="post" action="/login">
-              <div class="form-group mt-3px">
+              <div class="form-group mt-3">
                 <label for="email">Email address</label>
                 <input
                   type="email"
@@ -169,43 +211,51 @@ html {
                 />
                 <div id="error2" class="error-message"></div>
               </div>
-
-              <div class="form-group d-flex justify-content-end">
-                <a href="/forgot-password" class="forgot-password-link ms-auto">
+              <div class="form-group d-flex justify-content-end mt-2">
+                <a href="/forgot-password" class="forgot-password-link">
                   <i class="fa fa-key"></i> Forgot Password?
                 </a>
-              </div>              
-
-              <%if(locals.message && message.length>0){%>
-              <div class="alert alert-danger text-center">
-                <%=message%>
               </div>
-              <%}%>
-              <div class="d-flex justify-content-between align-items-center">
+  
+              <% if (locals.message && message.length > 0) { %>
+              <div class="alert alert-danger text-center">
+                <%= message %>
+              </div>
+              <% } %>
+  
+              <div class="d-flex justify-content-between align-items-center mt-4">
                 <button type="submit" class="btn btn-primary">Log In</button>
-                <div class="mt-2px">
-                  <p>or log in with</p>
-                </div>
-                <div class="social-btns">
-                  <a href="/auth/google" class="btn btn-outline-danger">
-                    <img
-                      src="img/googlesignup.webp"
-                      alt="Google Logo"
-                      style="width: 24px; height: 24px"
-                    />
-                  </a>
-                </div>
+                <p class="mb-0 mx-2">or</p>
+                <a href="/auth/google" class="btn btn-outline-danger">
+                  <img
+                    src="img/googlesignup.webp"
+                    alt="Google Logo"
+                    style="width: 24px; height: 24px"
+                  />
+                </a>
               </div>
             </form>
-          </div>
-          <div class="login-image">
-            <div class="text-center mt-2">
+            <div class="text-center mt-3">
               <a href="/signup" class="sign-up-link">Not registered? Sign up</a>
             </div>
           </div>
+  
+          <!-- Right-Side Image Section -->
+          <div class="col-md-6">
+            <h3 id="right-head">Welcome Back!</h3>
+            <img
+              src="img/shoe-collection.webp"
+              alt="Jordan Shoe"
+              class="img-fluid"
+              style="height: 100%; object-fit: cover;"
+            />
+          </div>
+          
         </div>
       </div>
     </div>
+  </body>
+  
 
     <script>
       const emailid = document.getElementById("email");
@@ -254,5 +304,5 @@ html {
         });
       });
     </script>
-  </body>
+
 </html>

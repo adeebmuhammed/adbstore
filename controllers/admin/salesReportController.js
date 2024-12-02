@@ -2,12 +2,41 @@ const Order = require("../../models/orderSchema")
 
 const getSalesReport = async (req, res) => {
     try {
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1); 
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0); 
 
-        res.render("salesReport", {
-             overallSalesCount : 0 ,
-             overallOrderAmount : 0,
-             overallDiscount : 0
+        const query = { createdOn: { $gte: startOfMonth, $lte: endOfMonth } };
+
+        const orders = await Order.find(query).populate("user", "name").populate("orderedItems.product", "name").exec();
+
+        if (orders.length > 0) {
+            const overallSalesCount = orders.length;
+            const overallOrderAmount = orders.reduce((total, order) => total + order.totalprice, 0);
+            const overallDiscount = orders.reduce((total, order) => total + order.discount, 0);
+
+            res.render("salesReportDownload", {
+                overallSalesCount,
+                overallOrderAmount,
+                overallDiscount,
+                orders,
+                startDate: startOfMonth.toISOString().split("T")[0], 
+                endDate: endOfMonth.toISOString().split("T")[0],
+                filter:null
             });
+        } else {
+            console.log("No orders found for the current month.");
+
+            res.render("salesReportDownload", {
+                overallSalesCount: 0,
+                overallOrderAmount: 0,
+                overallDiscount: 0,
+                orders: [],
+                startDate: startOfMonth.toISOString().split("T")[0],
+                endDate: endOfMonth.toISOString().split("T")[0],
+                filter:null
+            });
+        }
     } catch (error) {
         console.error(error);
         res.redirect("/admin/pageerror");
@@ -17,7 +46,6 @@ const getSalesReport = async (req, res) => {
 const generateSalesReport = async (req, res) => {
     try {
         const { startDate, endDate, filter } = req.body;
-        console.log("Received Dates:", startDate, endDate, filter);
 
         let query = {};
         const now = new Date();
@@ -54,8 +82,6 @@ const generateSalesReport = async (req, res) => {
             return res.status(400).json({ error: 'Please provide either a filter or a valid date range' });
         }
 
-        console.log("Query Object:", query);
-
         const orders = await Order.find(query).populate("user", "name").populate("orderedItems.product", "name").exec();
 
         if (orders.length > 0) {
@@ -69,7 +95,10 @@ const generateSalesReport = async (req, res) => {
                 overallSalesCount,
                 overallOrderAmount,
                 overallDiscount,
-                orders
+                orders,
+                filter: filter || null, // Store filter
+                startDate: startDate || null, // Store startDate
+                endDate: endDate || null // Store endDate
             };
 
             return res.json({
@@ -79,7 +108,6 @@ const generateSalesReport = async (req, res) => {
                 overallDiscount,
                 orders
             });
-            
         } else {
             console.log("No orders found for the given criteria.");
 
@@ -87,39 +115,47 @@ const generateSalesReport = async (req, res) => {
                 overallSalesCount: 0,
                 overallOrderAmount: 0,
                 overallDiscount: 0,
-                orders: []
+                orders: [],
+                filter: filter || null, // Store filter
+                startDate: startDate || null, // Store startDate
+                endDate: endDate || null // Store endDate
             };
-            
+
             return res.json({
                 redirectUrl: '/admin/salesReportDownload'
             });
         }
-
     } catch (error) {
         console.error("Error generating sales report:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
 
+
 const salesReportDownload = async (req, res) => {
     try {
-        const { overallSalesCount, overallOrderAmount, overallDiscount, orders } = req.session.salesReportData || {};
+        const { overallSalesCount, overallOrderAmount, overallDiscount, orders, filter, startDate, endDate } =
+            req.session.salesReportData || {};
 
         if (!orders || overallSalesCount === undefined || overallOrderAmount === undefined || overallDiscount === undefined) {
-            return res.redirect('/admin/pageerror'); 
+            return res.redirect('/admin/pageerror');
         }
 
         res.render("salesReportDownload", {
             overallSalesCount,
             overallOrderAmount,
             overallDiscount,
-            orders
+            orders,
+            filter,
+            startDate,
+            endDate
         });
     } catch (error) {
         console.error("Internal server error", error);
         res.redirect("/admin/pageerror");
     }
 };
+
 
 module.exports = {
     getSalesReport,

@@ -42,6 +42,11 @@ body {
     background-color: #33053d;
     color: #ffffff;
 }
+.menu-item a.menu-link.active {
+    background-color: #6e7e6e; /* Highlight color */
+    color: #ffffff; /* Text color for active link */
+}
+
 
 </style>
 </head>
@@ -117,7 +122,7 @@ body {
                 <button class="btn btn-icon btn-mobile me-auto" data-trigger="#offcanvas_aside"> <i class="material-icons md-apps"></i> </button>
                 <ul class="nav">
                     <li class="dropdown nav-item">
-                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="/admin-assets/imgs/people/avatar2.jpg" alt="User"></a>
+                        <a class="dropdown-toggle" data-bs-toggle="dropdown" href="#" id="dropdownAccount" aria-expanded="false"> <img class="img-xs rounded-circle" src="/img/avatar2.jpg" alt="User"></a>
                         <div class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownAccount">
                             <div class="dropdown-divider"></div>
                             <a class="dropdown-item text-danger" href="/admin/logout"><i class="material-icons md-exit_to_app"></i>Logout</a>
@@ -126,3 +131,15 @@ body {
                 </ul>
             </div>
         </header>
+
+        <script>
+            $(document).ready(function () {
+                const currentPath = window.location.pathname; // Get the current URL path
+                $('.menu-link').each(function () {
+                    const linkPath = $(this).attr('href');
+                    if (currentPath === linkPath) {
+                        $(this).addClass('active'); // Add 'active' class if paths match
+                    }
+                });
+            });
+        </script>        

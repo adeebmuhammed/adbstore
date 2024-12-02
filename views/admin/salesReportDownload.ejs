@@ -4,33 +4,64 @@
     <h2 class="text-center mb-4">Sales Report</h2>
 
     <!-- Filter Options -->
-    <div class="card mb-4">
-        <div class="card-header">
-            <h4>Generate Sales Report</h4>
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Generate Sales Report</h4>
         </div>
         <div class="card-body">
-            <form id="salesReportForm" action="/admin/generateSalesReport" method="POST">
-                <label for="startDate">Start Date:</label>
-                <input type="date" id="startDate" name="startDate">
-            
-                <label for="endDate">End Date:</label>
-                <input type="date" id="endDate" name="endDate">
-            
-                <label for="filter">Filter:</label>
-                <div class="btn-group mb-3" role="group">
-                    <button type="button" class="btn btn-primary">1 Day</button>
-                    <button type="button" class="btn btn-primary">1 Week</button>
-                    <button type="button" class="btn btn-primary">1 Month</button>
-                    <button type="button" class="btn btn-primary">1 Year</button>
-                </div>                                        
-            
-                <button type="submit">Generate Report</button>
-            </form>                
+            <form id="salesReportForm" action="/admin/generateSalesReport" method="POST" class="row g-3">
+                <!-- Start Date -->
+                <div class="col-md-4">
+                    <label for="startDate" class="form-label">Start Date:</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control" required>
+                </div>
+
+                <!-- End Date -->
+                <div class="col-md-4">
+                    <label for="endDate" class="form-label">End Date:</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control" required>
+                </div>
+
+                <!-- Filter Options -->
+                <div class="col-md-4">
+                    <label for="filter" class="form-label">Filter:</label>
+                    <div class="btn-group w-100" role="group" aria-label="Filter Options">
+                        <button type="button" class="btn btn-outline-primary filter-btn">1 Day</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn">1 Week</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn">1 Month</button>
+                        <button type="button" class="btn btn-outline-primary filter-btn">1 Year</button>
+                    </div>
+                </div>                
+
+                <!-- Submit Button -->
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-success px-4">Generate Report</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
+
 
 <!-- Report Content Wrapper -->
-<div id="reportContent">
+<div id="reportContent" style="padding-top: 30px;">
+    <div class="report-info mb-3 text-center">
+        <% if (filter) { %>
+            <p class="text-muted fs-4">
+                <span class="fw-bold">Sales Report Filter:</span>
+                <span class="text-primary fs-4"><%= filter %></span>
+            </p>
+        <% } else if (startDate && endDate) { %>
+            <p class="text-muted fs-4">
+                <span class="fw-bold">Sales Report Date Range:</span>
+                <span class="text-success fs-4"><%= startDate %></span> 
+                <span class="fw-bold text-dark fs-4">to</span> 
+                <span class="text-success fs-4"><%= endDate %></span>
+            </p>
+        <% } %>
+    </div>
+    
+    
     <!-- Overall Stats -->
     <div class="row mb-4">
         <div class="col-md-4">
@@ -103,15 +134,18 @@
     </div>
 </div>
 
-<!-- Download Report Button -->
-<div class="d-grid gap-2 d-md-flex justify-content-md-end">
-    <button class="btn btn-outline-primary me-md-2" type="button" onclick="downloadPDF()">Download PDF</button>
+<!-- Download Buttons Container -->
+<div class="d-flex justify-content-end align-items-center gap-2">
+    <button class="btn btn-outline-primary" type="button" onclick="downloadPDF()">Download PDF</button>
+    <button class="btn btn-outline-success" type="button" onclick="downloadExcel()">Download Excel</button>
 </div>
+
+
 
 <%- include("../../views/partials/admin/footer") %>
 
     <script>
-        function downloadPDF() {
+    function downloadPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const content = document.getElementById('reportContent');
@@ -136,73 +170,99 @@
             heightLeft -= pageHeight;
         }
 
-        doc.save("invoice.pdf");
+        doc.save("Sales_Report.pdf");
     });
 }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('salesReportForm');
-        const filterButtons = document.querySelectorAll('.btn-primary');
-        let selectedFilter = null;
+function downloadExcel() {
+    const table = document.getElementById('reportContent'); // Assume 'reportContent' contains a table or similar structure
+    const rows = [];
+    
+    // Extract table headers
+    const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent.trim());
+    rows.push(headers);
 
-        // Function to submit report request
-        function submitReportRequest() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
+    // Extract table rows
+    const dataRows = Array.from(table.querySelectorAll('tbody tr'));
+    dataRows.forEach(row => {
+        const rowData = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim());
+        rows.push(rowData);
+    });
 
-            // Check if either a filter or date range is selected
-            if (!selectedFilter && (!startDate || !endDate)) {
-                console.error("Please provide either a filter or a valid date range.");
-                return;
-            }
+    // Create a new workbook and worksheet
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.aoa_to_sheet(rows);
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sales Report");
 
-            // Prepare the data to send to the backend
-            const data = {
-                startDate: startDate || null,
-                endDate: endDate || null,
-                filter: selectedFilter || null
-            };
+    // Export the workbook as an Excel file
+    XLSX.writeFile(workbook, "Sales_Report.xlsx");
+}
 
-            // Send data to the backend using fetch
-            fetch('/admin/generateSalesReport', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.redirectUrl) {
-                    window.location.href = data.redirectUrl; // Redirect to the report page
-                } else {
-                    // Update the displayed data if needed
-                    document.getElementById('overallSalesCount').textContent = data.overallSalesCount || 0;
-                    document.getElementById('overallOrderAmount').textContent = `INR ${data.overallOrderAmount.toFixed(2) || '0.00'}`;
-                    document.getElementById('overallDiscount').textContent = `INR ${data.overallDiscount.toFixed(2) || '0.00'}`;
-                }
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-            });
+
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('salesReportForm');
+    const filterButtons = document.querySelectorAll('.filter-btn'); // Updated selector
+    let selectedFilter = null;
+
+    // Function to submit report request
+    function submitReportRequest() {
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
+
+        // Check if either a filter or date range is selected
+        if (!selectedFilter && (!startDate || !endDate)) {
+            console.error("Please provide either a filter or a valid date range.");
+            return;
         }
 
-        // Listen for form submission
-        form.addEventListener('submit', function (e) {
+        // Prepare the data to send to the backend
+        const data = {
+            startDate: startDate || null,
+            endDate: endDate || null,
+            filter: selectedFilter || null
+        };
+
+        // Send data to the backend using fetch
+        fetch('/admin/generateSalesReport', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.redirectUrl) {
+                window.location.href = data.redirectUrl; // Redirect to the report page
+            } else {
+                // Update the displayed data if needed
+                document.getElementById('overallSalesCount').textContent = data.overallSalesCount || 0;
+                document.getElementById('overallOrderAmount').textContent = `INR ${data.overallOrderAmount.toFixed(2) || '0.00'}`;
+                document.getElementById('overallDiscount').textContent = `INR ${data.overallDiscount.toFixed(2) || '0.00'}`;
+            }
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+
+    // Listen for form submission
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        selectedFilter = null; // Clear any filter if dates are chosen
+        submitReportRequest();
+    });
+
+    // Listen for filter button clicks
+    filterButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
             e.preventDefault();
-            selectedFilter = null; // Clear any filter if dates are chosen
+            selectedFilter = button.textContent.trim(); // Set selected filter
+            document.getElementById('startDate').value = ''; // Clear start date
+            document.getElementById('endDate').value = ''; // Clear end date
             submitReportRequest();
         });
-
-        // Listen for filter button clicks
-        filterButtons.forEach(button => {
-            button.addEventListener('click', (e) => {
-                e.preventDefault();
-                selectedFilter = button.textContent.trim(); // Set selected filter
-                document.getElementById('startDate').value = ''; // Clear start date
-                document.getElementById('endDate').value = ''; // Clear end date
-                submitReportRequest();
-            });
-        });
     });
+});
+
     </script>

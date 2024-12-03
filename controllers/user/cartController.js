@@ -4,25 +4,30 @@ const Cart = require("../../models/cartSchema")
 
 const getCartPage = async (req, res) => {
     try {
-        const userId = req.session.user
-        const userData = await User.findById(userId)
+        const userId = req.session.user;
+        const userData = await User.findById(userId);
 
         const cart = await Cart.findOne({ userId }).populate('items.productId');
+        let cartItemCount = 0;
 
-        if (!cart || cart.items.length === 0) {
-            return res.render("cart", { cart: null, message: "Your cart is empty. Add something to the cart!" });
+        if (cart && cart.items.length > 0) {
+            cartItemCount = cart.items.length;
+            cart.items.forEach(item => {
+                item.totalPrice = item.quantity * item.salePrice;
+            });
         }
 
-        cart.items.forEach(item => {
-            item.totalPrice = item.quantity * item.salePrice;
+        res.render("cart", {
+            cart: cart || null,
+            user: userData,
+            cartItemCount,
         });
-
-        res.render("cart", { cart,user:userData});
     } catch (error) {
         console.error(error);
         res.redirect("/pageNotFound");
     }
 };
+
 
 const addToCart = async (req, res) => {
     try {

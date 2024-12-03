@@ -4,16 +4,17 @@ const User = require("../../models/userSchema")
 const Product = require("../../models/productSchema")
 const Address = require("../../models/addressSchema")
 const Wallet = require("../../models/walletSchema")
+const Cart = require("../../models/cartSchema")
 
 const getMyOrders = async (req, res) => {
     try {
         const userId = req.session.user;
-        const user = await User.findOne({_id:userId})
+        const user = await User.findOne({ _id: userId });
 
-        const orders = await Order.find({ user: userId }).sort({createdAt:-1}).lean();
+        const orders = await Order.find({ user: userId }).sort({ createdAt: -1 }).lean();
 
         if (orders.length < 1) {
-            return res.render('my-orders', { orders: [] });
+            return res.render('my-orders', { orders: [], user, cartItemCount: 0 });
         }
 
         const userAddressData = await Address.findOne({ userId }).lean();
@@ -41,12 +42,17 @@ const getMyOrders = async (req, res) => {
             })
         );
 
-        res.render('my-orders', { orders: enrichedOrders,user });
+        // Fetch cart item count
+        const cart = await Cart.findOne({userId }).lean();
+        const cartItemCount = cart ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
+
+        res.render('my-orders', { orders: enrichedOrders, user, cartItemCount });
     } catch (error) {
         console.error("Error fetching orders:", error);
         res.status(500).send("An error occurred while fetching orders. Please try again later.");
     }
 };
+
 
 const cancelOrder = async (req, res) => {
     try {

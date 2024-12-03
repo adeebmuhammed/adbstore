@@ -64,39 +64,43 @@
                         </div>
                         <div class="shop__sidebar__accordion">
                             <div class="accordion" id="accordionExample">
-                            <% const selectedCategories = Array.isArray(categories) ? categories : (categories ? [categories] : []);%>
-
-<div class="card">
-    <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
-        <div class="card-body">
-            <div class="shop__sidebar__categories">
-                <form id="categoryFilterForm" method="get" action="/your-shop-route">
-                    <ul class="nice-scroll">
-                        <% for (let i = 0; i < cat.length; i++) { %>
-                            <li>
-                                <label>
-                                    <input 
-                                        type="checkbox" 
-                                        name="categories" 
-                                        value="<%= cat[i]._id %>" 
-                                        <%= selectedCategories.includes(cat[i]._id.toString()) ? 'checked' : '' %> 
-                                    >
-                                    <%= cat[i].name %>
-                                </label>
-                            </li>
-                        <% } %>
-                    </ul>
-                    <button type="submit" class="btn btn-primary">Filter</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-                                
+                                <% const selectedCategories = Array.isArray(categories) ? categories : (categories ? [categories] : []);%>
+                    
+                                <div class="card">
+                                    <div id="collapseOne" class="collapse show" data-parent="#accordionExample">
+                                        <div class="card-body">
+                                            <h5 class="shop__sidebar__title" style="padding-bottom: 10px;">Filter by Categories</h5>
+                                            
+                                            <div class="shop__sidebar__categories">
+                                                <form id="categoryFilterForm" method="get" action="/your-shop-route">
+                                                    <ul class="nice-scroll">
+                                                        <% for (let i = 0; i < cat.length; i++) { %>
+                                                            <li>
+                                                                <label>
+                                                                    <input 
+                                                                        type="checkbox" 
+                                                                        name="categories" 
+                                                                        value="<%= cat[i]._id %>" 
+                                                                        <%= selectedCategories.includes(cat[i]._id.toString()) ? 'checked' : '' %> 
+                                                                    >
+                                                                    <%= cat[i].name %>
+                                                                </label>
+                                                            </li>
+                                                        <% } %>
+                                                    </ul>
+                                                    <button type="submit" class="btn btn-primary">Filter</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    
+
+
+
                 </div>
                 <div class="col-lg-9">
                     <div class="shop__product__option__right">
@@ -112,7 +116,7 @@
                     </div>                                        
                     <div class="row">
                         <% if (product.length <= 0) { %>
-                            <div class="col-12 text-center">
+                            <div class="col-12 text-center" style="padding-right: 50px; padding-top: 50px;">
                                 <p>No products are available In this category. Please check back later.</p>
                             </div>
                         <% } else { %>

@@ -268,9 +268,10 @@ const orderConfirmation = async (req,res) => {
 
 const paymentFailed = async (req, res) => {
     try {
+        const user = await User.findById(req.session.user)
         const { orderId } = req.params;
 
-        res.render("payment-failed", { orderId });
+        res.render("payment-failed", { orderId , user });
     } catch (error) {
         console.error("Error loading payment failed page:", error);
         res.status(500).send("An error occurred");

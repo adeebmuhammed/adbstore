@@ -26,8 +26,6 @@ const getShopPage = async (req,res) => {
 
         if (user) {
             userData = await User.findOne({ _id: user});
-        }else {
-            return res.redirect("/login");
         }
 
 
@@ -63,9 +61,7 @@ const getProductDetails = async (req,res) => {
 
         if (user) {
             userData = await User.findOne({ _id: user});
-        }else {
-            return res.redirect("/login");
-        }
+        }else
 
         
         res.render("product-details",{
@@ -97,9 +93,7 @@ const sortProducts = async (req,res) => {
 
         if (user) {
             userData = await User.findOne({ _id: user});
-        }else {
-            return res.redirect("/login");
-        }
+        }else
 
     switch (sort) {
         case 'priceAsc':

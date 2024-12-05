@@ -1,5 +1,6 @@
 const User = require("../../models/userSchema")
 const Cart = require("../../models/cartSchema")
+const Product = require("../../models/productSchema")
 const env = require('dotenv').config()
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
@@ -7,13 +8,14 @@ const bcrypt = require('bcrypt')
 const loadHomepage = async (req, res) => {
     try {
         const user = req.session.user;
+        const product = await Product.find().sort({createdAt:-1}).limit(3)
 
         if (user) {
             const userData = await User.findOne({ _id: user });
 
-            return res.render("home", { user: userData, });
+            return res.render("home", { user: userData,product });
         } else {
-            return res.render("home", { user: null, });
+            return res.render("home", { user: null,product });
         }
     } catch (error) {
         console.error("Error loading home page:", error);

@@ -7,7 +7,6 @@ const cartItemCountMiddleware = async (req, res, next) => {
             const cartItemCount = cart?.items?.length || 0;
             res.locals.cartItemCount = cartItemCount;
         } catch (error) {
-            console.error('Error fetching cart item count:', error);
             res.locals.cartItemCount = 0;
         }
     } else {

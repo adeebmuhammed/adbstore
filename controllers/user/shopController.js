@@ -40,7 +40,6 @@ const getShopPage = async (req,res) => {
             categories:[]
         })
     } catch (error) {
-        console.error(error)
         res.redirect("/pageNotFound")
     }
 }
@@ -61,7 +60,7 @@ const getProductDetails = async (req,res) => {
 
         if (user) {
             userData = await User.findOne({ _id: user});
-        }else
+        }
 
         
         res.render("product-details",{
@@ -72,7 +71,6 @@ const getProductDetails = async (req,res) => {
             relatedProducts:relatedProducts,
         })
     } catch (error) {
-        console.error(error)
         res.redirect("/pageNotFound")
     }
 }
@@ -93,7 +91,7 @@ const sortProducts = async (req,res) => {
 
         if (user) {
             userData = await User.findOne({ _id: user});
-        }else
+        }
 
     switch (sort) {
         case 'priceAsc':
@@ -133,7 +131,6 @@ const sortProducts = async (req,res) => {
     })
     } catch (error) {
         res.status(500).json({message:"Internal server error"})
-        console.error(error);
     }
 }
 
@@ -180,7 +177,6 @@ const categoryFilter = async (req, res) => {
         });
         
     } catch (error) {
-        console.error(error);
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
@@ -214,7 +210,6 @@ const searchProducts = async (req,res) => {
             categories:[]
         })
     } catch (error) {
-        console.error(error)
         return res.status(500).json({success:false,message:"Internal server error"})
     }
 }

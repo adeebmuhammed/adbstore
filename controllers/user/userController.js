@@ -1,24 +1,29 @@
 const User = require("../../models/userSchema")
 const Cart = require("../../models/cartSchema")
 const Product = require("../../models/productSchema")
+const Banner = require("../../models/bannerSchema")
 const env = require('dotenv').config()
 const nodemailer = require('nodemailer')
 const bcrypt = require('bcrypt')
 
 const loadHomepage = async (req, res) => {
     try {
+        const today = new Date().toISOString()
         const user = req.session.user;
         const product = await Product.find().sort({createdAt:-1}).limit(3)
+        const banner = await Banner.find({
+            startDate:{$lt:new Date(today)},
+            endtDate:{$gt:new Date(today)}
+        })
 
         if (user) {
             const userData = await User.findOne({ _id: user });
 
-            return res.render("home", { user: userData,product });
+            return res.render("home", { user: userData,product, banner });
         } else {
-            return res.render("home", { user: null,product });
+            return res.render("home", { user: null,product, banner});
         }
     } catch (error) {
-        console.error("Error loading home page:", error);
         res.status(500).send("Server error");
     }
 };
@@ -27,7 +32,6 @@ const loadSignup = async (req,res)=> {
     try {
         return res.render('signup')
     } catch (error) {
-        console.log("home page not loading",error);
         res.status(500).send("server error")
     }
 }
@@ -59,7 +63,6 @@ async function sendVerificationEmail(email,otp){
 
         return info.accepted.length > 0
     } catch (error) {
-        console.error("Error sending email",error)
         return false
     }
 }
@@ -89,10 +92,7 @@ const signup = async(req,res)=>{
         req.session.userData = {name,phone,email,password}
 
         res.render("verify-otp")
-        console.log("OTP sent",otp);
-        
     } catch (error) {
-        console.error("signup error",error)
         res.redirect("/pageNotFound")
     }
 }
@@ -110,7 +110,6 @@ const securePassword = async(password)=>{
 const verifyOtp = async(req,res)=>{
     try {
         const {otp} = req.body
-        console.log(otp);
 
         if(otp===req.session.userOtp){
             const user = req.session.userData
@@ -131,7 +130,6 @@ const verifyOtp = async(req,res)=>{
             res.status(400).json({success:false,message:"Invalid OTP, Please try again"})
         }
     } catch (error) {
-        console.error("Error verifying OTP",error)
         res.status(500).json({success:false,message:"An error Occured"})
     }
 }
@@ -149,13 +147,11 @@ const resendOtp = async(req,res)=>{
         const emailSent = await sendVerificationEmail(email,otp)
 
         if(emailSent){
-            console.log("Resend OTP ",otp);
             res.status(200).json({success:true,message:"OTP resend successfully"})
         }else{
             res.status(500).json({success:false,message:"Failed to resend OTP. Please try again"})
         }
     } catch (error) {
-        console.error("Error resending OTP",error)
         res.status(500).json({success:false,message:"Internal Server error, Please try again"})
     }
 }
@@ -187,9 +183,6 @@ const login = async (req, res) => {
             return res.render("login", { message: "User is blocked by admin" });
         }
 
-        console.log("Password:", password);
-        console.log("Hashed Password:", findUser.password);
-
         const passwordMatch = await bcrypt.compare(password, findUser.password);
         if (!passwordMatch) {
             return res.render("login", { message: "Incorrect Password" });
@@ -198,7 +191,6 @@ const login = async (req, res) => {
         req.session.user = findUser._id;
         res.redirect("/");
     } catch (error) {
-        console.error("login error", error);
         res.render("login", { message: "Login failed, please try again later" });
     }
 };
@@ -213,7 +205,6 @@ const logout = async (req,res)=>{
             return res.redirect("/login")
         })
     } catch (error) {
-        console.log("Logout error",error);
         res.redirect("/pageNotFound")
     }
 }

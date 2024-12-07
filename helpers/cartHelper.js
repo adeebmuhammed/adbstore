@@ -23,7 +23,6 @@ const getAvailableStock = async (productId) => {
         // Return the quantity of the product
         return product.quantity;
     } catch (error) {
-        console.error("Error fetching available stock:", error.message);
         throw error; // Rethrow the error to be handled by the calling function
     }
 };

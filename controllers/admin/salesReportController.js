@@ -25,7 +25,6 @@ const getSalesReport = async (req, res) => {
                 filter:null
             });
         } else {
-            console.log("No orders found for the current month.");
 
             res.render("salesReportDownload", {
                 overallSalesCount: 0,
@@ -38,7 +37,6 @@ const getSalesReport = async (req, res) => {
             });
         }
     } catch (error) {
-        console.error(error);
         res.redirect("/admin/pageerror");
     }
 };
@@ -96,9 +94,9 @@ const generateSalesReport = async (req, res) => {
                 overallOrderAmount,
                 overallDiscount,
                 orders,
-                filter: filter || null, // Store filter
-                startDate: startDate || null, // Store startDate
-                endDate: endDate || null // Store endDate
+                filter: filter || null, 
+                startDate: startDate || null,
+                endDate: endDate || null 
             };
 
             return res.json({
@@ -109,16 +107,15 @@ const generateSalesReport = async (req, res) => {
                 orders
             });
         } else {
-            console.log("No orders found for the given criteria.");
 
             req.session.salesReportData = {
                 overallSalesCount: 0,
                 overallOrderAmount: 0,
                 overallDiscount: 0,
                 orders: [],
-                filter: filter || null, // Store filter
-                startDate: startDate || null, // Store startDate
-                endDate: endDate || null // Store endDate
+                filter: filter || null, 
+                startDate: startDate || null,
+                endDate: endDate || null 
             };
 
             return res.json({
@@ -126,7 +123,6 @@ const generateSalesReport = async (req, res) => {
             });
         }
     } catch (error) {
-        console.error("Error generating sales report:", error);
         return res.status(500).json({ error: "Internal Server Error" });
     }
 };
@@ -151,7 +147,6 @@ const salesReportDownload = async (req, res) => {
             endDate
         });
     } catch (error) {
-        console.error("Internal server error", error);
         res.redirect("/admin/pageerror");
     }
 };

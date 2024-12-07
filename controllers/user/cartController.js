@@ -23,7 +23,6 @@ const getCartPage = async (req, res) => {
             cartItemCount,
         });
     } catch (error) {
-        console.error(error);
         res.redirect("/pageNotFound");
     }
 };
@@ -35,16 +34,13 @@ const addToCart = async (req, res) => {
         const { productId, quantity, size } = req.body; 
         const userId = req.session.user; 
 
-        console.log("Received request to add to cart:", { productId, quantity, size, userId });
 
         if (!quantity || quantity < 1) {
-            console.log("Invalid quantity:", quantity);
             return res.status(400).json({ success: false, message: "Please provide a valid quantity." });
         }
 
         const product = await Product.findById(productId);
         if (!product) {
-            console.log("Product not found for ID:", productId);
             return res.status(404).json({ success: false, message: "Product not found." });
         }
 
@@ -55,7 +51,6 @@ const addToCart = async (req, res) => {
 
         const availableStock = sizeInfo.quantity; 
         if (quantity > availableStock) {
-            console.log(`Requested quantity ${quantity} exceeds available stock for size ${size}: ${availableStock}`);
             return res.status(400).json({ success: false, message: `Only ${availableStock} units available for size ${size}.` });
         }
 
@@ -100,10 +95,8 @@ const addToCart = async (req, res) => {
         }
 
         await cart.save();
-        console.log("Cart saved successfully");
         res.status(200).json({ success: true, message: "Product added to cart successfully!" });
     } catch (error) {
-        console.error("Error adding to cart:", error);
         res.status(500).json({ success: false, error: "Internal server error." });
     }
 };
@@ -113,7 +106,6 @@ const removeFromCart = async (req, res) => {
         const { productId } = req.body;
         const userId = req.session.user; 
 
-        console.log("Received request to remove from cart:", { productId, userId });
 
         const cart = await Cart.findOne({ userId });
         if (!cart) {
@@ -128,10 +120,8 @@ const removeFromCart = async (req, res) => {
         cart.items.splice(productIndex, 1);
 
         await cart.save();
-        console.log("Product removed from cart successfully.");
         res.status(200).json({ success: true, message: "Product removed from cart successfully!" });
     } catch (error) {
-        console.error("Error removing from cart:", error);
         res.status(500).json({ success: false, error: "Internal server error." });
     }
 };
@@ -146,13 +136,10 @@ const updateCart = async (req, res) => {
 
         const product = await Product.findById(itemId);
 
-        console.log('Product sizes:', product.sizes);
-
         const normalizedSize = size.trim().toLowerCase();
         const sizeInfo = product.sizes.find(s => s.size.trim().toLowerCase() === normalizedSize);
 
-        if (!sizeInfo) {
-            console.log('Invalid size selected:', normalizedSize); 
+        if (!sizeInfo) { 
             return res.status(400).json({ success: false, message: 'Invalid size selected.' });
         }
 
@@ -168,7 +155,6 @@ const updateCart = async (req, res) => {
 
         res.json({ success: true, message: 'Quantity updated successfully' });
     } catch (error) {
-        console.error('Error updating quantity:', error);
         res.status(500).json({ success: false, message: 'Error updating quantity' });
     }
 };

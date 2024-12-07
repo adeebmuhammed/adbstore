@@ -10,7 +10,6 @@ const getCouponPage = async (req,res) => {
 
         res.render("coupon",{coupons,user})
     } catch (error) {
-        console.error(error)
         res.redirect("/pageNotFound")
     }
 }
@@ -49,7 +48,6 @@ const addCoupon = async (req, res) => {
 
         res.status(200).json({ success: true, message: 'Coupon applied successfully!', discount });
     } catch (error) {
-        console.error('Error applying coupon:', error);
         res.status(500).json({ message: 'An error occurred while applying the coupon.', error });
     }
 };
@@ -69,7 +67,6 @@ const removeCoupon = async (req,res) => {
 
         return res.json({success:true, message:"Coupon Removed successfully"})
     } catch (error) {
-        console.error(error);
         return res.status(500).json({success: false, error:"Error in removing coupon"})
     }
 }

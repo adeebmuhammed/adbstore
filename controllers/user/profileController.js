@@ -24,7 +24,6 @@ const getProfilePage = async (req,res) => {
             res.redirect("/pageNotFound")
         }
     } catch (error) {
-        console.error(error)
         res.redirect("/pageNotFound")
     }
 }
@@ -44,7 +43,6 @@ const updateProfile = async (req,res) => {
             return res.status(400).json({error:"Error In Editing Profile"})
         }
     } catch (error) {
-        console.error(error)
         res.redirect("/pageNotFound")
     }
 }
@@ -122,11 +120,9 @@ const resendOtp = async (req,res) => {
         const emailSent = await sendVerificationEmail(email,otp)
 
         if(emailSent){
-            console.log("Resend OTP : ",otp);
             res.status(200).json({success:true,message:"Resend OTP Successfully"})
         }
     } catch (error) {
-        console.error("Error in resend OTP",error)
         res.status(500).json({success:false,message:"Internal Server Error"})
     }
 }
@@ -148,7 +144,6 @@ const resetPassword = async (req,res) => {
             res.render("reset-password",{message:"Password do not match"})
         }
     } catch (error) {
-        console.error(error)
         res.redirect("/pageNotFound")
     }
 }

@@ -20,7 +20,6 @@ const getOrderList = async (req,res) => {
 
         res.render('admin-orders', { orders });
     } catch (error) {
-        console.error("Error fetching orders:", error);
         res.status(500).send("Error fetching orders");
     }
 }
@@ -38,7 +37,6 @@ const changeOrderStatus = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Order not found' });
         }
     } catch (error) {
-        console.error("Error updating order status:", error);
         res.status(500).send("Error updating order status");
     }
 };

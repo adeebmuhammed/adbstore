@@ -10,6 +10,7 @@ const productController = require("../controllers/admin/productController")
 const orderController = require("../controllers/admin/orderController")
 const couponContrller = require("../controllers/admin/couponController")
 const salesReportController = require("../controllers/admin/salesReportController")
+const bannerController = require("../controllers/admin/bannerController")
 
 const storage = require("../helpers/multer")
 const multer = require('multer')
@@ -65,5 +66,10 @@ router.post("/deleteCoupon",adminAuth,couponContrller.deleteCoupon)
 router.get("/salesReport",adminAuth,salesReportController.getSalesReport)
 router.post("/generateSalesReport",adminAuth,salesReportController.generateSalesReport)
 router.get("/salesReportDownload",adminAuth,salesReportController.salesReportDownload)
+// Banner Management Routes
+router.get("/banner", adminAuth, bannerController.getBannerManagement);
+router.get("/addBanner",adminAuth,bannerController.getAddBannerPage)
+router.post("/addBanner",adminAuth,uploads.single("images"),bannerController.addBanner)
+router.get("/deleteBanner",adminAuth,bannerController.deleteBanner)
 
 module.exports = router

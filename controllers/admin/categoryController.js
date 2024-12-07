@@ -22,7 +22,6 @@ const categoryInfo = async (req,res) => {
             totalCategories:totalCategories
         })
     } catch (error) {
-        console.error(error);
         res.redirect("/admin/pageerror")
     }
 }
@@ -84,7 +83,6 @@ const addCategoryOffer = async (req, res) => {
 
         res.json({ status: true });
     } catch (error) {
-        console.error("Error", error);
         res.status(500).json({ status: false, message: "Internal server error" });
     }
 };

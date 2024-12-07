@@ -27,7 +27,6 @@ const getWalletPage = async (req, res) => {
             wallet,
         });
     } catch (error) {
-        console.error(error);
         res.redirect("/pageNotFound");
     }
 };

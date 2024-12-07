@@ -42,13 +42,11 @@ const getMyOrders = async (req, res) => {
             })
         );
 
-        // Fetch cart item count
         const cart = await Cart.findOne({userId }).lean();
         const cartItemCount = cart ? cart.items.reduce((total, item) => total + item.quantity, 0) : 0;
 
         res.render('my-orders', { orders: enrichedOrders, user, cartItemCount });
     } catch (error) {
-        console.error("Error fetching orders:", error);
         res.status(500).send("An error occurred while fetching orders. Please try again later.");
     }
 };
@@ -101,10 +99,8 @@ const cancelOrder = async (req, res) => {
                 });
 
                 await wallet.save();
-
-                console.log('Order cancellation processed successfully and wallet updated');
             } else {
-                console.log('Order cancellation does not require refund to wallet as it was Cash on Delivery');
+                return res.json({ success: false, message: 'Order cancellation does not require refund to wallet as it was Cash on Delivery' });
             }
 
             order.status = 'Canceled';
@@ -114,7 +110,6 @@ const cancelOrder = async (req, res) => {
             return res.json({ success: false, message: 'Order cannot be canceled' });
         }
     } catch (error) {
-        console.error("Error canceling order:", error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 };
@@ -132,7 +127,6 @@ const getOrderDetails = async (req,res) => {
         }
 
         const addressDoc = await Address.findOne({userId:userId});
-        console.log(addressDoc);
         
 
         if (!addressDoc) {
@@ -150,7 +144,6 @@ const getOrderDetails = async (req,res) => {
             user
         });
     } catch (error) {
-        console.error(error)
         res.redirect('/pageNotFound')
     }
 }
@@ -169,7 +162,6 @@ const returnOrder = async (req,res) => {
 
         return res.status(200).json({success:true,message:"Return Requested Successfully"})
     } catch (error) {
-        console.error("Error requesting return order:", error);
         res.status(500).json({ success: false, message: 'Server error' });
     }
 }

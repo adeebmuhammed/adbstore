@@ -22,7 +22,6 @@ const getManageAddresses = async (req, res) => {
         });
     } catch (error) {
         res.redirect("/pageNotFound");
-        console.error(error);
     }
 };
 
@@ -34,7 +33,6 @@ const getAddAddress = async (req,res) => {
             user:userData
         })
     } catch (error) {
-        console.error(error)
         res.redirect("/pageNotFound")
     }
 }
@@ -92,7 +90,6 @@ const addAddress = async (req, res) => {
 
         res.redirect("/manage-addresses")
     } catch (error) {
-        console.error(error);
         res.status(500).json({ message: 'Internal Server error' });
     }
 };
@@ -117,7 +114,6 @@ const getEditAddress = async (req, res) => {
 
         res.render('edit-address', { address,user });
     } catch (error) {
-        console.error('Error editing address:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
@@ -153,7 +149,6 @@ const editAddress = async (req, res) => {
 
         res.redirect('/manage-addresses'); 
     } catch (error) {
-        console.error('Error updating address:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };
@@ -181,7 +176,6 @@ const deleteAddress = async (req, res) => {
 
         res.status(200).json({ message: 'Address deleted successfully.' });
     } catch (error) {
-        console.error('Error deleting address:', error);
         res.status(500).json({ message: 'Internal Server Error' });
     }
 };

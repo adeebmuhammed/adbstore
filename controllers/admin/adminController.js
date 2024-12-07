@@ -28,13 +28,12 @@ const login = async (req,res) => {
                 req.session.admin = true
                 return res.redirect("/admin")
             }else{
-                return res.redirect("/admin/login")
+                return res.redirect("/admin/login").json({success:false,message:"Password doesn't match"})
             }
         }else{
             return res.redirect("/admin/login")
         }
     } catch (error) {
-        console.log("login error",error);
         return res.redirect("/admin/pageerror")
     }
 }
@@ -87,7 +86,6 @@ const loadDashboard = async (req, res) => {
         }
     } catch (error) {
         res.redirect("/admin/pageerror");
-        console.error(error);
     }
 };
 
@@ -98,11 +96,10 @@ const salesData = async (req, res) => {
         const currentDate = new Date();
         let startDate, endDate, groupFormat;
 
-        // Define date ranges and grouping format based on filter
         if (filter === 'yearly') {
-            startDate = new Date(currentDate.getFullYear() - 3, 0, 1); // Start of 3 years ago
-            endDate = new Date(currentDate.getFullYear() + 1, 0, 1); // Start of next year
-            groupFormat = { $year: "$createdOn" }; // Group by year
+            startDate = new Date(currentDate.getFullYear() - 3, 0, 1); 
+            endDate = new Date(currentDate.getFullYear() + 1, 0, 1); 
+            groupFormat = { $year: "$createdOn" }; 
         } else if (filter === 'monthly') {
             startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 5, 1); // Start of 6 months ago
             endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1); // Start of next month
@@ -134,7 +131,6 @@ const salesData = async (req, res) => {
 
         res.json({ labels, salesData });
     } catch (error) {
-        console.error(error);
         res.status(500).json({ error: 'Failed to fetch sales data' });
     }
 };
@@ -143,13 +139,11 @@ const logout = async (req,res) => {
     try {
         req.session.destroy(err=>{
             if(err){
-                console.log("Error destroying session",err);
                 return res.redirect("/admin/pageerror")
             }
             res.redirect("/admin/login")
         })
     } catch (error) {
-        console.log("Unexpected error during logout",error);
         res.redirect("/admin/pageerror")
     }
 }

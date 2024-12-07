@@ -41,7 +41,6 @@ const addBrand = async (req,res) => {
             res.redirect("/admin/brands")
         }
     } catch (error) {
-        console.error("error adding brand",error)
         res.redirect("/admin/pageerror")
     }
 }
@@ -75,7 +74,6 @@ const deleteBrand = async (req,res) => {
         await Brand.deleteOne({_id:id})
         res.redirect("/admin/brands")
     } catch (error) {
-        console.error("Error deleteing brand",error)
         res.status(500).redirect("/admin/pageerror")
     }
 }

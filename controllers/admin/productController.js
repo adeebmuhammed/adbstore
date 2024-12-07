@@ -75,7 +75,6 @@ const addProducts = async (req,res) => {
         }
 
     } catch (error) {
-        console.error("Error adding product",error)
         res.redirect("/admin/pageerror")
     }
 }
@@ -94,7 +93,7 @@ const getAllProducts = async (req,res) => {
         })
         .limit(limit * 1)
         .skip((page - 1) * limit)
-        .populate('category')  // Populate category
+        .populate('category')
         .exec();        
 
         const count = await Product.find({
@@ -116,7 +115,7 @@ const getAllProducts = async (req,res) => {
                 brand:brand
             })
         }else{
-            res.render("pageerror")
+            res.redirect("/admin/pageerror")
         }
     } catch (error) {
         res.redirect("/admin/pageerror")
@@ -212,7 +211,6 @@ const editProduct = async (req, res) => {
         const id = req.params.id;
         const data = req.body;
 
-        // Check if the product name already exists except the current product
         const existingProduct = await Product.findOne({
             productName: data.productName,
             _id: { $ne: id }
@@ -224,50 +222,43 @@ const editProduct = async (req, res) => {
 
         const images = [];
 
-        // Check if new images are uploaded
         if (req.files && req.files.length > 0) {
             for (let i = 0; i < req.files.length; i++) {
                 images.push(req.files[i].filename);
             }
         }
 
-        // Process sizes and corresponding quantities
         let sizes = [];
         if (data.sizes && Array.isArray(data.sizes)) {
             sizes = data.sizes.map((size) => ({
-                size: size, // Get the size value
-                quantity: data[`quantity${size}`] || 0 // Get the corresponding quantity from the form
+                size: size, 
+                quantity: data[`quantity${size}`] || 0 
             }));
         }
 
-        // Prepare the fields to update
         const updateFields = {
             productName: data.productName,
             description: data.description,
             brand: data.brand,
-            category: data.category, // Assuming category is also in form submission
+            category: data.category, 
             regularPrice: data.regularPrice,
             salePrice: data.salePrice,
-            sizes: sizes, // Updated sizes array with quantity
+            sizes: sizes, 
             color: data.color
         };
 
-        // Only add new images if they exist
         if (images.length > 0) {
-            updateFields.productImage = [...product.productImage, ...images]; // Merge old images with new ones
+            updateFields.productImage = [...product.productImage, ...images]; 
         }
 
-        // Update the product
         const updatedProduct = await Product.findByIdAndUpdate(id, updateFields, { new: true });
 
         if (updatedProduct) {
-            console.log("Product updated successfully");
             return res.redirect("/admin/products");
         } else {
             return res.status(404).json({ error: "Product not found" });
         }
     } catch (error) {
-        console.error("Error updating product", error);
         res.redirect("/admin/pageerror");
     }
 };
@@ -279,13 +270,12 @@ const deleteSingleImage= async(req,res)=>{
         const imagePath=path.join("public","uploads","re-image",imageNameToServer);
         if(fs.existsSync(imagePath)){
             await fs.unlinkSync(imagePath);
-            console.log(`Image ${imageNameToServer} deleted successfully`);
         }else{
-            console.log(`Image ${imageNameToServer} not found`);
+            return res.send({status:false})
         }
         res.send({status:true});
     } catch (error) {
-        res.redirect("pageerror");
+        res.redirect("/admin/pageerror");
     }
 }
 

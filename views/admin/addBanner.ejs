@@ -171,25 +171,23 @@ body {
 
                                </div>
                            </div>
-                               <div class="card-header">
-                                   <h4>Choose Banner Image</h4>
-                               </div>
-                               <div class="border row">
-                                   <div id="addedImagesContainer" class="thumbnails-container"></div>
-                               </div>
-                               <div class="card-body">
-                                  
-                                    
-                                       <img src="user/imgs/theme/upload.svg" alt="" id="imgView1">
-                                       <input class="form-control" type="file" name="images" id="inputFile"
-                                           accept="image/png, image/jpeg, image/jpg"
-                                           onchange="viewImage1(event),viewImage(event, 1)">
-                                           <div id="image-error" class="error-message"></div>
-                                   </div>
-                                   <div class="image-cropper" style="display:none; width: 300px; height: 200px;">
-                                       <img src="" id="croppedImg1" alt="">
-                                       <button type="button" id="saveButton1" class="btn-sm btn-primary">Save</button>
-                                   </div>
+                           <div class="card-header">
+                            <h4>Choose Banner Image</h4>
+                        </div>
+                        <div class="border row">
+                            <div id="addedImagesContainer" class="thumbnails-container"></div>
+                        </div>
+                        <div class="card-body">
+                            <img src="user/imgs/theme/upload.svg" alt="" id="imgView1">
+                            <input class="form-control" type="file" name="images" id="inputFile" accept="image/png, image/jpeg, image/jpg"
+                                onchange="viewImage(event)">
+                            <div id="image-error" class="error-message"></div>
+                        </div>
+                        <div class="image-cropper" style="display:none; width: 300px; height: 200px;">
+                            <img src="" id="croppedImg" alt="">
+                            <button type="button" id="saveButton" class="btn-sm btn-primary">Save</button>
+                        </div>
+                        
                             
                            </div>
 
@@ -349,48 +347,64 @@ if (File===undefined) {
        }
 
 
-       function viewImage(event, index) {
-           let input = event.target;
-           let reader = new FileReader();
+       function viewImage(event) {
+    let input = event.target;
+    let reader = new FileReader();
+    reader.onload = function () {
+        let dataURL = reader.result;
+        let image = document.getElementById('imgView1');
+        image.src = dataURL;
 
+        // Initialize the cropper on the image
+        let cropper = new Cropper(image, {
+            aspectRatio: 1360 / 777,  // Ensure the aspect ratio is correct
+            viewMode: 1,
+            guides: true,
+            background: false,
+            autoCropArea: 0.8,
+            zoomable: true
+        });
 
-           reader.onload = function () {
-               let dataURL = reader.result;
-               let image = document.getElementById('imgView' + index);
-               image.src = dataURL;
-               let cropper = new Cropper(image, {
-                   aspectRatio:1360 / 777,
-                   viewMode: 1,
-                   guides: true,
-                   background: false,
-                   autoCropArea: 0.8,
-                   zoomable: true
-               });
-               let cropperContainer = document.querySelector('#croppedImg' + index).parentNode;
-               cropperContainer.style.display = 'block';
-               let saveButton = document.querySelector('#saveButton' + index);
-               saveButton.addEventListener('click', async function () {
-                   let croppedCanvas = cropper.getCroppedCanvas();
-                   let croppedImage = document.getElementById("croppedImg" + index);
-                   croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
-                   let timestamp = new Date().getTime();
-                   let fileName = `cropped-img-${timestamp}-${index}.png`;
+        let cropperContainer = document.querySelector('#croppedImg').parentNode;
+        cropperContainer.style.display = 'block';  // Ensure it's visible
 
+        let saveButton = document.querySelector('#saveButton');
+        saveButton.addEventListener('click', async () => {
+            let croppedCanvas = cropper.getCroppedCanvas();
 
-                   await croppedCanvas.toBlob(blob => {
-                       let input = document.getElementById('input' + index)
-                       let imgFile = new File([blob], fileName, blob)
-                       const fileList = new DataTransfer();
-                       fileList.items.add(imgFile);
-                       input.files = fileList.files
-                   });
-                   cropperContainer.style.display = 'none';
-                   cropper.destroy();
-               });
-           };
-           reader.readAsDataURL(input.files[0]);
-       }
-   </script>
+            // Convert the cropped canvas to a data URL and update the image preview
+            let croppedImage = document.getElementById("croppedImg");
+            croppedImage.src = croppedCanvas.toDataURL('image/jpeg', 1.0); // Use image/jpeg for high quality
+
+            // Ensure the cropped image is visible
+            croppedImage.style.display = 'block';  // Make sure the cropped image is visible
+
+            // Generate a unique filename for the cropped image
+            let timestamp = new Date().getTime();
+            let fileName = `cropped-img-${timestamp}.jpg`;  // Save as .jpg or .png
+
+            // Convert the cropped canvas to a Blob and create a new File
+            await croppedCanvas.toBlob(blob => {
+                let imgFile = new File([blob], fileName, { type: 'image/jpeg' }); // Adjust MIME type if needed
+
+                // Create a new DataTransfer object to simulate the FileList
+                const fileList = new DataTransfer();
+                fileList.items.add(imgFile);
+
+                // Update the input element's files with the new file
+                let inputElement = document.getElementById('inputFile'); // Correct the ID here
+                inputElement.files = fileList.files;  // Update the input's files with the cropped image
+
+                console.log(inputElement.files); // Log files to check if the file is correctly updated
+            });
+
+            cropper.destroy();  // Destroy the cropper instance to clean up
+        });
+    };
+    reader.readAsDataURL(input.files[0]); // Trigger the FileReader to load the image
+}
+
+</script>
 
 
 <%- include("../../views/partials/admin/footer") %>

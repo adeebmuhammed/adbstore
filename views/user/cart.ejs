@@ -153,7 +153,9 @@
                                 text: "Product removed from cart successfully!",
                                 icon: "success",
                                 button: "OK",
-                            });
+                            }).then(()=>{
+                                window.location.reload()
+                            })
         
                             // Optionally, remove the product from the UI
                             this.closest('tr').remove(); // Assuming the icon is within a table row

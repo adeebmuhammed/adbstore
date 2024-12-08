@@ -137,12 +137,15 @@
                             </div>
                         </div>
                         <a href="/wishlist"><img src="img/icon/heart.png" alt=""></a>
-                        <a href="/cart" class="cart-icon">
+                        <a href="/cart" class="cart-icon position-relative">
                             <img src="img/icon/cart.png" alt="Cart">
                             <% if (locals.cartItemCount > 0) { %>
-                                <span class="cart-count"><%= locals.cartItemCount %></span>
+                                <span class="badge bg-danger position-absolute" style="font-size: 0.5rem; margin-top: 2px; margin-right: 5px; margin-left: -2px;">
+                                    <%= locals.cartItemCount %>
+                                </span>
                             <% } %>
                         </a>
+                        
                     <% } else { %>
                         <a href="/signup" class="sign-in-link">Sign Up</a>
                         <a href="/login" class="sign-in-link">Log in</a>

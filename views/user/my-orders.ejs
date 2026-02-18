@@ -12,7 +12,6 @@
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Order ID</th>
                         <th>Status</th>
                         <th>Total Price</th>
                         <th>Address</th>
@@ -25,7 +24,6 @@
                 <tbody>
                     <% orders.forEach(order => { %>
                         <tr>
-                            <td><%= order.orderId %></td>
                             <td><%= order.status %></td>
                             <td>₹<%= order.totalprice %></td>
                             <td>

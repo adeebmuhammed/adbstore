@@ -32,21 +32,24 @@
               </tr>
             </thead>
             <tbody id="transaction-history">
-  <% if (transactions.length > 0) { %>
-    <% transactions.forEach(transaction => { %>
-      <tr>
-        <td><%= new Date(transaction.date).toLocaleDateString() %></td>
-        <td><%= transaction.transaction_id %></td>
-        <td><%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></td>
-        <td>INR <%= transaction.amount.toFixed(2) %></td>
-        <td><%= transaction.description || 'N/A' %></td>
-      </tr>
-    <% }) %>
-  <% } else { %>
+  <% const txns = transactions || []; %>
+
+<% if (txns.length > 0) { %>
+  <% txns.forEach(transaction => { %>
     <tr>
-      <td colspan="5" class="text-center">No transactions found</td>
+      <td><%= new Date(transaction.date).toLocaleDateString() %></td>
+      <td><%= transaction.transaction_id %></td>
+      <td><%= transaction.type.charAt(0).toUpperCase() + transaction.type.slice(1) %></td>
+      <td>INR <%= transaction.amount.toFixed(2) %></td>
+      <td><%= transaction.description || 'N/A' %></td>
     </tr>
-  <% } %>
+  <% }) %>
+<% } else { %>
+  <tr>
+    <td colspan="5" class="text-center">No transactions found</td>
+  </tr>
+<% } %>
+
 </tbody>
           </table>
 

@@ -32,7 +32,7 @@
               </tr>
             </thead>
             <tbody id="transaction-history">
-  <% const txns = transactions || []; %>
+<% const txns = typeof transactions !== 'undefined' ? transactions : []; %>
 
 <% if (txns.length > 0) { %>
   <% txns.forEach(transaction => { %>
@@ -49,7 +49,6 @@
     <td colspan="5" class="text-center">No transactions found</td>
   </tr>
 <% } %>
-
 </tbody>
           </table>
 

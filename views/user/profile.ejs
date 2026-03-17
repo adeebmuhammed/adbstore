@@ -3,61 +3,123 @@
     <!--header ends-->
 
     <style>
-      .forgot-password-link{
-        font-size: 0.875rem;
-        text-decoration: none;
-        color: #007bff;
-      }
-      .forgot-password-link:hover{
-        color: #0056b3;
-        text-decoration: underline;
-      }
-    </style>
+  .profile-page {
+    margin-top: 50px;
+  }
 
-    <div class="container mt-5 profile-page">
-      <div class="row">
-        <!-- Sidebar -->
-        <%- include("../../views/partials/user/profile-sidebar") %>
-    
-        <!-- Profile Content -->
-        <div class="col-md-9 profile-content" style="padding-bottom: 100px;">
-          <h2 class="mb-4">My Profile</h2>
-    
-          <!-- Profile Display -->
-          <div class="card mb-4" id="profileCard">
-            <div class="card-body">
-              <h5>Name: <span id="display-name"><%= user.name %></span></h5>
-              <h5>Email: <span class="email-value"><%= user.email %></span></h5>
-              <h5>Phone: <span id="display-phone"><%= user.phone %></span></h5>
-              <button type="button" class="btn btn-primary edit-btn">Edit</button>
-            </div>
-          </div>
-    
-          <!-- Profile Edit Form -->
-          <form id="editProfileForm" style="display: none;">
-            <div class="form-group mb-3">
-              <label for="name">Name</label>
-              <input type="text" id="name" class="form-control" value="<%= user.name %>">
-              <small id="nameError" class="text-danger" style="display: none;"></small>
-            </div>
-            <div class="form-group mb-3">
-              <label for="phone">Phone</label>
-              <input type="text" id="phone" class="form-control" value="<%= user.phone %>">
-              <small id="phoneError" class="text-danger" style="display: none;"></small>
-            </div>
-            <div class="form-group d-flex justify-content-end">
-                <a href="/forgot-password" class="forgot-password-link ms-auto">
-                  <i class="fa fa-key"></i> Forgot Password?
-                </a>
-              </div>
-            <div class="text-center">
-              <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
-              <button type="button" class="btn btn-success save-btn">Save</button>
-            </div>
-          </form>
+  .profile-content h2 {
+    font-weight: 600;
+    margin-bottom: 25px;
+  }
+
+  .profile-card {
+    border: none;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    padding: 10px;
+  }
+
+  .profile-card .card-body h5 {
+    font-size: 1rem;
+    margin-bottom: 18px;
+    color: #333;
+  }
+
+  .profile-card .card-body span {
+    font-weight: 500;
+    color: #000;
+  }
+
+  .edit-btn,
+  .save-btn,
+  .cancel-btn {
+    min-width: 110px;
+    border-radius: 8px;
+    font-weight: 500;
+  }
+
+  #editProfileForm {
+    background: #fff;
+    padding: 25px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+  }
+
+  #editProfileForm label {
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  #editProfileForm .form-control {
+    border-radius: 8px;
+    padding: 10px;
+  }
+
+  .forgot-password-link {
+    font-size: 0.9rem;
+    text-decoration: none;
+    color: #007bff;
+    transition: 0.3s;
+  }
+
+  .forgot-password-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+  }
+
+  .text-center button {
+    margin: 0 6px;
+  }
+</style>
+
+<div class="container mt-5 profile-page">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <%- include("../../views/partials/user/profile-sidebar") %>
+
+    <!-- Profile Content -->
+    <div class="col-md-9 profile-content" style="padding-bottom: 100px;">
+      <h2>My Profile</h2>
+
+      <!-- Profile Display -->
+      <div class="card mb-4 profile-card" id="profileCard">
+        <div class="card-body">
+          <h5>Name: <span id="display-name"><%= user.name %></span></h5>
+          <h5>Email: <span class="email-value"><%= user.email %></span></h5>
+          <h5>Phone: <span id="display-phone"><%= user.phone %></span></h5>
+          <button type="button" class="btn btn-primary edit-btn">Edit</button>
         </div>
       </div>
+
+      <!-- Profile Edit Form -->
+      <form id="editProfileForm" style="display: none;">
+        <div class="form-group mb-3">
+          <label for="name">Name</label>
+          <input type="text" id="name" class="form-control" value="<%= user.name %>">
+          <small id="nameError" class="text-danger" style="display: none;"></small>
+        </div>
+
+        <div class="form-group mb-3">
+          <label for="phone">Phone</label>
+          <input type="text" id="phone" class="form-control" value="<%= user.phone %>">
+          <small id="phoneError" class="text-danger" style="display: none;"></small>
+        </div>
+
+        <div class="form-group d-flex justify-content-end">
+          <a href="/forgot-password" class="forgot-password-link ms-auto">
+            <i class="fa fa-key"></i> Forgot Password?
+          </a>
+        </div>
+
+        <div class="text-center mt-3">
+          <button type="button" class="btn btn-secondary cancel-btn">Cancel</button>
+          <button type="button" class="btn btn-success save-btn">Save</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
 
             <script>
                 document.addEventListener('DOMContentLoaded', function () {

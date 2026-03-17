@@ -1,22 +1,52 @@
+<style>
+  .profile-sidebar {
+    background: #fff;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+
+  .profile-sidebar .list-group-item {
+    border: none;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+    transition: all 0.3s ease;
+    padding: 12px 16px;
+  }
+
+  .profile-sidebar .list-group-item:hover {
+    background-color: #f8f9fa;
+    color: #000;
+    transform: translateX(4px);
+  }
+
+  .profile-sidebar .list-group-item.active {
+    background-color: #000;
+    color: #fff;
+    font-weight: 600;
+  }
+</style>
+
 <div class="col-md-3">
-  <div class="list-group" id="menu-items">
+  <div class="profile-sidebar">
+    <div class="list-group" id="menu-items">
       <a href="/profile" class="list-group-item list-group-item-action">My Profile</a>
       <a href="/manage-addresses" class="list-group-item list-group-item-action">Manage Addresses</a>
       <a href="/orders" class="list-group-item list-group-item-action">My Orders</a>
       <a href="/coupons" class="list-group-item list-group-item-action">Coupons</a>
       <a href="/wallet" class="list-group-item list-group-item-action">Wallet</a>
+    </div>
   </div>
 </div>
 
-<!-- JavaScript to add 'active' class based on current URL -->
 <script>
-  // Get all menu items
   const menuItems = document.querySelectorAll('#menu-items a');
 
-  // Loop through menu items and check the current URL path
   menuItems.forEach(item => {
-      if (item.getAttribute('href') === window.location.pathname) {
-          item.classList.add('active');
-      }
+    if (item.getAttribute('href') === window.location.pathname) {
+      item.classList.add('active');
+    }
   });
 </script>

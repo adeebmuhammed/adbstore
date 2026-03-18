@@ -3,8 +3,12 @@ const Cart = require("../models/cartSchema")
 const cartItemCountMiddleware = async (req, res, next) => {
     if (req.session.user) { 
         try {
-            const cart = await Cart.findOne({ userId: req.session.user }); 
-            const cartItemCount = cart?.items?.length || 0;
+            const cart = await Cart.findOne({ userId: req.session.user });
+
+            const cartItemCount = cart
+                ? cart.items.reduce((total, item) => total + item.quantity, 0)
+                : 0;
+
             res.locals.cartItemCount = cartItemCount;
         } catch (error) {
             res.locals.cartItemCount = 0;

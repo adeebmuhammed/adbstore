@@ -1,117 +1,132 @@
-<%-include("../../views/partials/user/header")%>
+<%- include("../partials/user/header") %>
 
-<div class="container my-5" >
-    <div class="text-center">
-        <h1 class="display-4">Thank You for Your Order!</h1>
-        <p class="lead">Your order has been successfully placed.</p>
-    </div>
-
-    <!-- Order Summary -->
-    <div id="invoice">
-    <div class="card mt-4">
-        <div class="card-header">
-            <h4>Order Summary</h4>
+    <div class="container my-5">
+        <div class="text-center">
+            <h1 class="display-4">Thank You for Your Order!</h1>
+            <p class="lead">Your order has been successfully placed.</p>
         </div>
-        <div class="card-body">
-            <h5>Order ID: <%= order.orderId %></h5>
 
-            <!-- Products Table -->
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Quantity</th>
-                        <th>Price</th>
-                        <th>Total</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% orderedItems.forEach(item => { %>
-                    <tr>
-                        <td><%= item.productName %></td>
-                        <td><%= item.quantity %></td>
-                        <td>INR <%= item.price %></td>
-                        <td>INR <%= item.quantity * item.price %></td>
-                    </tr>
-                    <% }); %>
-                </tbody>
-                <tfoot>
-                    <tr>
-                        <td colspan="3" class="text-end">Discount :</td>
-                        <td><%=order.discount%></td>
-                    </tr>
-                    <tr>         
-                        <td colspan="3" class="text-end"><strong>Total Price:</strong></td>
-                        <td><strong>INR <%= order.finalAmount %></strong></td>
-                    </tr>
-                </tfoot>
-            </table>
+        <!-- Order Summary -->
+        <div id="invoice">
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Order Summary</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Order ID: <%= order.orderId %>
+                    </h5>
+
+                    <!-- Products Table -->
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% orderedItems.forEach(item=> { %>
+                                <tr>
+                                    <td>
+                                        <%= item.productName %>
+                                    </td>
+                                    <td>
+                                        <%= item.quantity %>
+                                    </td>
+                                    <td>INR <%= item.price %>
+                                    </td>
+                                    <td>INR <%= item.quantity * item.price %>
+                                    </td>
+                                </tr>
+                                <% }); %>
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end">Discount :</td>
+                                <td>
+                                    <%=order.discount%>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total Price:</strong></td>
+                                <td><strong>INR <%= order.finalAmount %></strong></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h4>Shipping Address</h4>
+                </div>
+                <div class="card-body">
+                    <% if (specificAddress) { %>
+                        <p>
+                            <strong>
+                                <%= specificAddress.name %>
+                            </strong><br>
+                            <%= specificAddress.houseName %>, <%= specificAddress.street %><br>
+                                    <%= specificAddress.city %>, <%= specificAddress.state %>, <%=
+                                                specificAddress.pincode %><br>
+                                                Phone: <%= specificAddress.phone %><br>
+                                                    <% if (specificAddress.altPhone) { %>
+                                                        Alternate Phone: <%= specificAddress.altPhone %>
+                                                            <% } %>
+                        </p>
+                        <% } else { %>
+                            <p>Address not found</p>
+                            <% } %>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Message -->
+        <div class="alert alert-success mt-4" role="alert">
+            We’ve sent a confirmation email with your order details.
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+            <button onclick="downloadPDF()" class="btn btn-success">Invoice Download</button>
         </div>
     </div>
 
-    <!-- Shipping Address -->
-    <div class="card mt-4">
-        <div class="card-header">
-            <h4>Shipping Address</h4>
-        </div>
-        <div class="card-body">
-            <p>
-                <strong><%= specificAddress.name %></strong><br>
-                <%= specificAddress.houseName %>, <%= specificAddress.street %><br>
-                <%= specificAddress.city %>, <%= specificAddress.state %>, <%= specificAddress.pincode %><br>
-                Phone: <%= specificAddress.phone %><br>
-                <% if (specificAddress.altPhone) { %>
-                    Alternate Phone: <%= specificAddress.altPhone %>
-                <% } %>
-            </p>
-        </div>
-    </div>
-    </div>
-
-    <!-- Confirmation Message -->
-    <div class="alert alert-success mt-4" role="alert">
-        We’ve sent a confirmation email with your order details.
-    </div>
-
-    <div class="text-center mt-4">
-        <a href="/shop" class="btn btn-primary">Continue Shopping</a>
-        <button onclick="downloadPDF()" class="btn btn-success">Invoice Download</button>
-    </div>
-</div>
-
-    <%-include("../../views/partials/user/footer")%>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <%- include("../partials/user/footer") %>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 
-    <script>
-        function downloadPDF() {
-    const { jsPDF } = window.jspdf; // Access jsPDF from window.jspdf
-    const doc = new jsPDF();
-    const content = document.getElementById('invoice');
+        <script>
+            function downloadPDF() {
+                const { jsPDF } = window.jspdf; // Access jsPDF from window.jspdf
+                const doc = new jsPDF();
+                const content = document.getElementById('invoice');
 
-    html2canvas(content).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const imgWidth = 190; // Adjust to fit page width
-        const pageHeight = 297; // A4 size in mm (portrait)
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                html2canvas(content).then(canvas => {
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 190; // Adjust to fit page width
+                    const pageHeight = 297; // A4 size in mm (portrait)
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
-        // Check if content exceeds one page, add pages if necessary
-        let heightLeft = imgHeight;
-        let position = 10;
+                    // Check if content exceeds one page, add pages if necessary
+                    let heightLeft = imgHeight;
+                    let position = 10;
 
-        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+                    doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
 
-        while (heightLeft >= 0) {
-            position = heightLeft - imgHeight;
-            doc.addPage();
-            doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-        }
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        doc.addPage();
+                        doc.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
 
-        doc.save("invoice.pdf");
-    });
-}
+                    doc.save("invoice.pdf");
+                });
+            }
 
-    </script>
+        </script>

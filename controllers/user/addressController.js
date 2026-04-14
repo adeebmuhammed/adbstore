@@ -88,7 +88,7 @@ const addAddress = async (req, res) => {
             });
         }
 
-        res.redirect("/manage-addresses")
+       res.status(200).json({ success: true });
     } catch (error) {
         res.status(500).json({ message: 'Internal Server error' });
     }

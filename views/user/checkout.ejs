@@ -219,6 +219,9 @@
                 <div class="col-lg-8 col-md-6">
                     <div class="checkout__address mb-5">
                         <h4 class="order__title">Select Address</h4>
+                        <button type="button" class="site-btn btn-sm" id="showAddAddressForm">
+                            + Add Address
+                        </button>
                         <div class="checkout__address__list">
                             <% if (addresses && addresses.address && addresses.address.length> 0) { %>
                                 <% addresses.address.forEach((address)=> { %>
@@ -319,6 +322,39 @@
 
                 </div>
             </div>
+        </div>
+
+        <div id="addAddressFormContainer" style="display: none; margin-top: 15px;">
+            <form id="addAddressForm">
+                <div class="row">
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="name" placeholder="Full Name" required class="form-control">
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="mobile" placeholder="Phone Number" required class="form-control">
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="houseName" placeholder="House Name" required class="form-control">
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="street" placeholder="Street" required class="form-control">
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="city" placeholder="City" required class="form-control">
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="state" placeholder="State" required class="form-control">
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="pincode" placeholder="Pincode" required class="form-control">
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <input type="text" name="altPhone" placeholder="Alternate Phone" class="form-control">
+                    </div>
+                </div>
+
+                <button type="submit" class="site-btn mt-2">Save Address</button>
+            </form>
         </div>
     </section>
 
@@ -541,5 +577,56 @@
                         window.location.href = `/payment-failed/${data.message}`;
                     });
                 }
+            }
+
+            const showFormBtn = document.getElementById('showAddAddressForm');
+            const formContainer = document.getElementById('addAddressFormContainer');
+
+            showFormBtn.addEventListener('click', () => {
+                formContainer.style.display =
+                    formContainer.style.display === 'none' ? 'block' : 'none';
+            });
+
+            const addAddressForm = document.getElementById('addAddressForm');
+
+            if (addAddressForm) {
+                addAddressForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+
+                    const formData = new FormData(addAddressForm);
+                    const data = Object.fromEntries(formData.entries());
+
+                    try {
+                        const response = await fetch('/manage-addresses/add-address', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(data)
+                        });
+
+                        const result = await response.json();
+
+                        if (response.ok) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Address Added',
+                                text: 'Your address has been saved!',
+                            }).then(() => {
+                                window.location.reload(); // reload to show new address
+                            });
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message || 'Failed to add address',
+                            });
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Something went wrong',
+                        });
+                    }
+                });
             }
         </script>

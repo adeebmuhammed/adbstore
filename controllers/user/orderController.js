@@ -34,8 +34,12 @@ const getMyOrders = async (req, res) => {
       : {};
 
     // Enrich orders with full address object
-    const enrichedOrders = orders.map(order => {
-      if (order.address && typeof order.address === "object" && order.address.name) {
+    const enrichedOrders = orders.map((order) => {
+      if (
+        order.address &&
+        typeof order.address === "object" &&
+        order.address.name
+      ) {
         order.addressDetails = order.address;
       } else if (order.address) {
         order.addressDetails = addressMap[order.address?.toString()] || null;
@@ -69,73 +73,86 @@ const cancelOrder = async (req, res) => {
     const { orderId } = req.params;
     const { cancelReason } = req.body;
 
-    const order = await Order.findById(orderId).populate(
-      "orderedItems.product",
-    );
-    if (!order) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Order not found" });
-    }
-
-    if (order.status === "Pending" || order.status === "Placed") {
-      for (const item of order.orderedItems) {
-        const product = await Product.findById(item.product._id);
-
-        if (product) {
-          const sizeInfo = product.sizes.find((s) => s.size === item.size);
-
-          if (sizeInfo) {
-            sizeInfo.quantity += item.quantity;
-            await product.save();
-          }
-        }
-      }
-
-      if (order.paymentMethod !== "Cash on Delivery") {
-        const userId = order.user;
-        const refundAmount = order.finalAmount;
-
-        let wallet = await Wallet.findOne({ user_id: userId });
-
-        if (!wallet) {
-          wallet = new Wallet({
-            user_id: userId,
-            balance: 0,
-            transactions: [],
-          });
-        }
-
-        wallet.balance += refundAmount;
-
-        wallet.transactions.push({
-          amount: refundAmount,
-          type: "credit",
-          date: new Date(),
-          description: "Refund for canceled order",
-        });
-
-        await wallet.save();
-      } else {
-        return res.json({
-          success: false,
-          message:
-            "Order cancellation does not require refund to wallet as it was Cash on Delivery",
-        });
-      }
-
-      order.status = "Canceled";
-      order.cancelReason = cancelReason;
-      await order.save();
+    if (!cancelReason || cancelReason.trim().length < 3) {
       return res.json({
-        success: true,
-        message: "Order canceled successfully",
+        success: false,
+        message: "Cancellation reason is required",
       });
-    } else {
-      return res.json({ success: false, message: "Order cannot be canceled" });
     }
+
+    const order = await Order.findById(orderId).populate("orderedItems.product");
+
+    if (!order) {
+      return res.status(404).json({
+        success: false,
+        message: "Order not found",
+      });
+    }
+
+    if (order.status !== "Pending" && order.status !== "Placed") {
+      return res.json({
+        success: false,
+        message: "Order cannot be canceled",
+      });
+    }
+
+    for (const item of order.orderedItems) {
+      const product = await Product.findById(item.product._id);
+
+      if (product) {
+        const sizeInfo = product.sizes.find(
+          (s) => s.size === item.size
+        );
+
+        if (sizeInfo) {
+          sizeInfo.quantity += item.quantity;
+          await product.save();
+        }
+      }
+    }
+
+    if (order.paymentMethod !== "Cash on Delivery") {
+      const userId = order.user;
+      const refundAmount = order.finalAmount;
+
+      let wallet = await Wallet.findOne({ user_id: userId });
+
+      if (!wallet) {
+        wallet = new Wallet({
+          user_id: userId,
+          balance: 0,
+          transactions: [],
+        });
+      }
+
+      wallet.balance += refundAmount;
+
+      wallet.transactions.push({
+        amount: refundAmount,
+        type: "credit",
+        date: new Date(),
+        description: `Refund for canceled order (${order.orderId})`,
+      });
+
+      await wallet.save();
+    }
+
+    order.status = "Canceled";
+    order.cancelReason = cancelReason.trim();
+
+    await order.save();
+
+    return res.json({
+      success: true,
+      message: "Order canceled successfully",
+    });
+
   } catch (error) {
-    res.status(500).json({ success: false, message: "Server error" });
+    console.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
   }
 };
 
@@ -153,14 +170,20 @@ const getOrderDetails = async (req, res) => {
     let specificAddress = null;
 
     // New orders: address is embedded object
-    if (order.address && typeof order.address === "object" && order.address.name) {
+    if (
+      order.address &&
+      typeof order.address === "object" &&
+      order.address.name
+    ) {
       specificAddress = order.address;
-    } 
+    }
     // Old orders: address is ObjectId, fetch from Address collection
     else if (order.address) {
       const addressDoc = await Address.findOne({ userId });
       if (addressDoc) {
-        const addr = addressDoc.address.find(a => a._id.equals(order.address));
+        const addr = addressDoc.address.find((a) =>
+          a._id.equals(order.address),
+        );
         if (addr) specificAddress = addr;
       }
     }
@@ -172,7 +195,6 @@ const getOrderDetails = async (req, res) => {
       specificAddress,
       user,
     });
-
   } catch (error) {
     console.error(error);
     res.redirect("/pageNotFound");

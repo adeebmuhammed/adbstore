@@ -52,12 +52,28 @@
                                                         ₹<%= order.totalprice %>
                                                     </td>
 
-                                                    <!-- Address -->
-                                                    <td style="min-width:220px;">
-                                                        <%= order.addressDetails ? `${order.addressDetails.houseName},
-                                                            ${order.addressDetails.street},
-                                                            ${order.addressDetails.city}, ${order.addressDetails.state},
-                                                            ${order.addressDetails.pincode}` : 'Address not found' %>
+                                                    <td>
+                                                        <% if (order.address && order.address.name) { %>
+                                                            <div class="card" style="width: 18rem;">
+                                                                <div class="card-body">
+                                                                    <h5 class="card-title">
+                                                                        <%= order.address.name %>
+                                                                    </h5>
+                                                                    <p class="card-text">
+                                                                        <strong>Address:</strong><br>
+                                                                        <%= order.address.houseName %>, <br>
+                                                                            <%= order.address.street %>, <br>
+                                                                                <%= order.address.city %>, <br>
+                                                                                    <%= order.address.state %>, <br>
+                                                                                        <%= order.address.pincode %><br>
+                                                                                            <strong>Phone:</strong>
+                                                                                            <%= order.address.phone %>
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <% } else { %>
+                                                                <span class="text-danger">Address not found</span>
+                                                                <% } %>
                                                     </td>
 
                                                     <!-- Products -->

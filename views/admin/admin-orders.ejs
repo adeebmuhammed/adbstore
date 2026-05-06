@@ -25,18 +25,18 @@
                             <td><%= order.status %></td>
                             <td>₹<%= order.totalprice %></td>
                             <td>
-                                <% if (order.addressDetails) { %>
+                                <% if (order.address) { %>
                                     <div class="card" style="width: 18rem;">
                                         <div class="card-body">
-                                            <h5 class="card-title"><%= order.addressDetails.name %></h5>
+                                            <h5 class="card-title"><%= order.address.name %></h5>
                                             <p class="card-text">
                                                 <strong>Address:</strong><br>
-                                                <%= order.addressDetails.houseName %>, <br>
-                                                <%= order.addressDetails.street %>, <br>
-                                                <%= order.addressDetails.city %>, <br>
-                                                <%= order.addressDetails.state %>, <br>
-                                                <%= order.addressDetails.pincode %><br>
-                                                <strong>Phone:</strong> <%= order.addressDetails.phone %>
+                                                <%= order.address.houseName %>, <br>
+                                                <%= order.address.street %>, <br>
+                                                <%= order.address.city %>, <br>
+                                                <%= order.address.state %>, <br>
+                                                <%= order.address.pincode %><br>
+                                                <strong>Phone:</strong> <%= order.address.phone %>
                                             </p>
                                         </div>
                                     </div>

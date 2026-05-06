@@ -7,11 +7,6 @@ const getOrderList = async (req,res) => {
         const orders = await Order.find().lean();
 
         for (const order of orders) {
-            const userAddressData = await Address.findOne({ userId: order.user }).lean();
-
-            const specificAddress = userAddressData.address.find(addr => addr._id.equals(order.address));
-            order.addressDetails = specificAddress;
-
             for (const item of order.orderedItems) {
                 const product = await Product.findById(item.product).lean();
                 item.productDetails = product; 

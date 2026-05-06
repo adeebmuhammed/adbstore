@@ -24,31 +24,6 @@ const getMyOrders = async (req, res) => {
       .limit(limit)
       .lean();
 
-    // Get user's address doc once
-    const userAddressData = await Address.findOne({ userId }).lean();
-    const addressMap = userAddressData
-      ? userAddressData.address.reduce((map, addr) => {
-          map[addr._id.toString()] = addr;
-          return map;
-        }, {})
-      : {};
-
-    // Enrich orders with full address object
-    const enrichedOrders = orders.map((order) => {
-      if (
-        order.address &&
-        typeof order.address === "object" &&
-        order.address.name
-      ) {
-        order.addressDetails = order.address;
-      } else if (order.address) {
-        order.addressDetails = addressMap[order.address?.toString()] || null;
-      } else {
-        order.addressDetails = null;
-      }
-      return order;
-    });
-
     // Cart info
     const cart = await Cart.findOne({ userId }).lean();
     const cartItemCount = cart
@@ -56,7 +31,7 @@ const getMyOrders = async (req, res) => {
       : 0;
 
     res.render("my-orders", {
-      orders: enrichedOrders,
+      orders,
       user,
       cartItemCount,
       currentPage: page,

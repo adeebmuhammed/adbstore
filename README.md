@@ -44,8 +44,6 @@ ADBSTORE enables customers to browse products, securely purchase footwear online
 
   <img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/37790ab6-39c3-4a7a-be3c-a56a675211db" />
 
-  <img width="1918" height="963" alt="image" src="https://github.com/user-attachments/assets/61902de6-1c46-404a-bf5b-307c9eff5f7c" />
-
   <img width="1918" height="971" alt="image" src="https://github.com/user-attachments/assets/9bcc1170-0ff9-4edd-9512-c9bbb39bd3ad" />
 
   <img width="1915" height="963" alt="image" src="https://github.com/user-attachments/assets/0b29192e-39b7-4656-9d32-ddefdd616606" />
